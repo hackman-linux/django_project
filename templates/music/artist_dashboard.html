@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% block title %}Artist Dashboard — NapsterLegal{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-12 pt-24">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-3xl font-black text-white mb-1">Artist Dashboard</h1>
+      <p class="text-muted">Welcome back, {{ artist.stage_name|default:request.user.username }}</p>
+    </div>
+    <a href="/upload/" class="btn-primary flex items-center gap-2">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 4v16m8-8H4"/>
+      </svg>
+      Upload Track
+    </a>
+  </div>
+
+  <!-- Stats cards -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+    <div class="card text-center">
+      <div class="text-3xl font-black text-primary mb-1">{{ tracks.count }}</div>
+      <div class="text-muted text-sm">Total Tracks</div>
+    </div>
+    <div class="card text-center">
+      <div class="text-3xl font-black text-accent mb-1">{{ total_plays }}</div>
+      <div class="text-muted text-sm">Total Plays</div>
+    </div>
+    <div class="card text-center">
+      <div class="text-3xl font-black text-pink-400 mb-1">{{ total_likes }}</div>
+      <div class="text-muted text-sm">Total Likes</div>
+    </div>
+    <div class="card text-center">
+      <div class="text-3xl font-black text-green-400 mb-1">
+        {{ artist.monthly_listeners }}
+      </div>
+      <div class="text-muted text-sm">Monthly Listeners</div>
+    </div>
+  </div>
+
+  <!-- Tracks table -->
+  <div class="card">
+    <h2 class="text-white font-bold text-lg mb-6">Your Tracks</h2>
+
+    {% if tracks %}
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead>
+          <tr class="border-b border-white/10">
+            <th class="text-left text-muted text-xs font-semibold uppercase pb-3 pr-4">Track</th>
+            <th class="text-left text-muted text-xs font-semibold uppercase pb-3 pr-4">Genre</th>
+            <th class="text-right text-muted text-xs font-semibold uppercase pb-3 pr-4">Plays</th>
+            <th class="text-right text-muted text-xs font-semibold uppercase pb-3 pr-4">Likes</th>
+            <th class="text-center text-muted text-xs font-semibold uppercase pb-3 pr-4">Status</th>
+            <th class="text-right text-muted text-xs font-semibold uppercase pb-3">Uploaded</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5">
+          {% for track in tracks %}
+          <tr class="hover:bg-white/3 transition-colors">
+            <td class="py-4 pr-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-surface">
+                  {% if track.cover_image %}
+                    <img src="{{ track.cover_image.url }}" class="w-full h-full object-cover"/>
+                  {% else %}
+                    <div class="w-full h-full bg-gradient-to-br from-primary/30 to-accent/20 flex items-center justify-center">
+                      <svg class="w-5 h-5 text-muted" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M9 18V5l12-2v13M9 18c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/>
+                      </svg>
+                    </div>
+                  {% endif %}
+                </div>
+                <div>
+                  <a href="/track/{{ track.id }}/"
+                     class="text-white text-sm font-medium hover:text-primary transition-colors">
+                    {{ track.title }}
+                  </a>
+                  <p class="text-muted text-xs">{{ track.duration_display }}</p>
+                </div>
+              </div>
+            </td>
+            <td class="py-4 pr-4">
+              {% if track.genre %}
+                <span class="badge bg-primary/20 text-primary">{{ track.genre.name }}</span>
+              {% else %}
+                <span class="text-muted text-sm">—</span>
+              {% endif %}
+            </td>
+            <td class="py-4 pr-4 text-right">
+              <span class="text-white text-sm">{{ track.play_count }}</span>
+            </td>
+            <td class="py-4 pr-4 text-right">
+              <span class="text-white text-sm">{{ track.like_count }}</span>
+            </td>
+            <td class="py-4 pr-4 text-center">
+              {% if track.is_published %}
+                <span class="badge bg-green-500/20 text-green-400">Live</span>
+              {% else %}
+                <span class="badge bg-yellow-500/20 text-yellow-400">Draft</span>
+              {% endif %}
+            </td>
+            <td class="py-4 text-right">
+              <span class="text-muted text-xs">{{ track.uploaded_at|date:"M d, Y" }}</span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% else %}
+    <div class="text-center py-12">
+      <div class="w-16 h-16 bg-surface rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-muted" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M9 18V5l12-2v13M9 18c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/>
+        </svg>
+      </div>
+      <p class="text-white font-semibold mb-2">No tracks yet</p>
+      <p class="text-muted text-sm mb-6">Upload your first track and start sharing your music.</p>
+      <a href="/upload/" class="btn-primary">Upload Your First Track</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

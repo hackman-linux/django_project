@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block title %}Upload Track — NapsterLegal{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-12 pt-24">
+
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-black text-white mb-2">Upload a Track</h1>
+    <p class="text-muted">Share your music with the world. Fill in the details below.</p>
+  </div>
+
+  <div class="card">
+    <form method="POST" enctype="multipart/form-data" class="space-y-6">
+      {% csrf_token %}
+
+      <!-- Audio file -->
+      <div>
+        <label class="block text-sm font-semibold text-white mb-2">
+          Audio File <span class="text-red-400">*</span>
+        </label>
+        {{ form.audio_file }}
+        <p class="text-muted text-xs mt-1">Accepted formats: MP3, FLAC, WAV (max 50MB)</p>
+        {% if form.audio_file.errors %}
+          <p class="text-red-400 text-xs mt-1">{{ form.audio_file.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <!-- Title -->
+      <div>
+        <label class="block text-sm font-semibold text-white mb-2">
+          Title <span class="text-red-400">*</span>
+        </label>
+        {{ form.title }}
+        {% if form.title.errors %}
+          <p class="text-red-400 text-xs mt-1">{{ form.title.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <!-- Cover image -->
+      <div>
+        <label class="block text-sm font-semibold text-white mb-2">Cover Image</label>
+        {{ form.cover_image }}
+        <p class="text-muted text-xs mt-1">Square image recommended (JPG, PNG)</p>
+      </div>
+
+      <!-- Genre + License row -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-semibold text-white mb-2">Genre</label>
+          {{ form.genre }}
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-white mb-2">License</label>
+          {{ form.license_type }}
+        </div>
+      </div>
+
+      <!-- BPM + Preview start row -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-semibold text-white mb-2">BPM (optional)</label>
+          {{ form.bpm }}
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-white mb-2">Preview Start (seconds)</label>
+          {{ form.preview_start }}
+        </div>
+      </div>
+
+      <!-- Lyrics -->
+      <div>
+        <label class="block text-sm font-semibold text-white mb-2">Lyrics (optional)</label>
+        {{ form.lyrics }}
+      </div>
+
+      <!-- Checkboxes -->
+      <div class="flex flex-wrap gap-6">
+        <label class="flex items-center gap-3 cursor-pointer group">
+          {{ form.is_explicit }}
+          <span class="text-muted text-sm group-hover:text-white transition-colors">
+            This track contains explicit content
+          </span>
+        </label>
+        <label class="flex items-center gap-3 cursor-pointer group">
+          {{ form.is_published }}
+          <span class="text-muted text-sm group-hover:text-white transition-colors">
+            Publish immediately (visible to all users)
+          </span>
+        </label>
+      </div>
+
+      <!-- Rights confirmation -->
+      <div class="bg-primary/10 border border-primary/20 rounded-xl p-4">
+        <label class="flex items-start gap-3 cursor-pointer">
+          <input type="checkbox" required
+                 class="mt-1 rounded border-white/20 bg-white/5 text-primary focus:ring-primary"/>
+          <span class="text-sm text-muted leading-relaxed">
+            <span class="text-white font-semibold">I confirm</span> that I own all rights
+            to this track and that uploading it does not violate any copyright. I agree to
+            NapsterLegal's Terms of Service.
+          </span>
+        </label>
+      </div>
+
+      <!-- Submit -->
+      <div class="flex items-center gap-4">
+        <button type="submit" class="btn-primary flex items-center gap-2 text-base px-8 py-4">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+          </svg>
+          Upload Track
+        </button>
+        <a href="/dashboard/" class="btn-secondary px-6 py-4">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

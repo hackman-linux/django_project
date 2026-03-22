@@ -1,0 +1,324 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ track.title }} — {{ track.artist }} | NapsterLegal{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-12 pt-24">
+
+  <!-- ── TRACK HERO ──────────────────────────────────────────── -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+
+    <!-- Cover -->
+    <div class="lg:col-span-1">
+      <div class="aspect-square rounded-2xl overflow-hidden bg-surface shadow-2xl shadow-black/50">
+        {% if track.cover_image %}
+          <img src="{{ track.cover_image.url }}" alt="{{ track.title }}"
+               class="w-full h-full object-cover"/>
+        {% else %}
+          <div class="w-full h-full bg-gradient-to-br from-primary/40 to-accent/20 flex items-center justify-center">
+            <svg class="w-24 h-24 text-muted" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M9 18V5l12-2v13M9 18c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/>
+            </svg>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div class="lg:col-span-2 flex flex-col justify-between">
+      <div>
+        <!-- Badges -->
+        <div class="flex items-center gap-2 mb-4">
+          {% if track.genre %}
+            <span class="badge bg-primary/20 text-primary">{{ track.genre.name }}</span>
+          {% endif %}
+          {% if track.is_explicit %}
+            <span class="badge bg-red-500/20 text-red-400">Explicit</span>
+          {% endif %}
+          <span class="badge bg-white/10 text-muted">{{ track.get_license_type_display }}</span>
+        </div>
+
+        <!-- Title -->
+        <h1 class="text-4xl sm:text-5xl font-black text-white mb-3 leading-tight">
+          {{ track.title }}
+        </h1>
+
+        <!-- Artist -->
+        <a href="/artist/{{ track.artist.id }}/"
+           class="text-xl text-muted hover:text-primary transition-colors font-medium mb-6 block">
+          {{ track.artist }}
+        </a>
+
+        <!-- Stats -->
+        <div class="flex items-center gap-6 mb-8">
+          <div class="flex items-center gap-2 text-muted">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5z"/>
+            </svg>
+            <span class="text-sm">{{ track.play_count }} plays</span>
+          </div>
+          <div class="flex items-center gap-2 text-muted">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+            <span class="text-sm" id="like-count">{{ track.like_count }} likes</span>
+          </div>
+          <div class="flex items-center gap-2 text-muted">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span class="text-sm">{{ track.duration_display }}</span>
+          </div>
+          {% if track.bpm %}
+          <div class="flex items-center gap-2 text-muted">
+            <span class="text-sm">{{ track.bpm }} BPM</span>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="flex flex-wrap items-center gap-3">
+        <!-- Main play button -->
+        <button onclick="playTrack('{{ track.id }}', '{{ track.title|escapejs }}', '{{ track.artist|escapejs }}', '{% if track.cover_image %}{{ track.cover_image.url }}{% endif %}', '/api/stream/{{ track.id }}/')"
+                class="btn-primary flex items-center gap-2 text-base px-8 py-4">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+          Play Now
+        </button>
+
+        <!-- Like button -->
+        {% if user.is_authenticated %}
+        <button id="like-btn"
+                onclick="toggleLike('{{ track.id }}')"
+                class="btn-secondary flex items-center gap-2 px-6 py-4">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="like-icon">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+          </svg>
+          Like
+        </button>
+        {% endif %}
+
+        <!-- Share button -->
+        <button onclick="shareTrack()"
+                class="btn-secondary flex items-center gap-2 px-6 py-4">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+          </svg>
+          Share
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CONTENT GRID ────────────────────────────────────────── -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+    <!-- Left: Lyrics + Comments -->
+    <div class="lg:col-span-2 space-y-8">
+
+      <!-- Lyrics -->
+      {% if track.lyrics %}
+      <div class="card">
+        <h2 class="text-white font-bold text-lg mb-4 flex items-center gap-2">
+          <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          Lyrics
+        </h2>
+        <div class="text-muted leading-relaxed whitespace-pre-line text-sm">{{ track.lyrics }}</div>
+      </div>
+      {% endif %}
+
+      <!-- Comments -->
+      <div class="card">
+        <h2 class="text-white font-bold text-lg mb-6 flex items-center gap-2">
+          <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+          </svg>
+          Comments
+          <span class="badge bg-white/10 text-muted ml-1">{{ comments.count }}</span>
+        </h2>
+
+        <!-- Add comment form -->
+        {% if user.is_authenticated %}
+        <form method="POST" action="/social/comment/{{ track.id }}/" class="mb-6">
+          {% csrf_token %}
+          <div class="flex gap-3">
+            <div class="w-9 h-9 bg-gradient-to-br from-primary to-accent rounded-full flex-shrink-0 flex items-center justify-center text-white text-sm font-bold">
+              {{ user.username|first|upper }}
+            </div>
+            <div class="flex-1 flex gap-2">
+              <input type="text" name="content" placeholder="Add a comment..."
+                     class="input-field flex-1 py-2" required/>
+              <button type="submit" class="btn-primary px-4 py-2 text-sm">Post</button>
+            </div>
+          </div>
+        </form>
+        {% else %}
+        <div class="bg-white/5 rounded-xl p-4 mb-6 text-center">
+          <p class="text-muted text-sm">
+            <a href="/accounts/login/" class="text-primary hover:underline">Log in</a>
+            to leave a comment.
+          </p>
+        </div>
+        {% endif %}
+
+        <!-- Comments list -->
+        {% if comments %}
+          <div class="space-y-4">
+            {% for comment in comments %}
+            <div class="flex gap-3">
+              <div class="w-9 h-9 bg-gradient-to-br from-primary/50 to-accent/50 rounded-full flex-shrink-0 flex items-center justify-center text-white text-sm font-bold">
+                {{ comment.user.username|first|upper }}
+              </div>
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="text-white text-sm font-semibold">{{ comment.user.username }}</span>
+                  <span class="text-muted text-xs">{{ comment.created_at|timesince }} ago</span>
+                </div>
+                <p class="text-muted text-sm leading-relaxed">{{ comment.content }}</p>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-muted text-sm text-center py-4">No comments yet. Be the first!</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Right: Track info + Related -->
+    <div class="space-y-6">
+
+      <!-- Track metadata card -->
+      <div class="card">
+        <h3 class="text-white font-bold mb-4">Track Info</h3>
+        <dl class="space-y-3">
+          {% if track.album %}
+          <div class="flex justify-between">
+            <dt class="text-muted text-sm">Album</dt>
+            <dd class="text-white text-sm font-medium">{{ track.album.title }}</dd>
+          </div>
+          {% endif %}
+          {% if track.genre %}
+          <div class="flex justify-between">
+            <dt class="text-muted text-sm">Genre</dt>
+            <dd class="text-sm">
+              <span class="badge bg-primary/20 text-primary">{{ track.genre.name }}</span>
+            </dd>
+          </div>
+          {% endif %}
+          <div class="flex justify-between">
+            <dt class="text-muted text-sm">Duration</dt>
+            <dd class="text-white text-sm font-medium">{{ track.duration_display }}</dd>
+          </div>
+          <div class="flex justify-between">
+            <dt class="text-muted text-sm">License</dt>
+            <dd class="text-white text-sm font-medium">{{ track.get_license_type_display }}</dd>
+          </div>
+          <div class="flex justify-between">
+            <dt class="text-muted text-sm">Uploaded</dt>
+            <dd class="text-white text-sm font-medium">{{ track.uploaded_at|date:"M d, Y" }}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- Related tracks -->
+      {% if related %}
+      <div>
+        <h3 class="text-white font-bold mb-4">Related Tracks</h3>
+        <div class="space-y-3">
+          {% for rel in related %}
+          <div class="flex items-center gap-3 group cursor-pointer p-2 rounded-xl hover:bg-white/5 transition-colors"
+               onclick="playTrack('{{ rel.id }}', '{{ rel.title|escapejs }}', '{{ rel.artist|escapejs }}', '{% if rel.cover_image %}{{ rel.cover_image.url }}{% endif %}', '/api/stream/{{ rel.id }}/')">
+            <div class="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 bg-surface">
+              {% if rel.cover_image %}
+                <img src="{{ rel.cover_image.url }}" alt="{{ rel.title }}"
+                     class="w-full h-full object-cover"/>
+              {% else %}
+                <div class="w-full h-full bg-gradient-to-br from-primary/30 to-accent/20 flex items-center justify-center">
+                  <svg class="w-5 h-5 text-muted" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 18V5l12-2v13M9 18c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/>
+                  </svg>
+                </div>
+              {% endif %}
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-white text-sm font-medium truncate group-hover:text-primary transition-colors">
+                {{ rel.title }}
+              </p>
+              <p class="text-muted text-xs truncate">{{ rel.artist }}</p>
+            </div>
+            <span class="text-muted text-xs flex-shrink-0">{{ rel.duration_display }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+// Like toggle with Vanilla JS
+function toggleLike(trackId) {
+  // Get CSRF token from the cookie
+  const csrfToken = document.cookie
+    .split(';')
+    .find(c => c.trim().startsWith('csrftoken='))
+    ?.split('=')[1];
+
+  fetch(`/social/like/${trackId}/`, {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': csrfToken,
+      'Content-Type': 'application/json',
+    },
+  })
+  .then(response => response.json())
+  .then(data => {
+    const btn  = document.getElementById('like-btn');
+    const icon = document.getElementById('like-icon');
+    const count = document.getElementById('like-count');
+
+    // Update count
+    count.textContent = `${data.like_count} likes`;
+
+    // Toggle button style
+    if (data.liked) {
+      btn.classList.remove('btn-secondary');
+      btn.classList.add('bg-red-500/20', 'border', 'border-red-500/30', 'text-red-400',
+                        'rounded-xl', 'font-semibold', 'px-6', 'py-4', 'transition-all');
+      icon.setAttribute('fill', 'currentColor');
+      icon.setAttribute('stroke', 'none');
+    } else {
+      btn.className = 'btn-secondary flex items-center gap-2 px-6 py-4';
+      icon.setAttribute('fill', 'none');
+      icon.setAttribute('stroke', 'currentColor');
+    }
+  });
+}
+
+// Share track
+function shareTrack() {
+  if (navigator.share) {
+    navigator.share({
+      title: '{{ track.title|escapejs }}',
+      text: 'Listen to {{ track.title|escapejs }} by {{ track.artist|escapejs }} on NapsterLegal',
+      url: window.location.href,
+    });
+  } else {
+    navigator.clipboard.writeText(window.location.href);
+    alert('Link copied to clipboard!');
+  }
+}
+</script>
+{% endblock %}
