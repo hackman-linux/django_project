@@ -1,0 +1,266 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}NapsterLegal — Discover Legal Music{% endblock %}
+
+{% block content %}
+
+<!-- ── HERO SECTION ──────────────────────────────────────────── -->
+<section class="relative min-h-screen flex items-center justify-center overflow-hidden">
+
+  <!-- Animated background -->
+  <div class="absolute inset-0 bg-hero-gradient"></div>
+  <div class="absolute inset-0">
+    <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+    <div class="absolute top-1/2 left-1/2 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+  </div>
+
+  <!-- Floating music notes decoration -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute top-20 left-10 text-4xl opacity-10 animate-bounce delay-300">♪</div>
+    <div class="absolute top-40 right-20 text-6xl opacity-5 animate-bounce delay-700">♫</div>
+    <div class="absolute bottom-40 left-20 text-5xl opacity-10 animate-bounce delay-1000">♩</div>
+    <div class="absolute bottom-20 right-10 text-3xl opacity-10 animate-bounce delay-200">♬</div>
+  </div>
+
+  <div class="relative z-10 max-w-5xl mx-auto px-4 text-center">
+
+    <!-- Badge -->
+    <div class="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-2 mb-8 backdrop-blur-sm">
+      <div class="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
+      <span class="text-accent text-sm font-medium">100% Legal Music Streaming</span>
+    </div>
+
+    <!-- Main heading -->
+    <h1 class="text-5xl sm:text-6xl md:text-7xl font-black text-white leading-tight mb-6">
+      Music that
+      <span class="relative">
+        <span class="bg-gradient-to-r from-primary via-purple-400 to-accent bg-clip-text text-transparent">
+          moves you
+        </span>
+        <svg class="absolute -bottom-2 left-0 w-full" viewBox="0 0 300 12" fill="none">
+          <path d="M2 10 Q75 2 150 10 Q225 18 298 10" stroke="url(#underline-gradient)" stroke-width="3" stroke-linecap="round" fill="none"/>
+          <defs>
+            <linearGradient id="underline-gradient" x1="0" y1="0" x2="300" y2="0">
+              <stop offset="0%" stop-color="#6366F1"/>
+              <stop offset="100%" stop-color="#22D3EE"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </span>
+      <br/>legally.
+    </h1>
+
+    <p class="text-muted text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
+      Stream thousands of tracks from independent artists. No piracy — just pure music discovery with fair compensation for every creator.
+    </p>
+
+    <!-- CTA Buttons -->
+    <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+      {% if user.is_authenticated %}
+        <a href="#trending" class="btn-primary text-lg px-8 py-4">
+          Discover Music
+        </a>
+      {% else %}
+        <a href="/accounts/register/" class="btn-primary text-lg px-8 py-4">
+          Start Listening Free
+        </a>
+        <a href="/accounts/login/" class="btn-secondary text-lg px-8 py-4">
+          I have an account
+        </a>
+      {% endif %}
+    </div>
+
+    <!-- Stats bar -->
+    <div class="flex flex-col sm:flex-row gap-6 justify-center items-center">
+      <div class="flex items-center gap-2">
+        <svg class="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M9 18V5l12-2v13M9 18c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/>
+        </svg>
+        <span class="text-white font-semibold">10K+</span>
+        <span class="text-muted text-sm">Tracks</span>
+      </div>
+      <div class="w-px h-4 bg-white/10 hidden sm:block"></div>
+      <div class="flex items-center gap-2">
+        <svg class="w-5 h-5 text-accent" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+        </svg>
+        <span class="text-white font-semibold">2K+</span>
+        <span class="text-muted text-sm">Artists</span>
+      </div>
+      <div class="w-px h-4 bg-white/10 hidden sm:block"></div>
+      <div class="flex items-center gap-2">
+        <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
+        </svg>
+        <span class="text-white font-semibold">500K+</span>
+        <span class="text-muted text-sm">Streams</span>
+      </div>
+      <div class="w-px h-4 bg-white/10 hidden sm:block"></div>
+      <div class="flex items-center gap-2">
+        <svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+        </svg>
+        <span class="text-white font-semibold">100%</span>
+        <span class="text-muted text-sm">Legal</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scroll indicator -->
+  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+    <svg class="w-6 h-6 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ── GENRES ─────────────────────────────────────────────────── -->
+{% if genres %}
+<section class="py-16 px-4">
+  <div class="max-w-7xl mx-auto">
+    <h2 class="section-title">Browse Genres</h2>
+    <p class="section-subtitle">Find music that matches your mood</p>
+    <div class="flex flex-wrap gap-3">
+      {% for genre in genres %}
+      <a href="/search/?genre={{ genre.slug }}"
+         class="flex items-center gap-2 bg-surface/60 hover:bg-surface border border-white/10
+                hover:border-primary/40 rounded-full px-4 py-2 transition-all group">
+        <div class="w-3 h-3 rounded-full" style="background-color: {{ genre.color_hex }}"></div>
+        <span class="text-sm text-muted group-hover:text-white transition-colors font-medium">
+          {{ genre.name }}
+        </span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ── TRENDING TRACKS ─────────────────────────────────────────── -->
+<section id="trending" class="py-16 px-4 bg-darker/50">
+  <div class="max-w-7xl mx-auto">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="section-title">🔥 Trending Now</h2>
+        <p class="section-subtitle">Most played tracks this week</p>
+      </div>
+      <a href="/search/" class="text-primary hover:text-indigo-300 text-sm font-medium transition-colors">
+        View all →
+      </a>
+    </div>
+
+    {% if trending %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {% for track in trending %}
+      {% include 'components/track_card.html' with track=track %}
+      {% endfor %}
+    </div>
+    {% else %}
+    <!-- Empty state -->
+    <div class="text-center py-16">
+      <div class="w-16 h-16 bg-surface rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-muted" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M9 18V5l12-2v13M9 18c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/>
+        </svg>
+      </div>
+      <p class="text-muted text-lg font-medium mb-2">No tracks yet</p>
+      <p class="text-muted/60 text-sm">Be the first artist to upload music!</p>
+      {% if not user.is_authenticated %}
+      <a href="/accounts/register/" class="btn-primary mt-6 inline-block">Join as an Artist</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- ── NEW RELEASES ───────────────────────────────────────────── -->
+{% if new_tracks %}
+<section class="py-16 px-4">
+  <div class="max-w-7xl mx-auto">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="section-title">✨ New Releases</h2>
+        <p class="section-subtitle">Fresh uploads from independent artists</p>
+      </div>
+      <a href="/search/?sort=new" class="text-primary hover:text-indigo-300 text-sm font-medium transition-colors">
+        View all →
+      </a>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {% for track in new_tracks %}
+      {% include 'components/track_card.html' with track=track %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ── WHY NAPSTERLEGAL (shown to non-authenticated users) ────── -->
+{% if not user.is_authenticated %}
+<section class="py-24 px-4 bg-darker/50">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-16">
+      <h2 class="text-4xl font-black text-white mb-4">Why NapsterLegal?</h2>
+      <p class="text-muted text-lg max-w-2xl mx-auto">
+        We built what Napster should have been — a place where music is free to discover and artists are always paid.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+      <!-- Feature 1 -->
+      <div class="card text-center group">
+        <div class="w-14 h-14 bg-gradient-to-br from-primary to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-5 group-hover:scale-110 transition-transform shadow-lg shadow-primary/30">
+          <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>
+        </div>
+        <h3 class="text-white font-bold text-lg mb-3">100% Legal</h3>
+        <p class="text-muted text-sm leading-relaxed">Every track is licensed. Artists upload their own music and choose their license. No piracy, ever.</p>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="card text-center group">
+        <div class="w-14 h-14 bg-gradient-to-br from-accent to-teal-500 rounded-2xl flex items-center justify-center mx-auto mb-5 group-hover:scale-110 transition-transform shadow-lg shadow-accent/30">
+          <svg class="w-7 h-7 text-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <h3 class="text-white font-bold text-lg mb-3">Artists Get Paid</h3>
+        <p class="text-muted text-sm leading-relaxed">Every stream generates revenue for the artist. Fair compensation, transparent analytics, real money.</p>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="card text-center group">
+        <div class="w-14 h-14 bg-gradient-to-br from-pink-500 to-rose-500 rounded-2xl flex items-center justify-center mx-auto mb-5 group-hover:scale-110 transition-transform shadow-lg shadow-pink-500/30">
+          <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+        </div>
+        <h3 class="text-white font-bold text-lg mb-3">Community First</h3>
+        <p class="text-muted text-sm leading-relaxed">Create playlists, follow artists, share tracks and build a real music community around what you love.</p>
+      </div>
+    </div>
+
+    <!-- CTA Banner -->
+    <div class="relative overflow-hidden bg-gradient-to-r from-primary/20 via-purple-500/20 to-accent/20 border border-white/10 rounded-3xl p-10 text-center">
+      <div class="absolute inset-0 bg-gradient-to-r from-primary/5 to-accent/5"></div>
+      <div class="relative z-10">
+        <h3 class="text-3xl font-black text-white mb-4">Ready to start listening?</h3>
+        <p class="text-muted mb-8 text-lg">Join thousands of music lovers — it's completely free.</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="/accounts/register/" class="btn-primary text-lg px-10 py-4">
+            Create Free Account
+          </a>
+          <a href="/accounts/register/?type=artist" class="btn-accent text-lg px-10 py-4">
+            Join as an Artist
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}

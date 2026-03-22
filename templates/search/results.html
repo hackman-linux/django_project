@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Search — NapsterLegal{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-12 pt-24">
+  <h1 class="text-3xl font-black text-white mb-2">
+    {% if query %}Results for "{{ query }}"{% else %}Search Music{% endif %}
+  </h1>
+  {% if tracks %}
+    <p class="text-muted mb-8">{{ tracks.count }} tracks found</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {% for track in tracks %}
+        {% include 'components/track_card.html' with track=track %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted mt-8">No results found. Try a different search.</p>
+  {% endif %}
+</div>
+{% endblock %}

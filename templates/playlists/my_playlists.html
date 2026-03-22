@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}My Playlists — NapsterLegal{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-12 pt-24">
+  <h1 class="text-3xl font-black text-white mb-8">My Playlists</h1>
+  {% if playlists %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% for pl in playlists %}
+      <div class="card">
+        <h3 class="text-white font-bold">{{ pl.name }}</h3>
+        <p class="text-muted text-sm">{{ pl.track_count }} tracks</p>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted">No playlists yet. Create your first one!</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Log In — NapsterLegal{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center px-4 py-16">
+  <div class="w-full max-w-md">
+    <div class="bg-surface/60 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl shadow-black/40">
+
+      <div class="text-center mb-8">
+        <div class="w-14 h-14 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/30">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+          </svg>
+        </div>
+        <h1 class="text-2xl font-black text-white mb-2">Welcome back</h1>
+        <p class="text-muted text-sm">Log in to continue listening</p>
+      </div>
+
+      <form method="POST" class="space-y-5">
+        {% csrf_token %}
+        <div>
+          <label class="block text-sm font-medium text-muted mb-2">Username</label>
+          {{ form.username }}
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-muted mb-2">Password</label>
+          {{ form.password }}
+        </div>
+        <button type="submit" class="btn-primary w-full text-base py-4">
+          Log In →
+        </button>
+      </form>
+
+      <div class="flex items-center gap-4 my-6">
+        <div class="flex-1 h-px bg-white/10"></div>
+        <span class="text-muted text-xs">new here?</span>
+        <div class="flex-1 h-px bg-white/10"></div>
+      </div>
+
+      <a href="/accounts/register/" class="btn-secondary w-full text-center block text-sm py-3">
+        Create Free Account
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

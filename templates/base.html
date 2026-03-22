@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}NapsterLegal — Legal Music Streaming{% endblock %}</title>
+
+  <!-- Tailwind CSS -->
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/output.css' %}"/>
+
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+
+  <!-- Alpine.js — handles dropdowns, modals, tabs -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <!-- Heroicons (inline SVG icons via CDN) -->
+  <script src="https://unpkg.com/heroicons@2.1.1/dist/heroicons.min.js"></script>
+
+  {% block extra_head %}{% endblock %}
+</head>
+
+<body class="bg-dark min-h-screen flex flex-col" x-data="{ mobileOpen: false }">
+
+  <!-- ── NAVBAR ─────────────────────────────────────────────── -->
+  <nav class="fixed top-0 left-0 right-0 z-50 bg-dark/80 backdrop-blur-xl border-b border-white/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+
+        <!-- Logo -->
+        <a href="/" class="flex items-center gap-2 group">
+          <div class="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center shadow-lg shadow-primary/30">
+            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M9 18V5l12-2v13M9 18c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-2c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/>
+            </svg>
+          </div>
+          <span class="text-white font-bold text-lg tracking-tight group-hover:text-primary transition-colors">
+            Napster<span class="text-primary">Legal</span>
+          </span>
+        </a>
+
+        <!-- Desktop nav links -->
+        <div class="hidden md:flex items-center gap-6">
+          <a href="/" class="nav-link">Discover</a>
+          <a href="/search/" class="nav-link">Search</a>
+          {% if user.is_authenticated %}
+            <a href="/playlists/" class="nav-link">Playlists</a>
+            {% if user.is_artist %}
+              <a href="/dashboard/" class="nav-link">Dashboard</a>
+            {% endif %}
+          {% endif %}
+        </div>
+
+        <!-- Search bar (desktop) -->
+        <form action="/search/" method="GET" class="hidden md:flex items-center gap-2">
+          <div class="relative">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <input type="text" name="q" placeholder="Search tracks, artists..."
+                   class="bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-sm text-white placeholder-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 w-64 transition-all"/>
+          </div>
+        </form>
+
+        <!-- Auth buttons -->
+        <div class="hidden md:flex items-center gap-3">
+          {% if user.is_authenticated %}
+            <!-- User menu -->
+            <div class="relative" x-data="{ open: false }">
+              <button @click="open = !open"
+                      class="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl px-3 py-2 transition-all">
+                <div class="w-6 h-6 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center text-xs font-bold">
+                  {{ user.username|first|upper }}
+                </div>
+                <span class="text-sm text-white font-medium">{{ user.username }}</span>
+                <svg class="w-4 h-4 text-muted transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </button>
+              <!-- Dropdown -->
+              <div x-show="open" @click.outside="open = false"
+                   x-transition:enter="transition ease-out duration-150"
+                   x-transition:enter-start="opacity-0 scale-95"
+                   x-transition:enter-end="opacity-100 scale-100"
+                   x-transition:leave="transition ease-in duration-100"
+                   x-transition:leave-start="opacity-100 scale-100"
+                   x-transition:leave-end="opacity-0 scale-95"
+                   class="absolute right-0 mt-2 w-48 bg-surface border border-white/10 rounded-2xl shadow-xl shadow-black/40 overflow-hidden z-50">
+                <a href="/profile/" class="flex items-center gap-3 px-4 py-3 text-sm text-muted hover:text-white hover:bg-white/5 transition-colors">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                  Profile
+                </a>
+                {% if user.is_premium %}
+                <div class="px-4 py-2">
+                  <span class="badge bg-accent/20 text-accent">⭐ Premium</span>
+                </div>
+                {% endif %}
+                <div class="border-t border-white/5"></div>
+                <a href="/accounts/logout/" class="flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:text-red-300 hover:bg-white/5 transition-colors">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                  Logout
+                </a>
+              </div>
+            </div>
+          {% else %}
+            <a href="/accounts/login/" class="btn-secondary text-sm px-4 py-2">Log in</a>
+            <a href="/accounts/register/" class="btn-primary text-sm px-4 py-2">Sign up free</a>
+          {% endif %}
+        </div>
+
+        <!-- Mobile menu button -->
+        <button @click="mobileOpen = !mobileOpen" class="md:hidden text-muted hover:text-white transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path x-show="!mobileOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+            <path x-show="mobileOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile menu -->
+    <div x-show="mobileOpen"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 -translate-y-2"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         class="md:hidden bg-dark/95 border-t border-white/5 px-4 py-4 space-y-3">
+      <a href="/" class="block nav-link py-2">Discover</a>
+      <a href="/search/" class="block nav-link py-2">Search</a>
+      {% if user.is_authenticated %}
+        <a href="/playlists/" class="block nav-link py-2">Playlists</a>
+        <a href="/accounts/logout/" class="block text-red-400 text-sm py-2">Logout</a>
+      {% else %}
+        <a href="/accounts/login/" class="block btn-secondary text-center py-2">Log in</a>
+        <a href="/accounts/register/" class="block btn-primary text-center py-2">Sign up free</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <!-- ── FLASH MESSAGES ─────────────────────────────────────── -->
+  {% if messages %}
+  <div class="fixed top-20 right-4 z-50 space-y-2" x-data>
+    {% for message in messages %}
+    <div x-data="{ show: true }" x-show="show"
+         x-init="setTimeout(() => show = false, 4000)"
+         x-transition:leave="transition ease-in duration-300"
+         x-transition:leave-start="opacity-100 translate-x-0"
+         x-transition:leave-end="opacity-0 translate-x-full"
+         class="flex items-center gap-3 px-4 py-3 rounded-xl shadow-xl border backdrop-blur-sm
+                {% if message.tags == 'error' %}bg-red-500/20 border-red-500/30 text-red-300
+                {% elif message.tags == 'success' %}bg-green-500/20 border-green-500/30 text-green-300
+                {% elif message.tags == 'warning' %}bg-yellow-500/20 border-yellow-500/30 text-yellow-300
+                {% else %}bg-primary/20 border-primary/30 text-primary{% endif %}">
+      <span class="text-sm font-medium">{{ message }}</span>
+      <button @click="show = false" class="ml-2 opacity-60 hover:opacity-100">✕</button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- ── MAIN CONTENT ───────────────────────────────────────── -->
+  <main class="flex-1 pt-16">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ── PERSISTENT AUDIO PLAYER ───────────────────────────── -->
+  {% include 'components/player.html' %}
+
+  <!-- ── FOOTER ─────────────────────────────────────────────── -->
+  <footer class="bg-darker border-t border-white/5 py-12 pb-28">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div class="col-span-1 md:col-span-2">
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 18V5l12-2v13M9 18c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-2c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/>
+              </svg>
+            </div>
+            <span class="text-white font-bold text-lg">Napster<span class="text-primary">Legal</span></span>
+          </div>
+          <p class="text-muted text-sm leading-relaxed max-w-xs">
+            Legal music streaming for independent artists and music lovers. Discover, stream, and support artists you love.
+          </p>
+        </div>
+        <div>
+          <h4 class="text-white font-semibold text-sm mb-4">Platform</h4>
+          <ul class="space-y-2">
+            <li><a href="/" class="text-muted hover:text-white text-sm transition-colors">Discover</a></li>
+            <li><a href="/search/" class="text-muted hover:text-white text-sm transition-colors">Search</a></li>
+            <li><a href="/accounts/register/" class="text-muted hover:text-white text-sm transition-colors">Sign Up</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white font-semibold text-sm mb-4">Artists</h4>
+          <ul class="space-y-2">
+            <li><a href="/accounts/register/" class="text-muted hover:text-white text-sm transition-colors">Upload Music</a></li>
+            <li><a href="/dashboard/" class="text-muted hover:text-white text-sm transition-colors">Dashboard</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-white/5 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+        <p class="text-muted text-xs">© 2026 NapsterLegal. School Project. All rights reserved.</p>
+        <div class="flex items-center gap-2">
+          <span class="badge bg-green-500/20 text-green-400">Legal & Licensed</span>
+          <span class="badge bg-primary/20 text-primary">GDPR Compliant</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Player + Search JS -->
+  {% load static %}
+  <script src="{% static 'js/player.js' %}"></script>
+
+</body>
+</html>

@@ -1,0 +1,13 @@
+asgiref==3.11.1
+Django==6.0.3
+sqlparse==0.5.5
+psycopg2-binary # PostgreSQL driver
+mysqlclient # MySQL driver
+djangorestframework # REST API
+python-decouple # .env file handling
+pillow # Image processing
+mutagen # Audio metadata
+celery # Async tasks
+django-crispy-forms 
+crispy-tailwind
+redis
