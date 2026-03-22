@@ -1,20 +1,146 @@
 {% extends 'base.html' %}
-{% block title %}Profile — {{ profile_user.username }}{% endblock %}
+{% load static %}
+{% block title %}{{ profile_user.username }} — NapsterLegal{% endblock %}
+
 {% block content %}
-<div class="max-w-4xl mx-auto px-4 py-12 pt-24">
-  <div class="card">
-    <div class="flex items-center gap-6">
-      <div class="w-20 h-20 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center text-3xl font-black text-white">
+<div class="max-w-5xl mx-auto px-4 py-12 pt-24">
+
+  <!-- Profile header -->
+  <div class="card mb-8">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+
+      <!-- Avatar -->
+      <div class="w-20 h-20 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center text-white text-3xl font-black flex-shrink-0 shadow-lg shadow-primary/30">
         {{ profile_user.username|first|upper }}
       </div>
-      <div>
-        <h1 class="text-2xl font-black text-white">{{ profile_user.username }}</h1>
-        <p class="text-muted">{{ profile_user.get_user_type_display }}</p>
-        {% if profile_user.is_premium %}
-          <span class="badge bg-accent/20 text-accent mt-1">⭐ Premium</span>
+
+      <!-- Info -->
+      <div class="flex-1">
+        <div class="flex items-center gap-3 mb-1">
+          <h1 class="text-2xl font-black text-white">{{ profile_user.username }}</h1>
+          {% if profile_user.is_premium %}
+            <span class="badge bg-accent/20 text-accent">⭐ Premium</span>
+          {% endif %}
+          <span class="badge bg-white/10 text-muted">
+            {{ profile_user.get_user_type_display }}
+          </span>
+        </div>
+
+        {% if profile_user.bio %}
+          <p class="text-muted text-sm mb-3">{{ profile_user.bio }}</p>
         {% endif %}
+
+        <div class="flex flex-wrap gap-4 text-sm text-muted">
+          <span>{{ playlists.count }} playlists</span>
+          <span>{{ following.count }} following</span>
+          <span>Joined {{ profile_user.date_joined|date:"M Y" }}</span>
+        </div>
       </div>
+
+      <!-- Edit link -->
+      <a href="/accounts/profile/edit/"
+         class="btn-secondary text-sm px-4 py-2">
+        Edit Profile
+      </a>
     </div>
+  </div>
+
+  <!-- Tabs -->
+  <div x-data="{ tab: 'liked' }">
+    <div class="flex gap-1 border-b border-white/10 mb-6">
+      <button @click="tab = 'liked'"
+              :class="tab === 'liked' ? 'text-white border-b-2 border-primary' : 'text-muted'"
+              class="px-4 py-2 text-sm font-medium transition-colors">
+        Liked Tracks
+      </button>
+      <button @click="tab = 'playlists'"
+              :class="tab === 'playlists' ? 'text-white border-b-2 border-primary' : 'text-muted'"
+              class="px-4 py-2 text-sm font-medium transition-colors">
+        Playlists
+      </button>
+      <button @click="tab = 'following'"
+              :class="tab === 'following' ? 'text-white border-b-2 border-primary' : 'text-muted'"
+              class="px-4 py-2 text-sm font-medium transition-colors">
+        Following
+      </button>
+    </div>
+
+    <!-- Liked tracks -->
+    <div x-show="tab === 'liked'">
+      {% if liked_tracks %}
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {% for like in liked_tracks %}
+          {% include 'components/track_card.html' with track=like.track %}
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="text-center py-12">
+        <p class="text-muted">No liked tracks yet.</p>
+        <a href="/search/" class="btn-secondary mt-4 inline-block text-sm px-4 py-2">
+          Discover Music
+        </a>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Playlists -->
+    <div x-show="tab === 'playlists'">
+      {% if playlists %}
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for pl in playlists %}
+        <a href="/playlists/{{ pl.id }}/" class="card group hover:border-primary/40">
+          <div class="aspect-square rounded-xl bg-gradient-to-br from-primary/30 to-accent/20 flex items-center justify-center mb-3">
+            <svg class="w-10 h-10 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M9 19V6l12-3v13M9 19c0 1.1-1.34 2-3 2s-3-.9-3-2 1.34-2 3-2 3 .9 3 2z"/>
+            </svg>
+          </div>
+          <p class="text-white font-semibold truncate group-hover:text-primary transition-colors">
+            {{ pl.name }}
+          </p>
+          <p class="text-muted text-xs mt-1">{{ pl.track_count }} tracks</p>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="text-center py-12">
+        <p class="text-muted">No public playlists yet.</p>
+        <a href="/playlists/" class="btn-primary mt-4 inline-block text-sm px-4 py-2">
+          Create Playlist
+        </a>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Following -->
+    <div x-show="tab === 'following'">
+      {% if following %}
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        {% for follow in following %}
+        <a href="/artist/{{ follow.following.id }}/"
+           class="card group hover:border-primary/40 text-center">
+          <div class="w-14 h-14 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center text-white text-2xl font-black mx-auto mb-3">
+            {{ follow.following.stage_name|first|upper }}
+          </div>
+          <p class="text-white text-sm font-semibold truncate group-hover:text-primary transition-colors">
+            {{ follow.following.stage_name }}
+          </p>
+          <p class="text-muted text-xs mt-1">
+            {{ follow.following.monthly_listeners }} listeners
+          </p>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="text-center py-12">
+        <p class="text-muted">Not following any artists yet.</p>
+        <a href="/search/" class="btn-secondary mt-4 inline-block text-sm px-4 py-2">
+          Discover Artists
+        </a>
+      </div>
+      {% endif %}
+    </div>
+
   </div>
 </div>
 {% endblock %}

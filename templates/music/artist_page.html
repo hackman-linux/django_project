@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ artist.stage_name }} — NapsterLegal{% endblock %}
+
+{% block content %}
+
+<!-- ── HERO BANNER ──────────────────────────────────────────── -->
+<div class="relative h-64 bg-gradient-to-br from-primary/30 via-dark to-dark overflow-hidden">
+  <div class="absolute inset-0 bg-gradient-to-t from-dark via-dark/60 to-transparent"></div>
+  <!-- Decorative blobs -->
+  <div class="absolute top-0 left-1/4 w-64 h-64 bg-primary/20 rounded-full blur-3xl"></div>
+  <div class="absolute top-0 right-1/4 w-48 h-48 bg-accent/10 rounded-full blur-3xl"></div>
+</div>
+
+<div class="max-w-7xl mx-auto px-4">
+  <!-- Artist info overlapping banner -->
+  <div class="relative -mt-20 mb-8 flex flex-col sm:flex-row items-start sm:items-end gap-6">
+
+    <!-- Avatar -->
+    <div class="w-32 h-32 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white text-5xl font-black shadow-2xl border-4 border-dark flex-shrink-0">
+      {{ artist.stage_name|first|upper }}
+    </div>
+
+    <!-- Name + stats -->
+    <div class="flex-1 pb-2">
+      <div class="flex items-center gap-3 mb-1">
+        <h1 class="text-3xl font-black text-white">{{ artist.stage_name }}</h1>
+        {% if artist.verified %}
+          <svg class="w-6 h-6 text-accent flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>
+        {% endif %}
+      </div>
+
+      <div class="flex flex-wrap items-center gap-4 text-muted text-sm mb-4">
+        <span>{{ follower_count }} followers</span>
+        <span>{{ total_plays }} total plays</span>
+        <span>{{ tracks.count }} tracks</span>
+        {% if artist.country %}
+          <span>{{ artist.country }}</span>
+        {% endif %}
+      </div>
+
+      <!-- Genre tags -->
+      {% if artist.genres.all %}
+      <div class="flex flex-wrap gap-2 mb-4">
+        {% for genre in artist.genres.all %}
+          <span class="badge bg-primary/20 text-primary">{{ genre.name }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Follow button -->
+    {% if user.is_authenticated and user != artist.user %}
+    <div class="pb-2">
+      <button id="follow-btn"
+              onclick="toggleFollow('{{ artist.id }}')"
+              class="{% if is_following %}btn-secondary border-primary/40 text-primary{% else %}btn-primary{% endif %} px-6 py-2.5 text-sm">
+        {% if is_following %}Following{% else %}Follow{% endif %}
+      </button>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Bio -->
+  {% if artist.user.bio %}
+  <p class="text-muted mb-8 max-w-2xl leading-relaxed">{{ artist.user.bio }}</p>
+  {% endif %}
+
+  <!-- Tabs -->
+  <div x-data="{ tab: 'tracks' }" class="mb-8">
+    <div class="flex gap-1 border-b border-white/10 mb-6">
+      <button @click="tab = 'tracks'"
+              :class="tab === 'tracks' ? 'text-white border-b-2 border-primary' : 'text-muted'"
+              class="px-4 py-2 text-sm font-medium transition-colors">
+        Tracks ({{ tracks.count }})
+      </button>
+      {% if albums %}
+      <button @click="tab = 'albums'"
+              :class="tab === 'albums' ? 'text-white border-b-2 border-primary' : 'text-muted'"
+              class="px-4 py-2 text-sm font-medium transition-colors">
+        Albums ({{ albums.count }})
+      </button>
+      {% endif %}
+    </div>
+
+    <!-- Tracks tab -->
+    <div x-show="tab === 'tracks'">
+      {% if tracks %}
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {% for track in tracks %}
+          {% include 'components/track_card.html' with track=track %}
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-muted text-center py-12">No published tracks yet.</p>
+      {% endif %}
+    </div>
+
+    <!-- Albums tab -->
+    {% if albums %}
+    <div x-show="tab === 'albums'">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        {% for album in albums %}
+        <div class="card group">
+          <div class="aspect-square rounded-xl overflow-hidden bg-surface mb-3">
+            {% if album.cover_image %}
+              <img src="{{ album.cover_image.url }}" class="w-full h-full object-cover
+                         group-hover:scale-105 transition-transform duration-500"/>
+            {% else %}
+              <div class="w-full h-full bg-gradient-to-br from-primary/30 to-accent/20 flex items-center justify-center">
+                <svg class="w-10 h-10 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M9 19V6l12-3v13M9 19c0 1.1-1.34 2-3 2s-3-.9-3-2 1.34-2 3-2 3 .9 3 2z"/>
+                </svg>
+              </div>
+            {% endif %}
+          </div>
+          <p class="text-white font-semibold text-sm truncate">{{ album.title }}</p>
+          <p class="text-muted text-xs">
+            {{ album.get_album_type_display }}
+            {% if album.release_date %}· {{ album.release_date|date:"Y" }}{% endif %}
+          </p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+function toggleFollow(artistId) {
+  const csrfToken = document.cookie
+    .split(';').find(c => c.trim().startsWith('csrftoken='))?.split('=')[1];
+
+  fetch(`/social/follow/${artistId}/`, {
+    method: 'POST',
+    headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/json' },
+  })
+  .then(r => r.json())
+  .then(data => {
+    const btn = document.getElementById('follow-btn');
+    if (data.followed) {
+      btn.textContent = 'Following';
+      btn.className = 'btn-secondary border-primary/40 text-primary px-6 py-2.5 text-sm';
+    } else {
+      btn.textContent = 'Follow';
+      btn.className = 'btn-primary px-6 py-2.5 text-sm';
+    }
+  });
+}
+</script>
+{% endblock %}

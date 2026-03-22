@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% block title %}{{ playlist.name }} — NapsterLegal{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-12 pt-24">
+
+  <!-- Header -->
+  <div class="flex items-start gap-6 mb-10">
+    <div class="w-40 h-40 flex-shrink-0 rounded-2xl overflow-hidden bg-gradient-to-br from-primary/30 to-accent/20 flex items-center justify-center">
+      {% if playlist.cover_image %}
+        <img src="{{ playlist.cover_image.url }}" class="w-full h-full object-cover"/>
+      {% else %}
+        <svg class="w-16 h-16 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/>
+        </svg>
+      {% endif %}
+    </div>
+    <div class="flex-1">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="badge {% if playlist.is_public %}bg-green-500/20 text-green-400{% else %}bg-white/10 text-muted{% endif %}">
+          {% if playlist.is_public %}Public{% else %}Private{% endif %}
+        </span>
+        <span class="text-muted text-sm">Playlist</span>
+      </div>
+      <h1 class="text-4xl font-black text-white mb-2">{{ playlist.name }}</h1>
+      {% if playlist.description %}
+        <p class="text-muted mb-3">{{ playlist.description }}</p>
+      {% endif %}
+      <p class="text-muted text-sm">
+        By <span class="text-white">{{ playlist.owner.username }}</span>
+        · {{ tracks.count }} track{{ tracks.count|pluralize }}
+        · Created {{ playlist.created_at|date:"M d, Y" }}
+      </p>
+      <div class="flex gap-3 mt-4">
+        {% if tracks %}
+        <button onclick="playPlaylist()" class="btn-primary flex items-center gap-2">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          Play All
+        </button>
+        {% endif %}
+        {% if request.user == playlist.owner %}
+        <a href="/playlists/{{ playlist.id }}/delete/"
+           onclick="return confirm('Delete this playlist?')"
+           class="btn-secondary flex items-center gap-2 text-red-400 hover:text-red-300">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+          </svg>
+          Delete
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Track list -->
+  {% if tracks %}
+  <div class="card">
+    <div class="space-y-1">
+      {% for pt in tracks %}
+      <div class="flex items-center gap-4 p-3 rounded-xl hover:bg-white/5 transition-colors group">
+        <span class="text-muted text-sm w-6 text-right flex-shrink-0">{{ forloop.counter }}</span>
+
+        <div class="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-surface cursor-pointer"
+             onclick="playTrack('{{ pt.track.id }}', '{{ pt.track.title|escapejs }}', '{{ pt.track.artist|escapejs }}', '{% if pt.track.cover_image %}{{ pt.track.cover_image.url }}{% endif %}', '/api/stream/{{ pt.track.id }}/')">
+          {% if pt.track.cover_image %}
+            <img src="{{ pt.track.cover_image.url }}" class="w-full h-full object-cover"/>
+          {% else %}
+            <div class="w-full h-full bg-gradient-to-br from-primary/30 to-accent/20 flex items-center justify-center">
+              <svg class="w-4 h-4 text-muted" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 18V5l12-2v13M9 18c0 1.105-1.343 2-3 2s-3-.895-3-2z"/>
+              </svg>
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="flex-1 min-w-0 cursor-pointer"
+             onclick="playTrack('{{ pt.track.id }}', '{{ pt.track.title|escapejs }}', '{{ pt.track.artist|escapejs }}', '{% if pt.track.cover_image %}{{ pt.track.cover_image.url }}{% endif %}', '/api/stream/{{ pt.track.id }}/')">
+          <p class="text-white text-sm font-medium truncate group-hover:text-primary transition-colors">
+            {{ pt.track.title }}
+          </p>
+          <p class="text-muted text-xs truncate">{{ pt.track.artist }}</p>
+        </div>
+
+        <span class="text-muted text-xs flex-shrink-0">{{ pt.track.duration_display }}</span>
+
+        {% if request.user == playlist.owner %}
+        <a href="/playlists/{{ playlist.id }}/remove/{{ pt.track.id }}/"
+           class="opacity-0 group-hover:opacity-100 text-muted hover:text-red-400 transition-all ml-2"
+           title="Remove">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </a>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% else %}
+  <div class="text-center py-12 card">
+    <p class="text-muted">This playlist is empty. Add tracks from any track page.</p>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+function playPlaylist() {
+  const trackButtons = document.querySelectorAll('[onclick^="playTrack"]');
+  if (trackButtons.length > 0) trackButtons[0].click();
+}
+</script>
+{% endblock %}

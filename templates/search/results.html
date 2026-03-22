@@ -1,19 +1,134 @@
 {% extends 'base.html' %}
-{% block title %}Search — NapsterLegal{% endblock %}
+{% load static %}
+{% block title %}
+  {% if query %}Search: "{{ query }}"{% else %}Discover Music{% endif %} — NapsterLegal
+{% endblock %}
+
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 py-12 pt-24">
-  <h1 class="text-3xl font-black text-white mb-2">
-    {% if query %}Results for "{{ query }}"{% else %}Search Music{% endif %}
-  </h1>
-  {% if tracks %}
-    <p class="text-muted mb-8">{{ tracks.count }} tracks found</p>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {% for track in tracks %}
-        {% include 'components/track_card.html' with track=track %}
-      {% endfor %}
+
+  <div class="mb-8">
+    {% if query %}
+      <h1 class="text-3xl font-black text-white mb-1">
+        Results for "<span class="text-primary">{{ query }}</span>"
+      </h1>
+      <p class="text-muted">{{ tracks.count }} track{{ tracks.count|pluralize }} found</p>
+    {% else %}
+      <h1 class="text-3xl font-black text-white mb-1">Discover Music</h1>
+      <p class="text-muted">Browse all tracks on NapsterLegal</p>
+    {% endif %}
+  </div>
+
+  <div class="flex flex-col lg:flex-row gap-8">
+
+    <!-- Sidebar filters -->
+    <aside class="lg:w-56 flex-shrink-0">
+
+      <!-- Sort -->
+      <div class="card mb-4">
+        <h3 class="text-white font-semibold text-sm mb-3">Sort By</h3>
+        <div class="space-y-1">
+          <a href="?q={{ query }}&genre={{ current_genre }}&sort=relevance"
+             class="block px-3 py-2 rounded-lg text-sm transition-colors
+                    {% if current_sort == 'relevance' or not current_sort %}bg-primary/20 text-primary{% else %}text-muted hover:text-white hover:bg-white/5{% endif %}">
+            Most Popular
+          </a>
+          <a href="?q={{ query }}&genre={{ current_genre }}&sort=new"
+             class="block px-3 py-2 rounded-lg text-sm transition-colors
+                    {% if current_sort == 'new' %}bg-primary/20 text-primary{% else %}text-muted hover:text-white hover:bg-white/5{% endif %}">
+            Newest First
+          </a>
+          <a href="?q={{ query }}&genre={{ current_genre }}&sort=liked"
+             class="block px-3 py-2 rounded-lg text-sm transition-colors
+                    {% if current_sort == 'liked' %}bg-primary/20 text-primary{% else %}text-muted hover:text-white hover:bg-white/5{% endif %}">
+            Most Liked
+          </a>
+        </div>
+      </div>
+
+      <!-- Genres -->
+      {% if genres %}
+      <div class="card">
+        <h3 class="text-white font-semibold text-sm mb-3">Genre</h3>
+        <div class="space-y-1">
+          <a href="?q={{ query }}&sort={{ current_sort }}"
+             class="block px-3 py-2 rounded-lg text-sm transition-colors
+                    {% if not current_genre %}bg-primary/20 text-primary{% else %}text-muted hover:text-white hover:bg-white/5{% endif %}">
+            All Genres
+          </a>
+          {% for g in genres %}
+          <a href="?q={{ query }}&genre={{ g.slug }}&sort={{ current_sort }}"
+             class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors
+                    {% if current_genre == g.slug %}bg-primary/20 text-primary{% else %}text-muted hover:text-white hover:bg-white/5{% endif %}">
+            <div class="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                 style="background-color: {{ g.color_hex }}"></div>
+            {{ g.name }}
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </aside>
+
+    <!-- Results -->
+    <div class="flex-1">
+
+      <!-- Artists -->
+      {% if artists and query %}
+      <div class="mb-8">
+        <h2 class="text-white font-bold text-lg mb-4">Artists</h2>
+        <div class="flex flex-wrap gap-3">
+          {% for artist in artists %}
+          <a href="/artist/{{ artist.id }}/"
+             class="flex items-center gap-3 card py-3 px-4 hover:border-primary/40">
+            <div class="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+              {{ artist.stage_name|first|upper }}
+            </div>
+            <div>
+              <p class="text-white text-sm font-medium">{{ artist.stage_name }}</p>
+              <p class="text-muted text-xs">{{ artist.monthly_listeners }} listeners</p>
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Tracks -->
+      <div>
+        <h2 class="text-white font-bold text-lg mb-4">
+          Tracks
+          {% if tracks %}
+            <span class="text-muted font-normal text-sm ml-2">{{ tracks.count }} results</span>
+          {% endif %}
+        </h2>
+
+        {% if tracks %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {% for track in tracks %}
+            {% include 'components/track_card.html' with track=track %}
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-16">
+          <div class="w-16 h-16 bg-surface rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </div>
+          <p class="text-white font-semibold mb-2">No tracks found</p>
+          <p class="text-muted text-sm">
+            {% if query %}Try a different search term.{% else %}No tracks uploaded yet.{% endif %}
+          </p>
+          {% if query %}
+            <a href="/search/" class="btn-secondary mt-4 inline-block text-sm px-4 py-2">Browse All</a>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+
     </div>
-  {% else %}
-    <p class="text-muted mt-8">No results found. Try a different search.</p>
-  {% endif %}
+  </div>
 </div>
 {% endblock %}

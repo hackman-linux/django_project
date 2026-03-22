@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard — NapsterLegal{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-12 pt-24">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-3xl font-black text-white mb-1">Admin Dashboard</h1>
+      <p class="text-muted">Full platform overview and management</p>
+    </div>
+    <div class="flex gap-3">
+      <a href="/accounts/manage/users/" class="btn-secondary text-sm px-4 py-2">
+        Manage Users
+      </a>
+      <a href="/accounts/manage/tracks/" class="btn-secondary text-sm px-4 py-2">
+        Manage Tracks
+      </a>
+      <a href="/admin/" class="btn-secondary text-sm px-4 py-2 text-muted">
+        Django Admin
+      </a>
+    </div>
+  </div>
+
+  <!-- Stats grid -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+    <div class="card text-center">
+      <div class="text-4xl font-black text-primary mb-1">{{ total_users }}</div>
+      <div class="text-muted text-sm">Total Users</div>
+    </div>
+    <div class="card text-center">
+      <div class="text-4xl font-black text-accent mb-1">{{ total_artists }}</div>
+      <div class="text-muted text-sm">Artists</div>
+    </div>
+    <div class="card text-center">
+      <div class="text-4xl font-black text-green-400 mb-1">{{ total_tracks }}</div>
+      <div class="text-muted text-sm">Published Tracks</div>
+    </div>
+    <div class="card text-center">
+      <div class="text-4xl font-black text-yellow-400 mb-1">{{ total_plays }}</div>
+      <div class="text-muted text-sm">Total Plays</div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+
+    <!-- Recent users -->
+    <div class="card">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-white font-bold">Recent Users</h2>
+        <a href="/accounts/manage/users/" class="text-primary text-sm hover:underline">
+          View all →
+        </a>
+      </div>
+      <div class="space-y-3">
+        {% for u in recent_users %}
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 bg-gradient-to-br from-primary/50 to-accent/50 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+            {{ u.username|first|upper }}
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-white text-sm font-medium truncate">{{ u.username }}</p>
+            <p class="text-muted text-xs">{{ u.get_user_type_display }} · {{ u.date_joined|date:"M d, Y" }}</p>
+          </div>
+          <span class="badge {% if u.is_active %}bg-green-500/20 text-green-400{% else %}bg-red-500/20 text-red-400{% endif %}">
+            {% if u.is_active %}Active{% else %}Banned{% endif %}
+          </span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Top tracks -->
+    <div class="card">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-white font-bold">Top Tracks</h2>
+        <a href="/accounts/manage/tracks/" class="text-primary text-sm hover:underline">
+          View all →
+        </a>
+      </div>
+      <div class="space-y-3">
+        {% for track in top_tracks %}
+        <div class="flex items-center gap-3">
+          <span class="text-muted text-xs w-4">{{ forloop.counter }}</span>
+          <div class="w-8 h-8 rounded-lg overflow-hidden bg-surface flex-shrink-0">
+            {% if track.cover_image %}
+              <img src="{{ track.cover_image.url }}" class="w-full h-full object-cover"/>
+            {% else %}
+              <div class="w-full h-full bg-gradient-to-br from-primary/30 to-accent/20"></div>
+            {% endif %}
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-white text-sm font-medium truncate">{{ track.title }}</p>
+            <p class="text-muted text-xs">{{ track.artist }}</p>
+          </div>
+          <span class="text-accent text-xs font-semibold">{{ track.play_count }} plays</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Analytics from MariaDB -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+    <!-- Recent play events -->
+    <div class="card">
+      <h2 class="text-white font-bold mb-4 flex items-center gap-2">
+        Recent Play Events
+        <span class="badge bg-green-500/20 text-green-400 text-xs">MariaDB</span>
+      </h2>
+      {% if recent_events %}
+      <div class="space-y-2">
+        {% for event in recent_events %}
+        <div class="flex items-center justify-between py-2 border-b border-white/5">
+          <div>
+            <p class="text-white text-xs font-mono truncate max-w-32">
+              {{ event.track_id|truncatechars:16 }}
+            </p>
+            <p class="text-muted text-xs">
+              {{ event.country_code|default:"??" }} · {{ event.device_type|default:"unknown" }}
+            </p>
+          </div>
+          <div class="text-right">
+            <p class="text-accent text-xs">{{ event.listened_duration }}s</p>
+            <p class="text-muted text-xs">{{ event.timestamp|timesince }} ago</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-muted text-sm text-center py-6">
+        No play events yet. Events are logged when tracks are streamed.
+      </p>
+      {% endif %}
+    </div>
+
+    <!-- Recent searches -->
+    <div class="card">
+      <h2 class="text-white font-bold mb-4 flex items-center gap-2">
+        Recent Searches
+        <span class="badge bg-green-500/20 text-green-400 text-xs">MariaDB</span>
+      </h2>
+      {% if recent_searches %}
+      <div class="space-y-2">
+        {% for search in recent_searches %}
+        <div class="flex items-center justify-between py-2 border-b border-white/5">
+          <p class="text-white text-sm">"{{ search.query }}"</p>
+          <div class="text-right">
+            <p class="text-muted text-xs">{{ search.results_count }} results</p>
+            <p class="text-muted text-xs">{{ search.timestamp|timesince }} ago</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-muted text-sm text-center py-6">
+        No searches logged yet. Searches are recorded automatically.
+      </p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

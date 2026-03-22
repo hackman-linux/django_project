@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Manage Tracks — NapsterLegal Admin{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-12 pt-24">
+  <div class="flex items-center gap-4 mb-8">
+    <a href="/accounts/manage/" class="text-muted hover:text-white transition-colors">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </a>
+    <h1 class="text-2xl font-black text-white">Manage Tracks</h1>
+    <span class="badge bg-primary/20 text-primary">{{ tracks.count }} total</span>
+  </div>
+
+  <div class="card overflow-x-auto">
+    <table class="w-full">
+      <thead>
+        <tr class="border-b border-white/10">
+          <th class="text-left text-muted text-xs uppercase pb-3 pr-4">Track</th>
+          <th class="text-left text-muted text-xs uppercase pb-3 pr-4">Artist</th>
+          <th class="text-left text-muted text-xs uppercase pb-3 pr-4">Genre</th>
+          <th class="text-right text-muted text-xs uppercase pb-3 pr-4">Plays</th>
+          <th class="text-center text-muted text-xs uppercase pb-3 pr-4">Status</th>
+          <th class="text-left text-muted text-xs uppercase pb-3 pr-4">Uploaded</th>
+          <th class="text-center text-muted text-xs uppercase pb-3">Action</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-white/5">
+        {% for track in tracks %}
+        <tr class="hover:bg-white/3 transition-colors">
+          <td class="py-3 pr-4">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-lg overflow-hidden bg-surface flex-shrink-0">
+                {% if track.cover_image %}
+                  <img src="{{ track.cover_image.url }}" class="w-full h-full object-cover"/>
+                {% else %}
+                  <div class="w-full h-full bg-gradient-to-br from-primary/30 to-accent/20"></div>
+                {% endif %}
+              </div>
+              <a href="/track/{{ track.id }}/"
+                 class="text-white text-sm font-medium hover:text-primary transition-colors truncate max-w-32">
+                {{ track.title }}
+              </a>
+            </div>
+          </td>
+          <td class="py-3 pr-4">
+            <span class="text-muted text-sm">{{ track.artist }}</span>
+          </td>
+          <td class="py-3 pr-4">
+            {% if track.genre %}
+              <span class="badge bg-primary/20 text-primary text-xs">{{ track.genre.name }}</span>
+            {% else %}
+              <span class="text-muted text-xs">—</span>
+            {% endif %}
+          </td>
+          <td class="py-3 pr-4 text-right">
+            <span class="text-white text-sm">{{ track.play_count }}</span>
+          </td>
+          <td class="py-3 pr-4 text-center">
+            <span class="badge {% if track.is_published %}bg-green-500/20 text-green-400{% else %}bg-yellow-500/20 text-yellow-400{% endif %}">
+              {% if track.is_published %}Live{% else %}Draft{% endif %}
+            </span>
+          </td>
+          <td class="py-3 pr-4">
+            <span class="text-muted text-xs">{{ track.uploaded_at|date:"M d, Y" }}</span>
+          </td>
+          <td class="py-3 text-center">
+            <a href="/accounts/manage/tracks/{{ track.id }}/toggle/"
+               class="text-xs {% if track.is_published %}text-red-400 hover:text-red-300{% else %}text-green-400 hover:text-green-300{% endif %} transition-colors">
+              {% if track.is_published %}Unpublish{% else %}Publish{% endif %}
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

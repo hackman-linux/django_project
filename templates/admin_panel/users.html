@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Manage Users — NapsterLegal Admin{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-12 pt-24">
+  <div class="flex items-center gap-4 mb-8">
+    <a href="/accounts/manage/" class="text-muted hover:text-white transition-colors">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </a>
+    <h1 class="text-2xl font-black text-white">Manage Users</h1>
+    <span class="badge bg-primary/20 text-primary">{{ users.count }} total</span>
+  </div>
+
+  <div class="card overflow-x-auto">
+    <table class="w-full">
+      <thead>
+        <tr class="border-b border-white/10">
+          <th class="text-left text-muted text-xs uppercase pb-3 pr-4">User</th>
+          <th class="text-left text-muted text-xs uppercase pb-3 pr-4">Type</th>
+          <th class="text-left text-muted text-xs uppercase pb-3 pr-4">Email</th>
+          <th class="text-center text-muted text-xs uppercase pb-3 pr-4">Premium</th>
+          <th class="text-center text-muted text-xs uppercase pb-3 pr-4">Status</th>
+          <th class="text-left text-muted text-xs uppercase pb-3 pr-4">Joined</th>
+          <th class="text-center text-muted text-xs uppercase pb-3">Action</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-white/5">
+        {% for u in users %}
+        <tr class="hover:bg-white/3 transition-colors">
+          <td class="py-3 pr-4">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 bg-gradient-to-br from-primary/50 to-accent/50 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                {{ u.username|first|upper }}
+              </div>
+              <span class="text-white text-sm font-medium">{{ u.username }}</span>
+              {% if u.is_staff %}<span class="badge bg-yellow-500/20 text-yellow-400 text-xs">Staff</span>{% endif %}
+            </div>
+          </td>
+          <td class="py-3 pr-4">
+            <span class="text-muted text-sm">{{ u.get_user_type_display }}</span>
+          </td>
+          <td class="py-3 pr-4">
+            <span class="text-muted text-sm">{{ u.email }}</span>
+          </td>
+          <td class="py-3 pr-4 text-center">
+            {% if u.is_premium %}
+              <span class="badge bg-accent/20 text-accent">⭐ Yes</span>
+            {% else %}
+              <span class="text-muted text-xs">—</span>
+            {% endif %}
+          </td>
+          <td class="py-3 pr-4 text-center">
+            <span class="badge {% if u.is_active %}bg-green-500/20 text-green-400{% else %}bg-red-500/20 text-red-400{% endif %}">
+              {% if u.is_active %}Active{% else %}Banned{% endif %}
+            </span>
+          </td>
+          <td class="py-3 pr-4">
+            <span class="text-muted text-xs">{{ u.date_joined|date:"M d, Y" }}</span>
+          </td>
+          <td class="py-3 text-center">
+            {% if not u.is_superuser %}
+            <a href="/accounts/manage/users/{{ u.id }}/toggle/"
+               class="text-xs {% if u.is_active %}text-red-400 hover:text-red-300{% else %}text-green-400 hover:text-green-300{% endif %} transition-colors">
+              {% if u.is_active %}Ban{% else %}Unban{% endif %}
+            </a>
+            {% else %}
+            <span class="text-muted text-xs">Owner</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

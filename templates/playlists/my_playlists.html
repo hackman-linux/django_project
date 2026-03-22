@@ -1,19 +1,99 @@
 {% extends 'base.html' %}
 {% block title %}My Playlists — NapsterLegal{% endblock %}
+
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 py-12 pt-24">
-  <h1 class="text-3xl font-black text-white mb-8">My Playlists</h1>
-  {% if playlists %}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {% for pl in playlists %}
-      <div class="card">
-        <h3 class="text-white font-bold">{{ pl.name }}</h3>
-        <p class="text-muted text-sm">{{ pl.track_count }} tracks</p>
-      </div>
-      {% endfor %}
+
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-3xl font-black text-white mb-1">My Playlists</h1>
+      <p class="text-muted">{{ playlists.count }} playlist{{ playlists.count|pluralize }}</p>
     </div>
+
+    <!-- Create playlist modal trigger -->
+    <div x-data="{ open: false }">
+      <button @click="open = true" class="btn-primary flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        New Playlist
+      </button>
+
+      <!-- Modal -->
+      <div x-show="open" @keydown.escape.window="open = false"
+           class="fixed inset-0 z-50 flex items-center justify-center p-4"
+           x-transition:enter="transition ease-out duration-200"
+           x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="open = false"></div>
+        <div class="relative bg-surface border border-white/10 rounded-2xl p-6 w-full max-w-md shadow-2xl">
+          <h2 class="text-white font-bold text-lg mb-4">Create New Playlist</h2>
+          <form method="POST" action="/playlists/create/" class="space-y-4">
+            {% csrf_token %}
+            <div>
+              <label class="block text-sm text-muted mb-1">Name</label>
+              <input type="text" name="name" class="input-field" placeholder="My awesome playlist" required/>
+            </div>
+            <div>
+              <label class="block text-sm text-muted mb-1">Description (optional)</label>
+              <textarea name="description" class="input-field" rows="2"
+                        placeholder="What's this playlist about?"></textarea>
+            </div>
+            <label class="flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" name="is_public" checked
+                     class="rounded border-white/20 bg-white/5 text-primary"/>
+              <span class="text-muted text-sm">Make this playlist public</span>
+            </label>
+            <div class="flex gap-3 pt-2">
+              <button type="submit" class="btn-primary flex-1">Create</button>
+              <button type="button" @click="open = false" class="btn-secondary flex-1">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if playlists %}
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for pl in playlists %}
+    <a href="/playlists/{{ pl.id }}/" class="card group hover:border-primary/40">
+      <!-- Cover -->
+      <div class="aspect-square rounded-xl overflow-hidden bg-gradient-to-br from-primary/30 to-accent/20 mb-4 flex items-center justify-center">
+        {% if pl.cover_image %}
+          <img src="{{ pl.cover_image.url }}" class="w-full h-full object-cover"/>
+        {% else %}
+          <svg class="w-12 h-12 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+          </svg>
+        {% endif %}
+      </div>
+      <h3 class="text-white font-bold truncate group-hover:text-primary transition-colors">
+        {{ pl.name }}
+      </h3>
+      <div class="flex items-center justify-between mt-1">
+        <p class="text-muted text-sm">{{ pl.track_count }} tracks</p>
+        {% if pl.is_public %}
+          <span class="badge bg-green-500/20 text-green-400 text-xs">Public</span>
+        {% else %}
+          <span class="badge bg-white/10 text-muted text-xs">Private</span>
+        {% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+
   {% else %}
-    <p class="text-muted">No playlists yet. Create your first one!</p>
+  <div class="text-center py-20">
+    <div class="w-20 h-20 bg-surface rounded-2xl flex items-center justify-center mx-auto mb-4">
+      <svg class="w-10 h-10 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/>
+      </svg>
+    </div>
+    <p class="text-white font-semibold text-lg mb-2">No playlists yet</p>
+    <p class="text-muted text-sm mb-6">Create your first playlist and start curating music.</p>
+  </div>
   {% endif %}
 </div>
 {% endblock %}

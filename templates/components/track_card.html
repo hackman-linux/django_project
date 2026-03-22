@@ -1,6 +1,6 @@
 {% load static %}
-<div class="card group cursor-pointer"
-     onclick="playTrack('{{ track.id }}', '{{ track.title|escapejs }}', '{{ track.artist }}', '{% if track.cover_image %}{{ track.cover_image.url }}{% endif %}', '/api/stream/{{ track.id }}/')">
+<div class="card group cursor-pointer relative"
+     onclick="playTrack('{{ track.id }}', '{{ track.title|escapejs }}', '{{ track.artist|escapejs }}', '{% if track.cover_image %}{{ track.cover_image.url }}{% endif %}', '/api/stream/{{ track.id }}/')">
 
   <!-- Cover image -->
   <div class="relative aspect-square mb-4 rounded-xl overflow-hidden bg-surface">
@@ -15,16 +15,15 @@
       </div>
     {% endif %}
 
-    <!-- Play button overlay -->
+    <!-- Play overlay -->
     <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
       <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-xl transform scale-90 group-hover:scale-100 transition-transform">
-        <svg class="w-6 h-6 text-dark ml-1" fill="currentColor" viewBox="0 0 24 24">
+        <svg class="w-6 h-6 text-dark ml-0.5" fill="currentColor" viewBox="0 0 24 24">
           <path d="M8 5v14l11-7z"/>
         </svg>
       </div>
     </div>
 
-    <!-- Explicit badge -->
     {% if track.is_explicit %}
     <div class="absolute top-2 right-2">
       <span class="badge bg-red-500/80 text-white text-xs">E</span>
@@ -41,12 +40,11 @@
     </a>
     <p class="text-muted text-xs truncate">{{ track.artist }}</p>
 
-    <!-- Meta row -->
     <div class="flex items-center justify-between pt-1">
       <div class="flex items-center gap-3">
         <span class="flex items-center gap-1 text-muted text-xs">
           <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5z"/>
           </svg>
           {{ track.play_count }}
         </span>
@@ -59,5 +57,38 @@
       </div>
       <span class="text-muted text-xs">{{ track.duration_display }}</span>
     </div>
+
+    <!-- Add to playlist (shown on hover, only for logged-in users) -->
+    {% if user.is_authenticated %}
+    <div x-data="{ open: false }" class="pt-1" onclick="event.stopPropagation()">
+      <button @click="open = !open"
+              class="w-full text-xs text-muted hover:text-white bg-white/5 hover:bg-white/10
+                     rounded-lg py-1.5 transition-colors opacity-0 group-hover:opacity-100">
+        + Add to Playlist
+      </button>
+      <div x-show="open" @click.outside="open = false"
+           x-transition
+           class="absolute bottom-12 left-0 right-0 bg-surface border border-white/10 rounded-xl p-3 shadow-xl z-20">
+        {% if user.playlists.all %}
+          {% for pl in user.playlists.all %}
+          <form method="POST" action="/playlists/add/{{ track.id }}/">
+            {% csrf_token %}
+            <input type="hidden" name="playlist_id" value="{{ pl.id }}"/>
+            <button type="submit"
+                    class="w-full text-left text-sm text-muted hover:text-white py-2 px-2
+                           hover:bg-white/5 rounded-lg transition-colors truncate">
+              {{ pl.name }}
+            </button>
+          </form>
+          {% endfor %}
+        {% else %}
+          <p class="text-muted text-xs text-center py-2">No playlists yet.</p>
+        {% endif %}
+        <a href="/playlists/" class="block text-xs text-primary text-center mt-2 hover:underline">
+          Manage Playlists
+        </a>
+      </div>
+    </div>
+    {% endif %}
   </div>
 </div>

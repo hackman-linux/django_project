@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block title %}Edit Profile — NapsterLegal{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-12 pt-24">
+
+  <div class="flex items-center gap-4 mb-8">
+    <a href="/profile/" class="text-muted hover:text-white transition-colors">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </a>
+    <h1 class="text-2xl font-black text-white">Edit Profile</h1>
+  </div>
+
+  <form method="POST" enctype="multipart/form-data" class="space-y-6">
+    {% csrf_token %}
+
+    <!-- Avatar preview -->
+    <div class="card flex items-center gap-4">
+      <div class="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center text-white text-2xl font-black flex-shrink-0">
+        {% if request.user.avatar %}
+          <img src="{{ request.user.avatar.url }}" class="w-full h-full object-cover rounded-xl"/>
+        {% else %}
+          {{ request.user.username|first|upper }}
+        {% endif %}
+      </div>
+      <div class="flex-1">
+        <label class="block text-sm font-semibold text-white mb-1">Profile Picture</label>
+        {{ form.avatar }}
+      </div>
+    </div>
+
+    <!-- Basic info -->
+    <div class="card space-y-4">
+      <h2 class="text-white font-bold">Basic Information</h2>
+
+      <div>
+        <label class="block text-sm font-medium text-muted mb-1">Username</label>
+        {{ form.username }}
+        {% if form.username.errors %}
+          <p class="text-red-400 text-xs mt-1">{{ form.username.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-muted mb-1">Email</label>
+        {{ form.email }}
+        {% if form.email.errors %}
+          <p class="text-red-400 text-xs mt-1">{{ form.email.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-muted mb-1">Bio</label>
+        {{ form.bio }}
+      </div>
+    </div>
+
+    <!-- Artist-specific fields -->
+    {% if artist_form %}
+    <div class="card space-y-4">
+      <h2 class="text-white font-bold flex items-center gap-2">
+        <svg class="w-5 h-5 text-accent" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M9 18V5l12-2v13M9 18c0 1.1-1.34 2-3 2s-3-.9-3-2 1.34-2 3-2 3 .9 3 2z"/>
+        </svg>
+        Artist Profile
+      </h2>
+
+      <div>
+        <label class="block text-sm font-medium text-muted mb-1">Stage Name</label>
+        {{ artist_form.stage_name }}
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-muted mb-1">Country</label>
+        {{ artist_form.country }}
+      </div>
+
+      <!-- Social links - simple text inputs -->
+      <div>
+        <label class="block text-sm font-medium text-muted mb-2">Social Links</label>
+        <div class="space-y-2">
+          <div class="flex items-center gap-2">
+            <span class="text-muted text-sm w-20">Instagram</span>
+            <input type="text" name="instagram"
+                   value="{{ request.user.artist_profile.social_links.instagram|default:'' }}"
+                   class="input-field flex-1" placeholder="@yourhandle"/>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-muted text-sm w-20">Twitter/X</span>
+            <input type="text" name="twitter"
+                   value="{{ request.user.artist_profile.social_links.twitter|default:'' }}"
+                   class="input-field flex-1" placeholder="@yourhandle"/>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-muted text-sm w-20">Website</span>
+            <input type="url" name="website"
+                   value="{{ request.user.artist_profile.social_links.website|default:'' }}"
+                   class="input-field flex-1" placeholder="https://yoursite.com"/>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Actions -->
+    <div class="flex items-center gap-4">
+      <button type="submit" class="btn-primary px-8 py-3">Save Changes</button>
+      <a href="/profile/" class="btn-secondary px-6 py-3">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
