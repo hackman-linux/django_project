@@ -8,23 +8,17 @@
   <div class="flex items-center justify-between mb-8">
     <div>
       <h1 class="text-3xl font-black text-white mb-1">Admin Dashboard</h1>
-      <p class="text-muted">Full platform overview and management</p>
+      <p class="text-muted">Full platform overview — all analytics are internal only</p>
     </div>
     <div class="flex gap-3">
-      <a href="/accounts/manage/users/" class="btn-secondary text-sm px-4 py-2">
-        Manage Users
-      </a>
-      <a href="/accounts/manage/tracks/" class="btn-secondary text-sm px-4 py-2">
-        Manage Tracks
-      </a>
-      <a href="/admin/" class="btn-secondary text-sm px-4 py-2 text-muted">
-        Django Admin
-      </a>
+      <a href="/accounts/manage/users/"  class="btn-secondary text-sm px-4 py-2">Users</a>
+      <a href="/accounts/manage/tracks/" class="btn-secondary text-sm px-4 py-2">Tracks</a>
+      <a href="/admin/"                  class="btn-secondary text-sm px-4 py-2 text-muted">Django Admin</a>
     </div>
   </div>
 
-  <!-- Stats grid -->
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+  <!-- Platform stats -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
     <div class="card text-center">
       <div class="text-4xl font-black text-primary mb-1">{{ total_users }}</div>
       <div class="text-muted text-sm">Total Users</div>
@@ -43,15 +37,54 @@
     </div>
   </div>
 
+  <!-- Analytics stats from MariaDB -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+    <div class="card text-center border-green-500/20">
+      <div class="text-3xl font-black text-green-400 mb-1">{{ total_events }}</div>
+      <div class="text-muted text-sm">Play Events Logged</div>
+      <div class="badge bg-green-500/20 text-green-400 mt-2 text-xs">MariaDB</div>
+    </div>
+    <div class="card text-center border-green-500/20">
+      <div class="text-3xl font-black text-green-400 mb-1">{{ avg_listen }}s</div>
+      <div class="text-muted text-sm">Avg Listen Duration</div>
+      <div class="badge bg-green-500/20 text-green-400 mt-2 text-xs">MariaDB</div>
+    </div>
+    <div class="card text-center border-green-500/20">
+      <div class="text-3xl font-black text-green-400 mb-1">{{ completion_rate }}%</div>
+      <div class="text-muted text-sm">Track Completion Rate</div>
+      <div class="badge bg-green-500/20 text-green-400 mt-2 text-xs">MariaDB</div>
+    </div>
+    <div class="card text-center border-green-500/20">
+      <div class="text-3xl font-black text-green-400 mb-1">
+        {% for d in device_stats %}{% if forloop.first %}{{ d.count }}{% endif %}{% endfor %}
+      </div>
+      <div class="text-muted text-sm">
+        {% for d in device_stats %}{% if forloop.first %}{{ d.device_type|title }} (top){% endif %}{% endfor %}
+      </div>
+      <div class="badge bg-green-500/20 text-green-400 mt-2 text-xs">MariaDB</div>
+    </div>
+  </div>
+
+  <!-- Privacy notice -->
+  <div class="bg-primary/10 border border-primary/20 rounded-xl px-4 py-3 mb-8 flex items-center gap-3">
+    <svg class="w-5 h-5 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+    </svg>
+    <p class="text-muted text-sm">
+      <span class="text-white font-semibold">Privacy protected.</span>
+      All raw analytics (IP addresses, device data, session IDs) are visible to admins only.
+      Artists see only aggregated, anonymized stats. Users are never individually identified.
+    </p>
+  </div>
+
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
 
     <!-- Recent users -->
     <div class="card">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-white font-bold">Recent Users</h2>
-        <a href="/accounts/manage/users/" class="text-primary text-sm hover:underline">
-          View all →
-        </a>
+        <a href="/accounts/manage/users/" class="text-primary text-sm hover:underline">View all →</a>
       </div>
       <div class="space-y-3">
         {% for u in recent_users %}
@@ -75,14 +108,12 @@
     <div class="card">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-white font-bold">Top Tracks</h2>
-        <a href="/accounts/manage/tracks/" class="text-primary text-sm hover:underline">
-          View all →
-        </a>
+        <a href="/accounts/manage/tracks/" class="text-primary text-sm hover:underline">View all →</a>
       </div>
       <div class="space-y-3">
         {% for track in top_tracks %}
         <div class="flex items-center gap-3">
-          <span class="text-muted text-xs w-4">{{ forloop.counter }}</span>
+          <span class="text-muted text-xs w-4 text-right">{{ forloop.counter }}</span>
           <div class="w-8 h-8 rounded-lg overflow-hidden bg-surface flex-shrink-0">
             {% if track.cover_image %}
               <img src="{{ track.cover_image.url }}" class="w-full h-full object-cover"/>
@@ -101,29 +132,74 @@
     </div>
   </div>
 
-  <!-- Analytics from MariaDB -->
+  <!-- Device breakdown -->
+  {% if device_stats %}
+  <div class="card mb-8">
+    <h2 class="text-white font-bold mb-4 flex items-center gap-2">
+      Device Breakdown
+      <span class="badge bg-green-500/20 text-green-400 text-xs">MariaDB — Admin Only</span>
+    </h2>
+    <div class="flex flex-wrap gap-4">
+      {% for d in device_stats %}
+      <div class="flex items-center gap-3 bg-white/5 rounded-xl px-4 py-3">
+        <div class="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center">
+          {% if d.device_type == 'mobile' %}
+            <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+            </svg>
+          {% elif d.device_type == 'tablet' %}
+            <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+            </svg>
+          {% else %}
+            <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+          {% endif %}
+        </div>
+        <div>
+          <p class="text-white text-sm font-semibold">{{ d.device_type|title }}</p>
+          <p class="text-muted text-xs">{{ d.count }} events</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-    <!-- Recent play events -->
+    <!-- Recent play events — ADMIN ONLY -->
     <div class="card">
-      <h2 class="text-white font-bold mb-4 flex items-center gap-2">
+      <h2 class="text-white font-bold mb-2 flex items-center gap-2">
         Recent Play Events
-        <span class="badge bg-green-500/20 text-green-400 text-xs">MariaDB</span>
+        <span class="badge bg-red-500/20 text-red-400 text-xs">Admin Only</span>
       </h2>
+      <p class="text-muted text-xs mb-4">
+        Raw data including IPs — never shown to artists or users
+      </p>
       {% if recent_events %}
       <div class="space-y-2">
         {% for event in recent_events %}
         <div class="flex items-center justify-between py-2 border-b border-white/5">
           <div>
-            <p class="text-white text-xs font-mono truncate max-w-32">
-              {{ event.track_id|truncatechars:16 }}
-            </p>
+            <p class="text-white text-xs font-mono">{{ event.track_id|truncatechars:12 }}...</p>
             <p class="text-muted text-xs">
-              {{ event.country_code|default:"??" }} · {{ event.device_type|default:"unknown" }}
+              {{ event.ip_address|default:"—" }} ·
+              {{ event.device_type|default:"unknown" }}
+              {% if event.user_id %}· logged in{% else %}· guest{% endif %}
             </p>
           </div>
           <div class="text-right">
-            <p class="text-accent text-xs">{{ event.listened_duration }}s</p>
+            <p class="text-accent text-xs font-semibold">
+              {{ event.listened_duration }}s
+              {% if event.completed %}
+                <span class="text-green-400">✓</span>
+              {% endif %}
+            </p>
             <p class="text-muted text-xs">{{ event.timestamp|timesince }} ago</p>
           </div>
         </div>
@@ -131,24 +207,32 @@
       </div>
       {% else %}
       <p class="text-muted text-sm text-center py-6">
-        No play events yet. Events are logged when tracks are streamed.
+        No events yet. Stream a track to start logging.
       </p>
       {% endif %}
     </div>
 
-    <!-- Recent searches -->
+    <!-- Recent searches — ADMIN ONLY -->
     <div class="card">
-      <h2 class="text-white font-bold mb-4 flex items-center gap-2">
+      <h2 class="text-white font-bold mb-2 flex items-center gap-2">
         Recent Searches
-        <span class="badge bg-green-500/20 text-green-400 text-xs">MariaDB</span>
+        <span class="badge bg-red-500/20 text-red-400 text-xs">Admin Only</span>
       </h2>
+      <p class="text-muted text-xs mb-4">
+        Search queries — never shown to artists or other users
+      </p>
       {% if recent_searches %}
       <div class="space-y-2">
         {% for search in recent_searches %}
         <div class="flex items-center justify-between py-2 border-b border-white/5">
-          <p class="text-white text-sm">"{{ search.query }}"</p>
+          <div>
+            <p class="text-white text-sm font-medium">"{{ search.query }}"</p>
+            <p class="text-muted text-xs">
+              {% if search.user_id %}Logged-in user{% else %}Guest{% endif %}
+            </p>
+          </div>
           <div class="text-right">
-            <p class="text-muted text-xs">{{ search.results_count }} results</p>
+            <p class="text-white text-xs">{{ search.results_count }} results</p>
             <p class="text-muted text-xs">{{ search.timestamp|timesince }} ago</p>
           </div>
         </div>
@@ -156,7 +240,7 @@
       </div>
       {% else %}
       <p class="text-muted text-sm text-center py-6">
-        No searches logged yet. Searches are recorded automatically.
+        No searches logged yet.
       </p>
       {% endif %}
     </div>

@@ -147,24 +147,42 @@ def admin_dashboard(request):
     recent_tracks = Track.objects.select_related(
         'artist').order_by('-uploaded_at')[:10]
 
-    # Analytics from MariaDB
-    recent_events = PlayEvent.objects.order_by('-timestamp')[:20]
-    recent_searches = SearchLog.objects.order_by('-timestamp')[:10]
+    # Analytics from MariaDB (admin eyes only — raw data never shown to users/artists)
+    recent_events   = PlayEvent.objects.using('analytics').order_by('-timestamp')[:20]
+    recent_searches = SearchLog.objects.using('analytics').order_by('-timestamp')[:10]
+
+    # Aggregate stats from MariaDB
+    from django.db.models import Avg, Count as DCount
+    avg_listen = PlayEvent.objects.using('analytics').aggregate(
+        avg=Avg('listened_duration'))['avg'] or 0
+    completed_count = PlayEvent.objects.using('analytics').filter(
+        completed=True).count()
+    total_events = PlayEvent.objects.using('analytics').count()
+    completion_rate = round(
+        (completed_count / total_events * 100) if total_events > 0 else 0, 1)
+
+    # Device breakdown
+    device_stats = PlayEvent.objects.using('analytics').values(
+        'device_type').annotate(count=DCount('id')).order_by('-count')
 
     # Top tracks by play count
     top_tracks = Track.objects.filter(
         is_published=True).order_by('-play_count')[:10]
 
     return render(request, 'admin_panel/dashboard.html', {
-        'total_users':      total_users,
-        'total_artists':    total_artists,
-        'total_tracks':     total_tracks,
-        'total_plays':      total_plays,
-        'recent_users':     recent_users,
-        'recent_tracks':    recent_tracks,
-        'recent_events':    recent_events,
-        'recent_searches':  recent_searches,
-        'top_tracks':       top_tracks,
+        'total_users':       total_users,
+        'total_artists':     total_artists,
+        'total_tracks':      total_tracks,
+        'total_plays':       total_plays,
+        'recent_users':      recent_users,
+        'recent_tracks':     recent_tracks,
+        'recent_events':     recent_events,
+        'recent_searches':   recent_searches,
+        'top_tracks':        top_tracks,
+        'avg_listen':        round(avg_listen, 1),
+        'completion_rate':   completion_rate,
+        'total_events':      total_events,
+        'device_stats':      device_stats,
     })
 
 

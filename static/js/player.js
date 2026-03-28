@@ -1,6 +1,5 @@
 /**
  * NapsterLegal Audio Player
- * ─────────────────────────
  * This file does two things:
  * 1. Defines the Alpine.js component "audioPlayer()" used in player.html
  * 2. Exposes a global playTrack() function called by track cards
@@ -13,7 +12,7 @@
 
 function audioPlayer() {
   return {
-    // ── STATE (these are the "variables" of the player) ──────────
+    //  STATE (these are the "variables" of the player) 
     currentTrack: null,   // the track currently loaded { title, artist, cover, url }
     playing:      false,  // is audio playing right now?
     currentTime:  0,      // current position in seconds
@@ -25,7 +24,7 @@ function audioPlayer() {
     queue:        [],     // list of tracks queued up
     queueIndex:   0,      // which track in the queue we're on
 
-    // ── COMPUTED: format seconds into "m:ss" ─────────────────────
+    //COMPUTED: format seconds into "m:ss" 
     formatTime(seconds) {
       // Math.floor removes decimals: 90.5 → 90
       const mins = Math.floor(seconds / 60);
@@ -34,7 +33,7 @@ function audioPlayer() {
       return `${mins}:${secs.toString().padStart(2, '0')}`;
     },
 
-    // ── LOAD A TRACK ─────────────────────────────────────────────
+    //LOAD A TRACK 
     loadTrack(track) {
       // $refs.audio is the <audio> element in the template (x-ref="audio")
       this.currentTrack = track;
@@ -43,7 +42,7 @@ function audioPlayer() {
       this.play();
     },
 
-    // ── PLAY ─────────────────────────────────────────────────────
+    // PLAY 
     play() {
       // .play() returns a Promise — we use .then() to set playing=true only after it starts
       this.$refs.audio.play().then(() => {
@@ -53,13 +52,13 @@ function audioPlayer() {
       });
     },
 
-    // ── PAUSE ────────────────────────────────────────────────────
+    // PAUSE 
     pause() {
       this.$refs.audio.pause();
       this.playing = false;
     },
 
-    // ── TOGGLE PLAY/PAUSE ────────────────────────────────────────
+    //  TOGGLE PLAY/PAUSE 
     togglePlay() {
       if (this.playing) {
         this.pause();
@@ -68,8 +67,12 @@ function audioPlayer() {
       }
     },
 
-    // ── NEXT TRACK ───────────────────────────────────────────────
+    // NEXT TRACK 
     next() {
+      // Report partial listen before skipping
+      if (this.currentTrack && this.currentTime > 5) {
+        reportListenDuration(this.currentTrack.id, this.currentTime, false);
+      }
       if (this.queue.length === 0) return;
       if (this.shuffle) {
         // Pick a random index different from current
@@ -85,7 +88,7 @@ function audioPlayer() {
       this.loadTrack(this.queue[this.queueIndex]);
     },
 
-    // ── PREVIOUS TRACK ───────────────────────────────────────────
+    // PREVIOUS TRACK 
     previous() {
       if (this.currentTime > 3) {
         // If more than 3 seconds in — restart current track
@@ -98,7 +101,7 @@ function audioPlayer() {
       this.loadTrack(this.queue[this.queueIndex]);
     },
 
-    // ── SEEK (click on progress bar) ─────────────────────────────
+    //  SEEK (click on progress bar) 
     seek(event) {
       // event.currentTarget is the progress bar div
       const bar    = event.currentTarget;
@@ -109,24 +112,24 @@ function audioPlayer() {
       this.$refs.audio.currentTime = ratio * this.duration;
     },
 
-    // ── VOLUME ───────────────────────────────────────────────────
+    // VOLUME
     setVolume() {
       // HTML audio volume is 0.0 to 1.0, our slider is 0-100
       this.$refs.audio.volume = this.volume / 100;
     },
 
-    // ── TOGGLE SHUFFLE ───────────────────────────────────────────
+    // TOGGLE SHUFFLE 
     toggleShuffle() {
       this.shuffle = !this.shuffle;
     },
 
-    // ── TOGGLE REPEAT ────────────────────────────────────────────
+    //  TOGGLE REPEAT 
     toggleRepeat() {
       this.repeat = !this.repeat;
       this.$refs.audio.loop = this.repeat;
     },
 
-    // ── AUDIO EVENTS (called by @timeupdate, @ended, @loadedmetadata) ──
+    //  AUDIO EVENTS (called by @timeupdate, @ended, @loadedmetadata)
 
     onTimeUpdate() {
       this.currentTime = this.$refs.audio.currentTime;
@@ -144,8 +147,11 @@ function audioPlayer() {
 
     onEnded() {
       this.playing = false;
+      // Report full listen to server
+      if (this.currentTrack) {
+        reportListenDuration(this.currentTrack.id, this.duration, true);
+      }
       if (this.repeat) {
-        // repeat is handled by audio.loop, but just in case
         this.play();
       } else if (this.queue.length > 1) {
         this.next();
@@ -156,7 +162,6 @@ function audioPlayer() {
 
 /**
  * playTrack() — called by clicking any track card
- * ─────────────────────────────────────────────────
  * This is a GLOBAL function (on window) so any HTML element can call it.
  * It dispatches a custom event that Alpine.js picks up to load the track.
  */
@@ -178,4 +183,29 @@ function playTrack(id, title, artist, cover, streamUrl) {
     }
     playerData.loadTrack(track);
   }
+}
+
+
+/**
+ * reportListenDuration()
+ * Called when a track ends or the user skips away.
+ * Sends the actual listened duration back to the server
+ * so MariaDB PlayEvent gets updated with real data.
+ */
+function reportListenDuration(trackId, duration, completed) {
+  const csrfToken = document.cookie
+    .split(';')
+    .find(c => c.trim().startsWith('csrftoken='))
+    ?.split('=')[1];
+
+  if (!trackId || !csrfToken) return;
+
+  // Use sendBeacon so it works even when the page is closing
+  const data = new FormData();
+  data.append('track_id', trackId);
+  data.append('duration', Math.floor(duration));
+  data.append('completed', completed ? '1' : '0');
+  data.append('csrfmiddlewaretoken', csrfToken);
+
+  navigator.sendBeacon('/api/log-listen/', data);
 }

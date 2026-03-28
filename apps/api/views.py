@@ -9,9 +9,12 @@ def _log_play_event(request, track):
     try:
         from apps.analytics.models import PlayEvent
         # Get country from IP (simplified — just store the IP)
-        ip = (request.META.get('HTTP_X_FORWARDED_FOR', '')
-              .split(',')[0].strip()
-              or request.META.get('REMOTE_ADDR', ''))
+        try:
+            from ipware import get_client_ip
+            ip, _ = get_client_ip(request)
+            ip = ip or '0.0.0.0'
+        except Exception:
+            ip = request.META.get('REMOTE_ADDR', '0.0.0.0')
 
         # Detect device type from user agent
         ua = request.META.get('HTTP_USER_AGENT', '').lower()
@@ -73,3 +76,39 @@ def track_info(request, track_id):
         'cover':      track.cover_image.url if track.cover_image else '',
         'stream_url': f'/api/stream/{track.id}/',
     })
+
+
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+
+@require_POST
+def log_listen(request):
+   
+    # Receives actual listen duration from the JS player.
+    # Updates the most recent PlayEvent for this track in MariaDB.
+    # This data is ADMIN ONLY — never exposed to artists or users.
+    try:
+        from apps.analytics.models import PlayEvent
+        track_id  = request.POST.get('track_id', '')
+        duration  = int(request.POST.get('duration', 0))
+        completed = request.POST.get('completed', '0') == '1'
+
+        if not track_id:
+            from django.http import JsonResponse
+            return JsonResponse({'status': 'error', 'msg': 'no track_id'})
+
+        # Update the most recent PlayEvent for this track
+        event = PlayEvent.objects.using('analytics').filter(
+            track_id=track_id
+        ).order_by('-timestamp').first()
+
+        if event:
+            event.listened_duration = duration
+            event.completed = completed
+            event.save(using='analytics', update_fields=['listened_duration', 'completed'])
+
+    except Exception as e:
+        print(f"log_listen error: {e}")
+
+    from django.http import JsonResponse
+    return JsonResponse({'status': 'ok'})
