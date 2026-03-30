@@ -12,7 +12,10 @@
     </div>
     <div class="flex gap-3">
       <a href="/accounts/manage/users/"  class="btn-secondary text-sm px-4 py-2">Users</a>
-      <a href="/accounts/manage/tracks/" class="btn-secondary text-sm px-4 py-2">Tracks</a>
+      <a href="/accounts/manage/tracks/"  class="btn-secondary text-sm px-4 py-2">Tracks</a>
+      <a href="/accounts/manage/artists/" class="btn-secondary text-sm px-4 py-2 text-yellow-400">
+        Artists {% if pending_count %}<span class="badge bg-yellow-500/20 text-yellow-400 ml-1">{{ pending_count }}</span>{% endif %}
+      </a>
       <a href="/admin/"                  class="btn-secondary text-sm px-4 py-2 text-muted">Django Admin</a>
     </div>
   </div>

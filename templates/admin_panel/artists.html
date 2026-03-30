@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% block title %}Artist Verification — NapsterLegal Admin{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-12 pt-24">
+
+  <div class="flex items-center gap-4 mb-8">
+    <a href="/accounts/manage/" class="text-muted hover:text-white transition-colors">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </a>
+    <h1 class="text-2xl font-black text-white">Artist Verification</h1>
+    <span class="badge bg-yellow-500/20 text-yellow-400">{{ pending.count }} pending</span>
+  </div>
+
+  <!-- Tabs -->
+  <div x-data="{ tab: 'pending' }">
+    <div class="flex gap-1 border-b border-white/10 mb-6">
+      <button @click="tab = 'pending'"
+              :class="tab === 'pending' ? 'text-white border-b-2 border-yellow-400' : 'text-muted'"
+              class="px-4 py-2 text-sm font-medium transition-colors">
+        Pending ({{ pending.count }})
+      </button>
+      <button @click="tab = 'verified'"
+              :class="tab === 'verified' ? 'text-white border-b-2 border-green-400' : 'text-muted'"
+              class="px-4 py-2 text-sm font-medium transition-colors">
+        Verified ({{ verified.count }})
+      </button>
+      <button @click="tab = 'rejected'"
+              :class="tab === 'rejected' ? 'text-white border-b-2 border-red-400' : 'text-muted'"
+              class="px-4 py-2 text-sm font-medium transition-colors">
+        Rejected ({{ rejected.count }})
+      </button>
+    </div>
+
+    <!-- Pending -->
+    <div x-show="tab === 'pending'">
+      {% if pending %}
+      <div class="space-y-4">
+        {% for artist in pending %}
+        <div class="card border-yellow-500/20">
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 bg-gradient-to-br from-yellow-500/30 to-orange-500/20
+                          rounded-xl flex items-center justify-center text-white text-lg font-black flex-shrink-0">
+                {{ artist.stage_name|first|upper }}
+              </div>
+              <div>
+                <div class="flex items-center gap-2 mb-1">
+                  <h3 class="text-white font-bold">{{ artist.stage_name }}</h3>
+                  <span class="badge bg-yellow-500/20 text-yellow-400 text-xs">Pending</span>
+                </div>
+                <p class="text-muted text-sm mb-1">
+                  <span class="text-white/60">Username:</span> {{ artist.user.username }}
+                  · <span class="text-white/60">Joined:</span> {{ artist.user.date_joined|date:"M d, Y" }}
+                </p>
+                {% if artist.real_name %}
+                <p class="text-muted text-sm mb-1">
+                  <span class="text-white/60">Real name:</span>
+                  <span class="text-white">{{ artist.real_name }}</span>
+                </p>
+                {% else %}
+                <p class="text-red-400 text-sm mb-1">No real name provided</p>
+                {% endif %}
+                {% if artist.existing_work_url %}
+                <p class="text-sm mb-1">
+                  <span class="text-white/60">Work sample:</span>
+                  <a href="{{ artist.existing_work_url }}" target="_blank"
+                     class="text-primary hover:underline break-all">
+                    {{ artist.existing_work_url|truncatechars:60 }}
+                  </a>
+                </p>
+                {% else %}
+                <p class="text-red-400 text-sm mb-1">No work sample URL provided</p>
+                {% endif %}
+                {% if artist.country %}
+                <p class="text-muted text-sm">
+                  <span class="text-white/60">Country:</span> {{ artist.country }}
+                </p>
+                {% endif %}
+              </div>
+            </div>
+            <a href="/accounts/manage/artists/{{ artist.id }}/verify/"
+               class="btn-primary text-sm px-4 py-2 flex-shrink-0">
+              Review →
+            </a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="text-center py-12">
+        <p class="text-muted">No pending verifications. All caught up!</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Verified -->
+    <div x-show="tab === 'verified'">
+      {% if verified %}
+      <div class="space-y-3">
+        {% for artist in verified %}
+        <div class="card border-green-500/20 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-green-500/30 to-teal-500/20
+                        rounded-xl flex items-center justify-center text-white font-black">
+              {{ artist.stage_name|first|upper }}
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <p class="text-white font-semibold">{{ artist.stage_name }}</p>
+                <svg class="w-4 h-4 text-accent" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
+              </div>
+              <p class="text-muted text-xs">{{ artist.user.username }}
+                {% if artist.verification_date %}
+                  · Verified {{ artist.verification_date|date:"M d, Y" }}
+                {% endif %}
+              </p>
+            </div>
+          </div>
+          <a href="/accounts/manage/artists/{{ artist.id }}/verify/"
+             class="btn-secondary text-xs px-3 py-1.5">Edit</a>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-muted text-center py-8">No verified artists yet.</p>
+      {% endif %}
+    </div>
+
+    <!-- Rejected -->
+    <div x-show="tab === 'rejected'">
+      {% if rejected %}
+      <div class="space-y-3">
+        {% for artist in rejected %}
+        <div class="card border-red-500/20 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-red-500/30 to-orange-500/20
+                        rounded-xl flex items-center justify-center text-white font-black">
+              {{ artist.stage_name|first|upper }}
+            </div>
+            <div>
+              <p class="text-white font-semibold">{{ artist.stage_name }}</p>
+              <p class="text-muted text-xs">
+                {{ artist.user.username }}
+                {% if artist.verification_note %}
+                  · {{ artist.verification_note|truncatechars:50 }}
+                {% endif %}
+              </p>
+            </div>
+          </div>
+          <a href="/accounts/manage/artists/{{ artist.id }}/verify/"
+             class="btn-secondary text-xs px-3 py-1.5">Review</a>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-muted text-center py-8">No rejected artists.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

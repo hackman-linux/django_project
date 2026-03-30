@@ -32,6 +32,24 @@ class RegisterForm(UserCreationForm):
         })
     )
 
+    # Artist-only fields (shown conditionally via Alpine.js)
+    real_name = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'input-field',
+            'placeholder': 'Your legal full name (kept private)'
+        }),
+        help_text='Required for artists. Kept confidential — admin only.'
+    )
+    existing_work_url = forms.URLField(
+        required=False,
+        widget=forms.URLInput(attrs={
+            'class': 'input-field',
+            'placeholder': 'https://youtube.com/yourchannel or SoundCloud link'
+        }),
+        help_text='Link to your existing music online. Helps us verify your identity.'
+    )
+
     class Meta:
         model  = CustomUser
         fields = ('username', 'email', 'user_type', 'password1', 'password2')
@@ -51,7 +69,6 @@ class LoginForm(forms.Form):
 
 
 class ProfileEditForm(forms.ModelForm):
-    """Edit basic user info — works for both listeners and artists."""
     class Meta:
         model  = CustomUser
         fields = ['username', 'email', 'bio', 'avatar']
@@ -73,10 +90,9 @@ class ProfileEditForm(forms.ModelForm):
 
 
 class ArtistProfileEditForm(forms.ModelForm):
-    """Extra fields for artist profiles."""
     class Meta:
         model  = ArtistProfile
-        fields = ['stage_name', 'country', 'social_links']
+        fields = ['stage_name', 'country', 'real_name', 'existing_work_url']
         widgets = {
             'stage_name': forms.TextInput(attrs={
                 'class': 'input-field', 'placeholder': 'Your artist name'
@@ -84,5 +100,26 @@ class ArtistProfileEditForm(forms.ModelForm):
             'country': forms.TextInput(attrs={
                 'class': 'input-field', 'placeholder': 'e.g. Cameroon'
             }),
-            'social_links': forms.HiddenInput(),
+            'real_name': forms.TextInput(attrs={
+                'class': 'input-field',
+                'placeholder': 'Your legal full name (kept private — admin only)'
+            }),
+            'existing_work_url': forms.URLInput(attrs={
+                'class': 'input-field',
+                'placeholder': 'Link to your existing music online'
+            }),
+        }
+
+
+class ArtistVerificationForm(forms.ModelForm):
+    """Used by admin to update verification status."""
+    class Meta:
+        model  = ArtistProfile
+        fields = ['verification_status', 'verification_note']
+        widgets = {
+            'verification_status': forms.Select(attrs={'class': 'input-field'}),
+            'verification_note': forms.Textarea(attrs={
+                'class': 'input-field', 'rows': 3,
+                'placeholder': 'Explain your decision to the artist...'
+            }),
         }

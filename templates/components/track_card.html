@@ -24,21 +24,41 @@
       </div>
     </div>
 
-    {% if track.is_explicit %}
-    <div class="absolute top-2 right-2">
-      <span class="badge bg-red-500/80 text-white text-xs">E</span>
+    <!-- Badges -->
+    <div class="absolute top-2 right-2 flex flex-col gap-1 items-end">
+      {% if track.is_explicit %}
+        <span class="badge bg-red-500/80 text-white text-xs">E</span>
+      {% endif %}
+      {% if track.artist.verification_status != 'verified' %}
+        <span class="badge bg-gray-500/80 text-white text-xs">Unverified</span>
+      {% endif %}
     </div>
-    {% endif %}
   </div>
 
   <!-- Track info -->
   <div class="space-y-1">
+    <!-- Track title → track detail page -->
     <a href="/track/{{ track.id }}/"
        class="block text-white font-semibold text-sm truncate hover:text-primary transition-colors"
        onclick="event.stopPropagation()">
       {{ track.title }}
     </a>
-    <p class="text-muted text-xs truncate">{{ track.artist }}</p>
+
+    <!-- Artist name → public artist page + inline follow button -->
+    <div class="flex items-center gap-2" onclick="event.stopPropagation()">
+      <a href="/artist/{{ track.artist.id }}/"
+         class="text-muted text-xs truncate hover:text-accent transition-colors flex-1 min-w-0">
+        {{ track.artist }}
+      </a>
+      {% if user.is_authenticated and user != track.artist.user %}
+      <button
+        onclick="toggleFollowCard(this, '{{ track.artist.id }}')"
+        class="text-xs text-primary border border-primary/40 hover:bg-primary/10
+               rounded-full px-2 py-0.5 transition-colors flex-shrink-0 follow-btn-{{ track.artist.id }}">
+        Follow
+      </button>
+      {% endif %}
+    </div>
 
     <div class="flex items-center justify-between pt-1">
       <div class="flex items-center gap-3">
@@ -58,7 +78,7 @@
       <span class="text-muted text-xs">{{ track.duration_display }}</span>
     </div>
 
-    <!-- Add to playlist (shown on hover, only for logged-in users) -->
+    <!-- Add to playlist -->
     {% if user.is_authenticated %}
     <div x-data="{ open: false }" class="pt-1" onclick="event.stopPropagation()">
       <button @click="open = !open"
@@ -92,3 +112,31 @@
     {% endif %}
   </div>
 </div>
+
+<script>
+// Follow toggle from track card — works without page reload
+function toggleFollowCard(btn, artistId) {
+  const csrfToken = document.cookie
+    .split(';').find(c => c.trim().startsWith('csrftoken='))?.split('=')[1];
+
+  fetch(`/social/follow/${artistId}/`, {
+    method: 'POST',
+    headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/json' },
+  })
+  .then(r => r.json())
+  .then(data => {
+    // Update ALL follow buttons for this artist on the page
+    document.querySelectorAll(`.follow-btn-${artistId}`).forEach(b => {
+      if (data.followed) {
+        b.textContent = 'Following';
+        b.classList.add('text-accent', 'border-accent/40');
+        b.classList.remove('text-primary', 'border-primary/40');
+      } else {
+        b.textContent = 'Follow';
+        b.classList.remove('text-accent', 'border-accent/40');
+        b.classList.add('text-primary', 'border-primary/40');
+      }
+    });
+  });
+}
+</script>

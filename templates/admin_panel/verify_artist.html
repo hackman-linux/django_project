@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% block title %}Verify Artist — {{ artist.stage_name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-12 pt-24">
+
+  <div class="flex items-center gap-4 mb-8">
+    <a href="/accounts/manage/artists/" class="text-muted hover:text-white transition-colors">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </a>
+    <h1 class="text-2xl font-black text-white">
+      Review: {{ artist.stage_name }}
+    </h1>
+  </div>
+
+  <!-- Artist Info Card -->
+  <div class="card mb-6">
+    <h2 class="text-white font-bold mb-4">Artist Information</h2>
+    <dl class="space-y-3">
+      <div class="flex justify-between">
+        <dt class="text-muted text-sm">Username</dt>
+        <dd class="text-white text-sm">{{ artist.user.username }}</dd>
+      </div>
+      <div class="flex justify-between">
+        <dt class="text-muted text-sm">Stage Name</dt>
+        <dd class="text-white text-sm">{{ artist.stage_name|default:"—" }}</dd>
+      </div>
+      <div class="flex justify-between">
+        <dt class="text-muted text-sm">Real Name (Private)</dt>
+        <dd class="text-sm {% if artist.real_name %}text-white{% else %}text-red-400{% endif %}">
+          {{ artist.real_name|default:"Not provided" }}
+        </dd>
+      </div>
+      <div class="flex justify-between">
+        <dt class="text-muted text-sm">Country</dt>
+        <dd class="text-white text-sm">{{ artist.country|default:"—" }}</dd>
+      </div>
+      <div class="flex justify-between">
+        <dt class="text-muted text-sm">Joined</dt>
+        <dd class="text-white text-sm">{{ artist.user.date_joined|date:"M d, Y" }}</dd>
+      </div>
+      <div class="flex justify-between">
+        <dt class="text-muted text-sm">Current Status</dt>
+        <dd>
+          <span class="badge
+            {% if artist.verification_status == 'verified' %}bg-green-500/20 text-green-400
+            {% elif artist.verification_status == 'rejected' %}bg-red-500/20 text-red-400
+            {% else %}bg-yellow-500/20 text-yellow-400{% endif %}">
+            {{ artist.get_verification_status_display }}
+          </span>
+        </dd>
+      </div>
+      {% if artist.existing_work_url %}
+      <div>
+        <dt class="text-muted text-sm mb-1">Work Sample URL</dt>
+        <dd>
+          <a href="{{ artist.existing_work_url }}" target="_blank"
+             class="text-primary text-sm hover:underline break-all">
+            {{ artist.existing_work_url }}
+          </a>
+          <span class="text-muted text-xs ml-2">(opens in new tab)</span>
+        </dd>
+      </div>
+      {% else %}
+      <div class="flex justify-between">
+        <dt class="text-muted text-sm">Work Sample</dt>
+        <dd class="text-red-400 text-sm">Not provided</dd>
+      </div>
+      {% endif %}
+    </dl>
+  </div>
+
+  <!-- Tracks uploaded by this artist -->
+  {% with tracks=artist.tracks.all %}
+  {% if tracks %}
+  <div class="card mb-6">
+    <h2 class="text-white font-bold mb-4">
+      Uploaded Tracks ({{ tracks.count }})
+    </h2>
+    <div class="space-y-2">
+      {% for track in tracks %}
+      <div class="flex items-center justify-between py-2 border-b border-white/5">
+        <div>
+          <p class="text-white text-sm font-medium">{{ track.title }}</p>
+          <div class="flex items-center gap-2 mt-0.5">
+            <!-- AcoustID status badge -->
+            <span class="badge text-xs
+              {% if track.acoustid_status == 'passed' %}bg-green-500/20 text-green-400
+              {% elif track.acoustid_status == 'failed' %}bg-red-500/20 text-red-400
+              {% elif track.acoustid_status == 'error' %}bg-yellow-500/20 text-yellow-400
+              {% else %}bg-white/10 text-muted{% endif %}">
+              Fingerprint: {{ track.acoustid_status|default:"not checked" }}
+            </span>
+            <span class="badge {% if track.is_published %}bg-green-500/20 text-green-400{% else %}bg-white/10 text-muted{% endif %} text-xs">
+              {% if track.is_published %}Live{% else %}Draft{% endif %}
+            </span>
+          </div>
+        </div>
+        <span class="text-muted text-xs">{{ track.uploaded_at|date:"M d" }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+  {% endwith %}
+
+  <!-- Verification Decision Form -->
+  <div class="card">
+    <h2 class="text-white font-bold mb-6">Verification Decision</h2>
+
+    <!-- Checklist for admin -->
+    <div class="bg-white/5 rounded-xl p-4 mb-6 space-y-2">
+      <p class="text-white text-sm font-semibold mb-3">Before deciding, verify:</p>
+      <label class="flex items-center gap-3 cursor-pointer">
+        <input type="checkbox" class="rounded border-white/20 bg-white/5 text-primary"/>
+        <span class="text-muted text-sm">Real name has been provided</span>
+      </label>
+      <label class="flex items-center gap-3 cursor-pointer">
+        <input type="checkbox" class="rounded border-white/20 bg-white/5 text-primary"/>
+        <span class="text-muted text-sm">Work sample URL opens and shows their music</span>
+      </label>
+      <label class="flex items-center gap-3 cursor-pointer">
+        <input type="checkbox" class="rounded border-white/20 bg-white/5 text-primary"/>
+        <span class="text-muted text-sm">Artist name on external platform matches stage name</span>
+      </label>
+      <label class="flex items-center gap-3 cursor-pointer">
+        <input type="checkbox" class="rounded border-white/20 bg-white/5 text-primary"/>
+        <span class="text-muted text-sm">No suspicious tracks (all AcoustID checks passed)</span>
+      </label>
+    </div>
+
+    <form method="POST" class="space-y-4">
+      {% csrf_token %}
+      <div>
+        <label class="block text-sm font-medium text-muted mb-2">Decision</label>
+        {{ form.verification_status }}
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-muted mb-2">
+          Note to Artist (optional — they will see this if rejected)
+        </label>
+        {{ form.verification_note }}
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="submit"
+                class="btn-primary flex-1 py-3">
+          Save Decision
+        </button>
+        <a href="/accounts/manage/artists/"
+           class="btn-secondary px-6 py-3">
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

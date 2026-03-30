@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+{% block title %}Edit Track — {{ track.title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-12 pt-24">
+
+  <div class="flex items-center gap-4 mb-8">
+    <a href="/dashboard/" class="text-muted hover:text-white transition-colors">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </a>
+    <div>
+      <h1 class="text-2xl font-black text-white">Edit Track</h1>
+      <p class="text-muted text-sm">{{ track.title }}</p>
+    </div>
+  </div>
+
+  <div class="card" x-data="{
+    lyricsDetecting: false,
+    lyricsDetected: false,
+    detectedLyrics: '',
+    async detectLyrics() {
+      const audioInput = document.getElementById('id_audio_file');
+      const existingAudio = '{{ track.audio_file.url|default:'' }}';
+      if (!audioInput.files[0] && !existingAudio) {
+        alert('No audio file available for detection.');
+        return;
+      }
+      this.lyricsDetecting = true;
+      const formData = new FormData();
+      const csrfToken = document.cookie
+        .split(';').find(c => c.trim().startsWith('csrftoken='))?.split('=')[1];
+      if (audioInput.files[0]) {
+        formData.append('audio_file', audioInput.files[0]);
+      } else {
+        formData.append('track_id', '{{ track.id }}');
+      }
+      try {
+        const resp = await fetch('/api/detect-lyrics/', {
+          method: 'POST',
+          headers: { 'X-CSRFToken': csrfToken },
+          body: formData
+        });
+        const data = await resp.json();
+        this.lyricsDetecting = false;
+        if (data.lyrics) {
+          this.detectedLyrics = data.lyrics;
+          this.lyricsDetected = true;
+        } else {
+          alert(data.message || 'No lyrics detected.');
+        }
+      } catch(err) {
+        this.lyricsDetecting = false;
+        alert('Detection failed. Edit lyrics manually below.');
+      }
+    },
+    acceptLyrics() {
+      document.getElementById('id_lyrics').value = this.detectedLyrics;
+      this.lyricsDetected = false;
+    },
+    rejectLyrics() {
+      this.lyricsDetected = false;
+      this.detectedLyrics = '';
+    }
+  }">
+    <form method="POST" enctype="multipart/form-data" class="space-y-6">
+      {% csrf_token %}
+
+      <!-- Current audio info -->
+      <div class="bg-white/5 rounded-xl p-4 flex items-center gap-3">
+        <svg class="w-8 h-8 text-accent flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M9 18V5l12-2v13M9 18c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/>
+        </svg>
+        <div class="flex-1 min-w-0">
+          <p class="text-white text-sm font-medium truncate">{{ track.audio_file.name|default:"Audio file" }}</p>
+          <p class="text-muted text-xs">Duration: {{ track.duration_display }} · Leave blank to keep current file</p>
+        </div>
+      </div>
+
+      <!-- Replace audio (optional) -->
+      <div>
+        <label class="block text-sm font-semibold text-white mb-2">Replace Audio File (optional)</label>
+        <input type="file" name="audio_file" id="id_audio_file"
+               accept="audio/mpeg,audio/flac,audio/wav,audio/*"
+               class="input-field"/>
+        <p class="text-muted text-xs mt-1">Leave empty to keep the current file. Replacing will re-run AcoustID check.</p>
+      </div>
+
+      <!-- Title -->
+      <div>
+        <label class="block text-sm font-semibold text-white mb-2">
+          Title <span class="text-red-400">*</span>
+        </label>
+        {{ form.title }}
+        {% if form.title.errors %}
+          <p class="text-red-400 text-xs mt-1">{{ form.title.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <!-- Cover image -->
+      <div>
+        <label class="block text-sm font-semibold text-white mb-2">Cover Image</label>
+        {% if track.cover_image %}
+        <div class="flex items-center gap-3 mb-2">
+          <img src="{{ track.cover_image.url }}" class="w-12 h-12 rounded-lg object-cover"/>
+          <p class="text-muted text-xs">Current cover · Upload a new one to replace</p>
+        </div>
+        {% endif %}
+        {{ form.cover_image }}
+      </div>
+
+      <!-- Genre -->
+      <div>
+        <label class="block text-sm font-semibold text-white mb-2">Genre</label>
+        <select name="genre" id="id_genre" class="input-field">
+          <option value="">— Select a genre —</option>
+          {% for genre in all_genres %}
+          <option value="{{ genre.id }}"
+            {% if track.genre_id == genre.id %}selected{% endif %}>
+            {{ genre.name }}
+          </option>
+          {% endfor %}
+        </select>
+        <!-- Genre color chips -->
+        <div class="flex flex-wrap gap-1.5 mt-2">
+          {% for genre in all_genres %}
+          <button type="button"
+                  onclick="document.getElementById('id_genre').value='{{ genre.id }}'; this.closest('.flex').querySelectorAll('button').forEach(b=>b.style.opacity='0.5'); this.style.opacity='1'; this.style.fontWeight='bold';"
+                  class="text-xs px-2 py-0.5 rounded-full border text-white/60 hover:text-white transition-colors"
+                  style="background-color: {{ genre.color_hex }}20; border-color: {{ genre.color_hex }}40;
+                         {% if track.genre_id == genre.id %}opacity:1; font-weight:bold;{% else %}opacity:0.5;{% endif %}">
+            {{ genre.name }}
+          </button>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- License -->
+      <div>
+        <label class="block text-sm font-semibold text-white mb-2">License</label>
+        {{ form.license_type }}
+      </div>
+
+      <!-- BPM + Preview start -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-semibold text-white mb-2">BPM</label>
+          {{ form.bpm }}
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-white mb-2">Preview Start (seconds)</label>
+          {{ form.preview_start }}
+        </div>
+      </div>
+
+      <!-- Lyrics with detection -->
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <label class="block text-sm font-semibold text-white">Lyrics</label>
+          <button type="button"
+                  @click="detectLyrics()"
+                  :disabled="lyricsDetecting"
+                  class="flex items-center gap-1.5 text-xs text-accent border border-accent/30
+                         hover:bg-accent/10 rounded-lg px-3 py-1.5 transition-colors
+                         disabled:opacity-50 disabled:cursor-not-allowed">
+            <svg class="w-3.5 h-3.5" :class="lyricsDetecting ? 'animate-spin' : ''"
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3l14 9-14 9V3z"/>
+            </svg>
+            <span x-text="lyricsDetecting ? 'Detecting...' : '✦ Re-detect lyrics'"></span>
+          </button>
+        </div>
+
+        <div x-show="lyricsDetected" x-transition
+             class="bg-accent/10 border border-accent/20 rounded-xl p-4 mb-3">
+          <p class="text-accent text-sm font-semibold mb-2">✦ Lyrics detected — review before accepting</p>
+          <pre class="text-muted text-xs leading-relaxed whitespace-pre-wrap max-h-40 overflow-y-auto mb-3"
+               x-text="detectedLyrics"></pre>
+          <div class="flex gap-2">
+            <button type="button" @click="acceptLyrics()" class="btn-primary text-xs px-4 py-2">✓ Accept</button>
+            <button type="button" @click="rejectLyrics()" class="btn-secondary text-xs px-4 py-2">✗ Discard</button>
+          </div>
+        </div>
+
+        {{ form.lyrics }}
+      </div>
+
+      <!-- Checkboxes -->
+      <div class="flex flex-wrap gap-6">
+        <label class="flex items-center gap-3 cursor-pointer group">
+          {{ form.is_explicit }}
+          <span class="text-muted text-sm group-hover:text-white transition-colors">Explicit content</span>
+        </label>
+        <label class="flex items-center gap-3 cursor-pointer group">
+          {{ form.is_published }}
+          <span class="text-muted text-sm group-hover:text-white transition-colors">Published (visible to all)</span>
+        </label>
+      </div>
+
+      <!-- Submit -->
+      <div class="flex items-center gap-4">
+        <button type="submit" class="btn-primary flex items-center gap-2 text-base px-8 py-4">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          Save Changes
+        </button>
+        <a href="/dashboard/" class="btn-secondary px-6 py-4">Cancel</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Danger zone: delete -->
+  <div class="card mt-6 border-red-500/20">
+    <h2 class="text-white font-bold mb-2">Danger Zone</h2>
+    <p class="text-muted text-sm mb-4">Deleting this track is permanent and cannot be undone. All play history and likes will be lost.</p>
+    <form method="POST" action="/track/{{ track.id }}/delete/"
+          onsubmit="return confirm('Delete \'{{ track.title|escapejs }}\' permanently? This cannot be undone.');">
+      {% csrf_token %}
+      <button type="submit"
+              class="bg-red-500/20 border border-red-500/30 text-red-400 hover:bg-red-500/30
+                     rounded-xl px-6 py-2.5 text-sm font-semibold transition-colors">
+        Delete This Track
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

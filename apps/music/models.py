@@ -76,6 +76,15 @@ class Track(models.Model):
     tags          = models.ManyToManyField('Tag', blank=True, related_name='tracks')
     preview_start = models.PositiveIntegerField(default=0,
                                                 help_text='Preview start in seconds')
+    # AcoustID fingerprinting fields
+    acoustid_checked = models.BooleanField(default=False,
+        help_text='Whether AcoustID fingerprint check has been run')
+    acoustid_result  = models.JSONField(default=dict, blank=True,
+        help_text='Raw AcoustID API response — admin only')
+    acoustid_status  = models.CharField(
+        max_length=20, default='pending',
+        help_text='pending / passed / failed / error')
+
     is_published  = models.BooleanField(default=False)
     uploaded_at   = models.DateTimeField(auto_now_add=True)
 

@@ -10,7 +10,86 @@
     <p class="text-muted">Share your music with the world. Fill in the details below.</p>
   </div>
 
-  <div class="card">
+  <!-- Verification status notice -->
+  {% if verification_notice %}
+  <div class="{% if artist.verification_status == 'rejected' %}bg-red-500/10 border-red-500/20{% else %}bg-yellow-500/10 border-yellow-500/20{% endif %} border rounded-xl px-4 py-3 mb-6 flex items-start gap-3">
+    <svg class="w-5 h-5 {% if artist.verification_status == 'rejected' %}text-red-400{% else %}text-yellow-400{% endif %} flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+    </svg>
+    <p class="text-sm {% if artist.verification_status == 'rejected' %}text-red-300{% else %}text-yellow-300{% endif %}">
+      {{ verification_notice }}
+    </p>
+  </div>
+  {% endif %}
+
+  <!-- AcoustID rejection error -->
+  {% if acoustid_error %}
+  <div class="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 mb-6">
+    <p class="text-red-400 text-sm font-semibold mb-1">⚠ Upload Rejected — Copyright Match Found</p>
+    <p class="text-red-300 text-sm">{{ acoustid_error }}</p>
+    {% if acoustid_matches %}
+    <div class="mt-3 space-y-1 border-t border-red-500/20 pt-3">
+      {% for match in acoustid_matches %}
+      <p class="text-muted text-xs">Matched: "{{ match.title }}" by {{ match.artist }} ({{ match.score|floatformat:0 }}% confidence)</p>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <div class="card" x-data="{
+    lyricsDetecting: false,
+    lyricsDetected: false,
+    detectedLyrics: '',
+    audioFileName: '',
+    onAudioChange(e) {
+      const file = e.target.files[0];
+      this.audioFileName = file ? file.name : '';
+      this.lyricsDetected = false;
+      this.detectedLyrics = '';
+    },
+    async detectLyrics() {
+      const audioInput = document.getElementById('id_audio_file');
+      if (!audioInput.files[0]) {
+        alert('Please select an audio file first.');
+        return;
+      }
+      this.lyricsDetecting = true;
+      // Simulate processing delay — real detection runs server-side on upload
+      // This sends the file to a detection endpoint
+      const formData = new FormData();
+      formData.append('audio_file', audioInput.files[0]);
+      const csrfToken = document.cookie
+        .split(';').find(c => c.trim().startsWith('csrftoken='))?.split('=')[1];
+      try {
+        const resp = await fetch('/api/detect-lyrics/', {
+          method: 'POST',
+          headers: { 'X-CSRFToken': csrfToken },
+          body: formData
+        });
+        const data = await resp.json();
+        this.lyricsDetecting = false;
+        if (data.lyrics) {
+          this.detectedLyrics = data.lyrics;
+          this.lyricsDetected = true;
+        } else {
+          alert(data.message || 'No lyrics detected. This may be an instrumental track.');
+        }
+      } catch(err) {
+        this.lyricsDetecting = false;
+        alert('Detection failed. You can add lyrics manually below.');
+      }
+    },
+    acceptLyrics() {
+      document.getElementById('id_lyrics').value = this.detectedLyrics;
+      this.lyricsDetected = false;
+      this.detectedLyrics = '';
+    },
+    rejectLyrics() {
+      this.lyricsDetected = false;
+      this.detectedLyrics = '';
+    }
+  }">
     <form method="POST" enctype="multipart/form-data" class="space-y-6">
       {% csrf_token %}
 
@@ -19,7 +98,10 @@
         <label class="block text-sm font-semibold text-white mb-2">
           Audio File <span class="text-red-400">*</span>
         </label>
-        {{ form.audio_file }}
+        <input type="file" name="audio_file" id="id_audio_file" required
+               accept="audio/mpeg,audio/flac,audio/wav,audio/*"
+               class="input-field"
+               @change="onAudioChange($event)"/>
         <p class="text-muted text-xs mt-1">Accepted formats: MP3, FLAC, WAV (max 50MB)</p>
         {% if form.audio_file.errors %}
           <p class="text-red-400 text-xs mt-1">{{ form.audio_file.errors.0 }}</p>
@@ -44,19 +126,48 @@
         <p class="text-muted text-xs mt-1">Square image recommended (JPG, PNG)</p>
       </div>
 
-      <!-- Genre + License row -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-semibold text-white mb-2">Genre</label>
-          {{ form.genre }}
-        </div>
-        <div>
-          <label class="block text-sm font-semibold text-white mb-2">License</label>
-          {{ form.license_type }}
+      <!-- Genre — ALL genres from DB, grouped by color -->
+      <div>
+        <label class="block text-sm font-semibold text-white mb-2">Genre</label>
+        <select name="genre" id="id_genre" class="input-field">
+          <option value="">— Select a genre —</option>
+          {% for genre in all_genres %}
+          <option value="{{ genre.id }}"
+            {% if form.genre.value == genre.id|stringformat:"s" %}selected{% endif %}>
+            {{ genre.name }}
+          </option>
+          {% endfor %}
+        </select>
+        {% if form.genre.errors %}
+          <p class="text-red-400 text-xs mt-1">{{ form.genre.errors.0 }}</p>
+        {% endif %}
+
+        <!-- Genre color preview chips -->
+        <div class="flex flex-wrap gap-1.5 mt-2" id="genre-chips">
+          {% for genre in all_genres %}
+          <button type="button"
+                  onclick="document.getElementById('id_genre').value='{{ genre.id }}'; highlightGenre(this);"
+                  class="genre-chip text-xs px-2 py-0.5 rounded-full border border-white/10 text-white/60 hover:text-white transition-colors"
+                  style="background-color: {{ genre.color_hex }}20; border-color: {{ genre.color_hex }}40;"
+                  data-genre-id="{{ genre.id }}">
+            {{ genre.name }}
+          </button>
+          {% endfor %}
         </div>
       </div>
 
-      <!-- BPM + Preview start row -->
+      <!-- License -->
+      <div>
+        <label class="block text-sm font-semibold text-white mb-2">License</label>
+        {{ form.license_type }}
+        <p class="text-muted text-xs mt-1">
+          CC BY = others can remix with credit ·
+          CC BY-NC = non-commercial only ·
+          All Rights Reserved = full copyright
+        </p>
+      </div>
+
+      <!-- BPM + Preview start -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label class="block text-sm font-semibold text-white mb-2">BPM (optional)</label>
@@ -68,10 +179,49 @@
         </div>
       </div>
 
-      <!-- Lyrics -->
+      <!-- Lyrics with AI detection -->
       <div>
-        <label class="block text-sm font-semibold text-white mb-2">Lyrics (optional)</label>
+        <div class="flex items-center justify-between mb-2">
+          <label class="block text-sm font-semibold text-white">Lyrics (optional)</label>
+          <button type="button"
+                  @click="detectLyrics()"
+                  :disabled="lyricsDetecting"
+                  class="flex items-center gap-1.5 text-xs text-accent border border-accent/30
+                         hover:bg-accent/10 rounded-lg px-3 py-1.5 transition-colors
+                         disabled:opacity-50 disabled:cursor-not-allowed">
+            <svg class="w-3.5 h-3.5" :class="lyricsDetecting ? 'animate-spin' : ''"
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M5 3l14 9-14 9V3z"/>
+            </svg>
+            <span x-text="lyricsDetecting ? 'Detecting...' : '✦ Auto-detect lyrics'"></span>
+          </button>
+        </div>
+
+        <!-- Detected lyrics proposal box -->
+        <div x-show="lyricsDetected" x-transition
+             class="bg-accent/10 border border-accent/20 rounded-xl p-4 mb-3">
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-accent text-sm font-semibold">✦ Lyrics detected — review before accepting</p>
+          </div>
+          <pre class="text-muted text-xs leading-relaxed whitespace-pre-wrap max-h-40 overflow-y-auto mb-3"
+               x-text="detectedLyrics"></pre>
+          <div class="flex gap-2">
+            <button type="button" @click="acceptLyrics()"
+                    class="btn-primary text-xs px-4 py-2">
+              ✓ Accept & Add to Form
+            </button>
+            <button type="button" @click="rejectLyrics()"
+                    class="btn-secondary text-xs px-4 py-2">
+              ✗ Discard
+            </button>
+          </div>
+        </div>
+
         {{ form.lyrics }}
+        <p class="text-muted text-xs mt-1">
+          Click "Auto-detect lyrics" after selecting your audio file, or paste manually.
+        </p>
       </div>
 
       <!-- Checkboxes -->
@@ -85,7 +235,7 @@
         <label class="flex items-center gap-3 cursor-pointer group">
           {{ form.is_published }}
           <span class="text-muted text-sm group-hover:text-white transition-colors">
-            Publish immediately (visible to all users)
+            Publish immediately
           </span>
         </label>
       </div>
@@ -117,4 +267,26 @@
     </form>
   </div>
 </div>
+
+<script>
+// Highlight the selected genre chip
+function highlightGenre(btn) {
+  document.querySelectorAll('.genre-chip').forEach(c => {
+    c.style.opacity = '0.5';
+    c.style.fontWeight = 'normal';
+  });
+  btn.style.opacity = '1';
+  btn.style.fontWeight = 'bold';
+  btn.style.boxShadow = `0 0 0 2px ${btn.style.backgroundColor.replace('20)', '80)')}`;
+}
+
+// On page load, highlight the pre-selected genre if editing
+document.addEventListener('DOMContentLoaded', () => {
+  const sel = document.getElementById('id_genre');
+  if (sel && sel.value) {
+    const chip = document.querySelector(`.genre-chip[data-genre-id="${sel.value}"]`);
+    if (chip) highlightGenre(chip);
+  }
+});
+</script>
 {% endblock %}

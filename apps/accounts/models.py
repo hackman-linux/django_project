@@ -4,12 +4,6 @@ from django.contrib.auth.models import AbstractUser
 
 
 class CustomUser(AbstractUser):
-    """
-    Our main user model. Extends Django's built-in user
-    and adds fields for the NapsterLegal platform.
-    """
-
-    # User type choices
     LISTENER = 'listener'
     ARTIST   = 'artist'
     ADMIN    = 'admin'
@@ -20,14 +14,13 @@ class CustomUser(AbstractUser):
         (ADMIN,    'Admin'),
     ]
 
-    # Extra fields
-    id          = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user_type   = models.CharField(max_length=10, choices=USER_TYPE_CHOICES, default=LISTENER)
-    avatar      = models.ImageField(upload_to='avatars/', null=True, blank=True)
-    bio         = models.TextField(blank=True)
-    is_premium  = models.BooleanField(default=False)
+    id            = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user_type     = models.CharField(max_length=10, choices=USER_TYPE_CHOICES, default=LISTENER)
+    avatar        = models.ImageField(upload_to='avatars/', null=True, blank=True)
+    bio           = models.TextField(blank=True)
+    is_premium    = models.BooleanField(default=False)
     premium_until = models.DateTimeField(null=True, blank=True)
-    created_at  = models.DateTimeField(auto_now_add=True)
+    created_at    = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.username} ({self.user_type})"
@@ -39,36 +32,63 @@ class CustomUser(AbstractUser):
         return self.user_type == self.LISTENER
 
     class Meta:
-        verbose_name = 'User'
+        verbose_name        = 'User'
         verbose_name_plural = 'Users'
 
 
 class ArtistProfile(models.Model):
-    """
-    Extended profile for users who are artists.
-    Created automatically when user_type is set to 'artist'.
-    """
-    user             = models.OneToOneField(CustomUser, on_delete=models.CASCADE,
-                                            related_name='artist_profile')
-    stage_name       = models.CharField(max_length=100, blank=True)
-    country          = models.CharField(max_length=100, blank=True)
+    # Verification status choices
+    PENDING  = 'pending'
+    VERIFIED = 'verified'
+    REJECTED = 'rejected'
+
+    VERIFICATION_CHOICES = [
+        (PENDING,  'Pending Review'),
+        (VERIFIED, 'Verified'),
+        (REJECTED, 'Rejected'),
+    ]
+
+    # Basic profile
+    user              = models.OneToOneField(
+        CustomUser, on_delete=models.CASCADE, related_name='artist_profile')
+    stage_name        = models.CharField(max_length=100, blank=True)
+    country           = models.CharField(max_length=100, blank=True)
     monthly_listeners = models.PositiveIntegerField(default=0)
-    verified         = models.BooleanField(default=False)
-    social_links     = models.JSONField(default=dict, blank=True)
-    # genres will be added as M2M after Genre model is created in music app
+    verified          = models.BooleanField(default=False)
+    social_links      = models.JSONField(default=dict, blank=True)
+
+    # Verification system fields
+    verification_status   = models.CharField(
+        max_length=10, choices=VERIFICATION_CHOICES, default=PENDING)
+    real_name             = models.CharField(
+        max_length=200, blank=True,
+        help_text='Legal full name — kept private, admin only')
+    id_document           = models.FileField(
+        upload_to='verification/ids/', null=True, blank=True,
+        help_text='Government ID or passport — stored securely, admin only')
+    existing_work_url     = models.URLField(
+        blank=True,
+        help_text='Link to your music on YouTube, SoundCloud, Instagram, etc.')
+    verification_note     = models.TextField(
+        blank=True,
+        help_text='Admin note explaining verification decision')
+    verification_date     = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.stage_name or self.user.username} (Artist)"
 
+    def is_verified(self):
+        return self.verification_status == self.VERIFIED
+
+    def is_pending(self):
+        return self.verification_status == self.PENDING
+
     class Meta:
-        verbose_name = 'Artist Profile'
+        verbose_name        = 'Artist Profile'
         verbose_name_plural = 'Artist Profiles'
 
 
 class Subscription(models.Model):
-    """
-    Tracks premium subscription history for users.
-    """
     ACTIVE    = 'active'
     EXPIRED   = 'expired'
     CANCELLED = 'cancelled'
@@ -79,8 +99,8 @@ class Subscription(models.Model):
         (CANCELLED, 'Cancelled'),
     ]
 
-    user       = models.ForeignKey(CustomUser, on_delete=models.CASCADE,
-                                   related_name='subscriptions')
+    user       = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, related_name='subscriptions')
     status     = models.CharField(max_length=10, choices=STATUS_CHOICES, default=ACTIVE)
     started_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
@@ -90,6 +110,4 @@ class Subscription(models.Model):
         return f"{self.user.username} — {self.status}"
 
     class Meta:
-        verbose_name = 'Subscription'
-        verbose_name_plural = 'Subscriptions'
         ordering = ['-started_at']

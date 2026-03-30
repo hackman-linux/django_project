@@ -15,13 +15,26 @@ def register_view(request):
         if form.is_valid():
             user = form.save()
             if user.user_type == CustomUser.ARTIST:
+                real_name        = form.cleaned_data.get('real_name', '')
+                existing_work    = form.cleaned_data.get('existing_work_url', '')
                 ArtistProfile.objects.create(
-                    user=user, stage_name=user.username)
+                    user=user,
+                    stage_name=user.username,
+                    real_name=real_name,
+                    existing_work_url=existing_work,
+                    verification_status=ArtistProfile.PENDING,
+                )
+                messages.info(
+                    request,
+                    'Your artist account is under review. You can upload tracks '
+                    'but they will be marked as Unverified until an admin approves your profile.'
+                )
             login(request, user)
             messages.success(request, f'Welcome to NapsterLegal, {user.username}!')
             return redirect('home')
         else:
             messages.error(request, 'Please fix the errors below.')
+            print("FORM ERRORS:", form.errors)
     else:
         form = RegisterForm()
     return render(request, 'accounts/register.html', {'form': form})
@@ -169,8 +182,11 @@ def admin_dashboard(request):
     top_tracks = Track.objects.filter(
         is_published=True).order_by('-play_count')[:10]
 
+    pending_count = ArtistProfile.objects.filter(verification_status='pending').count()
+
     return render(request, 'admin_panel/dashboard.html', {
         'total_users':       total_users,
+        'pending_count':     pending_count,
         'total_artists':     total_artists,
         'total_tracks':      total_tracks,
         'total_plays':       total_plays,
@@ -223,3 +239,52 @@ def admin_toggle_track(request, track_id):
     status = 'published' if track.is_published else 'unpublished'
     messages.success(request, f'"{track.title}" {status}.')
     return redirect('admin_tracks')
+
+
+@admin_required
+def admin_artists(request):
+    """Manage artist verification."""
+    from .models import ArtistProfile
+    pending  = ArtistProfile.objects.filter(
+        verification_status='pending').select_related('user').order_by('-user__date_joined')
+    verified = ArtistProfile.objects.filter(
+        verification_status='verified').select_related('user').order_by('stage_name')
+    rejected = ArtistProfile.objects.filter(
+        verification_status='rejected').select_related('user').order_by('-user__date_joined')
+    return render(request, 'admin_panel/artists.html', {
+        'pending':  pending,
+        'verified': verified,
+        'rejected': rejected,
+    })
+
+
+@admin_required
+def admin_verify_artist(request, artist_id):
+    """Verify or reject an artist."""
+    from .models import ArtistProfile
+    from .forms import ArtistVerificationForm
+    import datetime
+    from django.utils import timezone
+
+    artist = get_object_or_404(ArtistProfile, id=artist_id)
+
+    if request.method == 'POST':
+        form = ArtistVerificationForm(request.POST, instance=artist)
+        if form.is_valid():
+            ap = form.save(commit=False)
+            ap.verification_date = timezone.now()
+            # Set verified boolean based on status
+            ap.verified = (ap.verification_status == ArtistProfile.VERIFIED)
+            ap.save()
+            messages.success(
+                request,
+                f'{artist.stage_name} verification set to {ap.get_verification_status_display()}.'
+            )
+            return redirect('admin_artists')
+    else:
+        form = ArtistVerificationForm(instance=artist)
+
+    return render(request, 'admin_panel/verify_artist.html', {
+        'artist': artist,
+        'form':   form,
+    })

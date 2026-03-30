@@ -17,7 +17,42 @@
     </a>
   </div>
 
-  <!-- Privacy notice for artists -->
+  <!-- Verification status banner -->
+  {% if artist.verification_status == 'pending' %}
+  <div class="bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3 mb-6 flex items-center gap-3">
+    <svg class="w-5 h-5 text-yellow-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+    </svg>
+    <p class="text-yellow-300 text-sm">
+      <span class="font-semibold">Account pending verification.</span>
+      Your tracks are live but show an "Unverified Artist" badge. An admin will review your profile soon.
+    </p>
+  </div>
+  {% elif artist.verification_status == 'verified' %}
+  <div class="bg-green-500/10 border border-green-500/20 rounded-xl px-4 py-3 mb-6 flex items-center gap-3">
+    <svg class="w-5 h-5 text-green-400 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+    </svg>
+    <p class="text-green-300 text-sm">
+      <span class="font-semibold">✓ Verified Artist.</span>
+      Your tracks are featured on the homepage and your profile shows a verified badge.
+    </p>
+  </div>
+  {% elif artist.verification_status == 'rejected' %}
+  <div class="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 mb-6 flex items-center gap-3">
+    <svg class="w-5 h-5 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    <div>
+      <p class="text-red-300 text-sm font-semibold">Verification rejected.</p>
+      {% if artist.verification_note %}
+      <p class="text-red-300/70 text-xs mt-0.5">Reason: {{ artist.verification_note }}</p>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Privacy notice -->
   <div class="bg-green-500/10 border border-green-500/20 rounded-xl px-4 py-3 mb-8 flex items-center gap-3">
     <svg class="w-5 h-5 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -25,11 +60,11 @@
     </svg>
     <p class="text-muted text-sm">
       <span class="text-white font-semibold">Your listeners' privacy is protected.</span>
-      Stats shown here are aggregated totals only. No individual listener data is ever shared with artists.
+      Stats shown here are aggregated totals only — no individual listener data is shared with artists.
     </p>
   </div>
 
-  <!-- Aggregated stats only -->
+  <!-- Aggregated stats -->
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
     <div class="card text-center">
       <div class="text-3xl font-black text-primary mb-1">{{ tracks.count }}</div>
@@ -44,14 +79,12 @@
       <div class="text-muted text-sm">Total Likes</div>
     </div>
     <div class="card text-center">
-      <div class="text-3xl font-black text-green-400 mb-1">
-        {{ artist.followers.count }}
-      </div>
+      <div class="text-3xl font-black text-green-400 mb-1">{{ artist.followers.count }}</div>
       <div class="text-muted text-sm">Followers</div>
     </div>
   </div>
 
-  <!-- Tracks table -->
+  <!-- Tracks table with edit/delete -->
   <div class="card">
     <h2 class="text-white font-bold text-lg mb-6">Your Tracks</h2>
     {% if tracks %}
@@ -64,7 +97,8 @@
             <th class="text-right text-muted text-xs font-semibold uppercase pb-3 pr-4">Plays</th>
             <th class="text-right text-muted text-xs font-semibold uppercase pb-3 pr-4">Likes</th>
             <th class="text-center text-muted text-xs font-semibold uppercase pb-3 pr-4">Status</th>
-            <th class="text-right text-muted text-xs font-semibold uppercase pb-3">Uploaded</th>
+            <th class="text-center text-muted text-xs font-semibold uppercase pb-3 pr-4">Fingerprint</th>
+            <th class="text-right text-muted text-xs font-semibold uppercase pb-3">Actions</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-white/5">
@@ -108,8 +142,33 @@
                 <span class="badge bg-yellow-500/20 text-yellow-400">Draft</span>
               {% endif %}
             </td>
+            <td class="py-4 pr-4 text-center">
+              <span class="badge text-xs
+                {% if track.acoustid_status == 'passed' %}bg-green-500/20 text-green-400
+                {% elif track.acoustid_status == 'failed' %}bg-red-500/20 text-red-400
+                {% elif track.acoustid_status == 'error' %}bg-yellow-500/20 text-yellow-400
+                {% else %}bg-white/10 text-muted{% endif %}">
+                {{ track.acoustid_status|default:"pending" }}
+              </span>
+            </td>
             <td class="py-4 text-right">
-              <span class="text-muted text-xs">{{ track.uploaded_at|date:"M d, Y" }}</span>
+              <div class="flex items-center justify-end gap-3">
+                <!-- Edit -->
+                <a href="/track/{{ track.id }}/edit/"
+                   class="text-xs text-primary hover:text-indigo-300 transition-colors font-medium">
+                  Edit
+                </a>
+                <!-- Delete -->
+                <form method="POST" action="/track/{{ track.id }}/delete/"
+                      onsubmit="return confirm('Delete \'{{ track.title|escapejs }}\' permanently?');"
+                      class="inline">
+                  {% csrf_token %}
+                  <button type="submit"
+                          class="text-xs text-red-400 hover:text-red-300 transition-colors font-medium">
+                    Delete
+                  </button>
+                </form>
+              </div>
             </td>
           </tr>
           {% endfor %}
