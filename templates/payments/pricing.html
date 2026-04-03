@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+{% block title %}Pricing — NapsterLegal{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-16 pt-28">
+
+  <div class="text-center mb-10">
+    <h1 class="text-4xl sm:text-5xl font-black text-white mb-4">
+      Simple, Fair
+      <span class="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Pricing</span>
+    </h1>
+    <p class="text-muted text-lg max-w-2xl mx-auto">
+      70% of every subscription goes directly to the artists you listen to. No label. No middleman.
+    </p>
+  </div>
+
+  <!-- Why leave Spotify banner -->
+  <div class="bg-gradient-to-r from-green-500/10 to-accent/10 border border-green-500/20 rounded-2xl p-6 mb-10">
+    <div class="flex flex-col sm:flex-row items-center gap-4">
+      <div class="text-4xl">🎵</div>
+      <div class="flex-1 text-center sm:text-left">
+        <p class="text-white font-bold text-lg mb-1">Why NapsterLegal beats Spotify</p>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
+          {% for item in spotify_comparison %}
+          <div class="bg-white/5 rounded-xl p-3 text-center">
+            <p class="text-red-400 text-xs line-through mb-0.5">{{ item.spotify }}</p>
+            <p class="text-green-400 text-xs font-semibold">{{ item.us }}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Listener / Artist -->
+  <div x-data="{ tab: '{% if request.user.is_artist %}artist{% else %}listener{% endif %}' }" class="mb-12">
+    <div class="flex gap-1 bg-white/5 rounded-2xl p-1 max-w-xs mx-auto mb-8">
+      <button @click="tab = 'listener'"
+              :class="tab === 'listener' ? 'bg-primary text-white shadow-lg' : 'text-muted hover:text-white'"
+              class="flex-1 rounded-xl py-2.5 text-sm font-semibold transition-all">
+        🎧 Listener
+      </button>
+      <button @click="tab = 'artist'"
+              :class="tab === 'artist' ? 'bg-accent text-dark shadow-lg' : 'text-muted hover:text-white'"
+              class="flex-1 rounded-xl py-2.5 text-sm font-semibold transition-all">
+        🎤 Artist
+      </button>
+    </div>
+
+    <!-- ── LISTENER PLANS ── -->
+    <div x-show="tab === 'listener'" x-transition>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
+        <!-- Free -->
+        <div class="card flex flex-col">
+          <div class="mb-6">
+            <h3 class="text-white font-black text-xl mb-2">Free</h3>
+            <div class="flex items-baseline gap-1 mb-3">
+              <span class="text-4xl font-black text-white">$0</span>
+              <span class="text-muted text-sm">/month</span>
+            </div>
+            <div class="badge bg-white/10 text-muted text-xs mb-3">MP3 128kbps only</div>
+          </div>
+          <ul class="space-y-2.5 flex-1 mb-6">
+            {% for f in free_features %}
+            <li class="flex items-start gap-2">
+              <svg class="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+              <span class="text-muted text-sm">{{ f }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+          {% if user.is_authenticated %}
+            <span class="btn-secondary text-center py-3 opacity-60 cursor-default">Current Plan</span>
+          {% else %}
+            <a href="/accounts/register/" class="btn-secondary text-center py-3 block">Start Free</a>
+          {% endif %}
+        </div>
+
+        <!-- Premium Listener -->
+        <div class="card border-primary/60 shadow-lg shadow-primary/20 flex flex-col relative">
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2">
+            <span class="badge bg-primary text-white px-4 py-1 text-xs font-bold">Most Popular</span>
+          </div>
+          <div class="mb-6">
+            <h3 class="text-white font-black text-xl mb-2">Premium</h3>
+            <div class="flex items-baseline gap-1 mb-1">
+              <span class="text-4xl font-black text-primary">$4.99</span>
+              <span class="text-muted text-sm">/month</span>
+            </div>
+            <p class="text-muted text-xs mb-3">or $39.99/year <span class="text-green-400">(save $19)</span></p>
+            <div class="badge bg-primary/20 text-primary text-xs">FLAC + WAV Lossless</div>
+          </div>
+          <ul class="space-y-2.5 flex-1 mb-6">
+            {% for f in premium_features %}
+            <li class="flex items-start gap-2">
+              <svg class="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+              <span class="text-muted text-sm">{{ f }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+          <a href="{% if user.is_authenticated %}/pricing/subscribe/premium/{% else %}/accounts/register/{% endif %}"
+             class="btn-primary text-center py-3 block">
+            {% if user.is_authenticated %}Upgrade to Premium{% else %}Get Started{% endif %}
+          </a>
+        </div>
+
+        <!-- Listener Pro -->
+        <div class="card border-accent/40 flex flex-col">
+          <div class="mb-6">
+            <h3 class="text-white font-black text-xl mb-2">Listener Pro</h3>
+            <div class="flex items-baseline gap-1 mb-1">
+              <span class="text-4xl font-black text-accent">$9.99</span>
+              <span class="text-muted text-sm">/month</span>
+            </div>
+            <p class="text-muted text-xs mb-3">or $79.99/year <span class="text-green-400">(save $40)</span></p>
+            <div class="badge bg-accent/20 text-accent text-xs">FLAC + WAV + Early Access</div>
+          </div>
+          <ul class="space-y-2.5 flex-1 mb-6">
+            {% for f in listener_pro_features %}
+            <li class="flex items-start gap-2">
+              <svg class="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+              <span class="text-muted text-sm">{{ f }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+          <a href="{% if user.is_authenticated %}/pricing/subscribe/listener_pro/{% else %}/accounts/register/{% endif %}"
+             class="btn-accent text-center py-3 block">Get Listener Pro</a>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── ARTIST PLANS ── -->
+    <div x-show="tab === 'artist'" x-transition>
+      <div class="bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3 mb-6 flex items-start gap-3">
+        <svg class="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <p class="text-yellow-300 text-sm">
+          <strong>Artist plans require a monthly subscription</strong> to maintain an active artist account and receive royalty payments.
+          This covers platform costs and ensures only serious artists participate. Your first 30 days are free.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
+        <!-- Artist Starter -->
+        <div class="card flex flex-col">
+          <div class="mb-6">
+            <h3 class="text-white font-black text-xl mb-2">Artist Starter</h3>
+            <div class="flex items-baseline gap-1 mb-1">
+              <span class="text-4xl font-black text-white">$2.99</span>
+              <span class="text-muted text-sm">/month</span>
+            </div>
+            <p class="text-muted text-xs mb-3">or $24.99/year <span class="text-green-400">(save $11)</span></p>
+            <div class="badge bg-white/10 text-muted text-xs">Up to 10 tracks · MP3</div>
+          </div>
+          <ul class="space-y-2.5 flex-1 mb-6">
+            {% for f in artist_starter_features %}
+            <li class="flex items-start gap-2">
+              <svg class="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+              <span class="text-muted text-sm">{{ f }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+          <a href="{% if user.is_authenticated %}/pricing/subscribe/artist_starter/{% else %}/accounts/register/?type=artist{% endif %}"
+             class="btn-secondary text-center py-3 block">Start Artist Starter</a>
+        </div>
+
+        <!-- Artist Pro (most popular for artists) -->
+        <div class="card border-accent/60 shadow-lg shadow-accent/20 flex flex-col relative">
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2">
+            <span class="badge bg-accent text-dark px-4 py-1 text-xs font-bold">Best for Artists</span>
+          </div>
+          <div class="mb-6">
+            <h3 class="text-white font-black text-xl mb-2">Artist Pro</h3>
+            <div class="flex items-baseline gap-1 mb-1">
+              <span class="text-4xl font-black text-accent">$9.99</span>
+              <span class="text-muted text-sm">/month</span>
+            </div>
+            <p class="text-muted text-xs mb-3">or $79.99/year <span class="text-green-400">(save $40)</span></p>
+            <div class="badge bg-accent/20 text-accent text-xs">Unlimited · FLAC/WAV</div>
+          </div>
+          <ul class="space-y-2.5 flex-1 mb-6">
+            {% for f in artist_pro_features %}
+            <li class="flex items-start gap-2">
+              <svg class="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+              <span class="text-muted text-sm">{{ f }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+          <a href="{% if user.is_authenticated %}/pricing/subscribe/artist_pro/{% else %}/accounts/register/?type=artist{% endif %}"
+             class="btn-accent text-center py-3 block">Get Artist Pro</a>
+        </div>
+
+        <!-- Artist Label -->
+        <div class="card border-yellow-500/40 flex flex-col">
+          <div class="mb-6">
+            <h3 class="text-white font-black text-xl mb-2">Artist Label</h3>
+            <div class="flex items-baseline gap-1 mb-1">
+              <span class="text-4xl font-black text-yellow-400">$24.99</span>
+              <span class="text-muted text-sm">/month</span>
+            </div>
+            <p class="text-muted text-xs mb-3">or $199.99/year <span class="text-green-400">(save $100)</span></p>
+            <div class="badge bg-yellow-500/20 text-yellow-400 text-xs">Multiple artists · Priority</div>
+          </div>
+          <ul class="space-y-2.5 flex-1 mb-6">
+            {% for f in artist_label_features %}
+            <li class="flex items-start gap-2">
+              <svg class="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+              <span class="text-muted text-sm">{{ f }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+          <a href="{% if user.is_authenticated %}/pricing/subscribe/artist_label/{% else %}/accounts/register/?type=artist{% endif %}"
+             class="btn-secondary border-yellow-500/40 text-yellow-400 text-center py-3 block">
+            Get Artist Label
+          </a>
+        </div>
+
+      </div>
+
+      <!-- Royalty explanation -->
+      <div class="card border-green-500/20">
+        <h3 class="text-white font-bold mb-4 flex items-center gap-2">
+          <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          How Your Royalties Are Calculated
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+          <div class="bg-white/5 rounded-xl p-4">
+            <div class="text-2xl font-black text-green-400 mb-1">70%</div>
+            <p class="text-white text-sm font-semibold">Artist Pool</p>
+            <p class="text-muted text-xs mt-1">Of all subscription revenue goes to artists every month</p>
+          </div>
+          <div class="bg-white/5 rounded-xl p-4">
+            <div class="text-2xl font-black text-primary mb-1">÷ Streams</div>
+            <p class="text-white text-sm font-semibold">Your Share</p>
+            <p class="text-muted text-xs mt-1">(Your streams ÷ Total platform streams) × Artist pool</p>
+          </div>
+          <div class="bg-white/5 rounded-xl p-4">
+            <div class="text-2xl font-black text-accent mb-1">Direct</div>
+            <p class="text-white text-sm font-semibold">No Middleman</p>
+            <p class="text-muted text-xs mt-1">Payment sent directly to you. No label takes a cut.</p>
+          </div>
+        </div>
+        <p class="text-muted text-xs text-center mt-4">
+          Spotify pays $0.003–$0.005/stream with labels taking 52%. NapsterLegal pays you directly from the pool.
+        </p>
+      </div>
+    </div>
+
+  </div><!-- end x-data tab -->
+
+  <!-- Revenue split -->
+  <div class="card border-white/10 mb-12">
+    <h2 class="text-white font-bold text-xl mb-6 text-center">Platform Revenue Split</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+      <div>
+        <div class="text-3xl font-black text-primary mb-2">70%</div>
+        <p class="text-white font-semibold text-sm mb-1">To Artists</p>
+        <p class="text-muted text-xs">Monthly pool split proportionally by streams.</p>
+      </div>
+      <div class="border-x border-white/10">
+        <div class="text-3xl font-black text-accent mb-2">20%</div>
+        <p class="text-white font-semibold text-sm mb-1">Operations</p>
+        <p class="text-muted text-xs">Servers, storage, AcoustID, payment processing.</p>
+      </div>
+      <div>
+        <div class="text-3xl font-black text-green-400 mb-2">10%</div>
+        <p class="text-white font-semibold text-sm mb-1">Platform Growth</p>
+        <p class="text-muted text-xs">Reinvested in features and community.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="max-w-2xl mx-auto">
+    <h2 class="text-white font-bold text-xl mb-6 text-center">Frequently Asked Questions</h2>
+    <div x-data="{ open: null }" class="space-y-3">
+      {% for item in faq_items %}
+      <div class="card">
+        <button @click="open = open === {{ forloop.counter }} ? null : {{ forloop.counter }}"
+                class="w-full flex items-center justify-between text-left">
+          <span class="text-white font-semibold text-sm">{{ item.q }}</span>
+          <svg class="w-4 h-4 text-muted flex-shrink-0 transition-transform"
+               :class="open === {{ forloop.counter }} ? 'rotate-180' : ''"
+               fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+        <div x-show="open === {{ forloop.counter }}" x-transition class="mt-3 text-muted text-sm leading-relaxed">
+          {{ item.a }}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

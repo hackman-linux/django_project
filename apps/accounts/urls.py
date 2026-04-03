@@ -9,6 +9,9 @@ urlpatterns = [
     # Profile
     path('profile/',      views.profile_view,         name='profile'),
     path('profile/edit/', views.profile_edit,         name='profile_edit'),
+    
+    path('dashboard/',         views.listener_dashboard,     name='listener_dashboard'),
+    path('artist/dashboard/',  views.artist_home_dashboard,  name='artist_home_dashboard'),
     # Custom admin
     path('manage/',                          views.admin_dashboard,     name='admin_dashboard'),
     path('manage/users/',                    views.admin_users,         name='admin_users'),

@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% block title %}Subscribe to {{ plan.name }} — NapsterLegal{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto px-4 py-16 pt-28">
+
+  <div class="text-center mb-8">
+    <h1 class="text-3xl font-black text-white mb-2">{{ plan.name }}</h1>
+    <p class="text-muted">Complete your subscription</p>
+  </div>
+
+  {% if existing %}
+  <div class="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 mb-6">
+    <p class="text-yellow-400 text-sm">
+      You currently have an active <strong>{{ existing.plan.name }}</strong> subscription.
+      Subscribing to a new plan will replace it.
+    </p>
+  </div>
+  {% endif %}
+
+  <div class="card mb-6">
+    <div class="flex justify-between items-center mb-4">
+      <span class="text-white font-bold">{{ plan.name }}</span>
+      <span class="badge bg-primary/20 text-primary">Selected Plan</span>
+    </div>
+
+    <!-- Billing cycle selector -->
+    <div x-data="{ cycle: 'monthly' }" class="space-y-4">
+      <div class="grid grid-cols-2 gap-3">
+        <label class="cursor-pointer">
+          <input type="radio" name="billing_display" value="monthly"
+                 x-model="cycle" class="sr-only"/>
+          <div :class="cycle === 'monthly' ? 'border-primary bg-primary/10' : 'border-white/10 bg-white/5'"
+               class="border-2 rounded-xl p-3 text-center transition-all">
+            <p class="text-white font-bold">${{ plan.price_monthly }}</p>
+            <p class="text-muted text-xs">per month</p>
+          </div>
+        </label>
+        {% if plan.price_yearly %}
+        <label class="cursor-pointer relative">
+          <input type="radio" name="billing_display" value="yearly"
+                 x-model="cycle" class="sr-only"/>
+          <div :class="cycle === 'yearly' ? 'border-accent bg-accent/10' : 'border-white/10 bg-white/5'"
+               class="border-2 rounded-xl p-3 text-center transition-all">
+            <p class="text-white font-bold">${{ plan.price_yearly }}</p>
+            <p class="text-muted text-xs">per year</p>
+            <span class="absolute -top-2 -right-2 badge bg-green-500 text-white text-xs px-2">
+              Save
+            </span>
+          </div>
+        </label>
+        {% endif %}
+      </div>
+
+      <form method="POST" class="space-y-4">
+        {% csrf_token %}
+        <input type="hidden" name="billing_cycle" :value="cycle"/>
+
+        <!-- Payment method -->
+        <div>
+          <label class="block text-sm font-medium text-muted mb-2">Payment Method</label>
+          <select name="payment_method" class="input-field">
+            <option value="card">Credit / Debit Card</option>
+            <option value="paypal">PayPal</option>
+            <option value="mobile_money">Mobile Money (MTN/Orange)</option>
+          </select>
+        </div>
+
+        <!-- Demo notice -->
+        <div class="bg-primary/10 border border-primary/20 rounded-xl p-4">
+          <p class="text-primary text-xs font-semibold mb-1">Demo Mode</p>
+          <p class="text-muted text-xs leading-relaxed">
+            This is a school project demo. No real payment is processed.
+            In production, this would connect to Stripe or CinetPay.
+          </p>
+        </div>
+
+        <!-- Price summary -->
+        <div class="bg-white/5 rounded-xl p-4 space-y-2">
+          <div class="flex justify-between">
+            <span class="text-muted text-sm">Plan</span>
+            <span class="text-white text-sm">{{ plan.name }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-muted text-sm">Billing</span>
+            <span class="text-white text-sm" x-text="cycle === 'yearly' ? 'Yearly' : 'Monthly'"></span>
+          </div>
+          <div class="border-t border-white/10 pt-2 flex justify-between">
+            <span class="text-white font-bold text-sm">Total</span>
+            <span class="text-white font-black text-lg">
+              <span x-show="cycle === 'monthly'">${{ plan.price_monthly }}/mo</span>
+              <span x-show="cycle === 'yearly'">${{ plan.price_yearly }}/yr</span>
+            </span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary w-full py-4 text-base">
+          Confirm Subscription →
+        </button>
+
+        <a href="/pricing/" class="block text-center text-muted text-sm hover:text-white transition-colors">
+          ← Back to pricing
+        </a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

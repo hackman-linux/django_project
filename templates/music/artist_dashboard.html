@@ -17,41 +17,6 @@
     </a>
   </div>
 
-  <!-- Verification status banner -->
-  {% if artist.verification_status == 'pending' %}
-  <div class="bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3 mb-6 flex items-center gap-3">
-    <svg class="w-5 h-5 text-yellow-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-    </svg>
-    <p class="text-yellow-300 text-sm">
-      <span class="font-semibold">Account pending verification.</span>
-      Your tracks are live but show an "Unverified Artist" badge. An admin will review your profile soon.
-    </p>
-  </div>
-  {% elif artist.verification_status == 'verified' %}
-  <div class="bg-green-500/10 border border-green-500/20 rounded-xl px-4 py-3 mb-6 flex items-center gap-3">
-    <svg class="w-5 h-5 text-green-400 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-      <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-    </svg>
-    <p class="text-green-300 text-sm">
-      <span class="font-semibold">✓ Verified Artist.</span>
-      Your tracks are featured on the homepage and your profile shows a verified badge.
-    </p>
-  </div>
-  {% elif artist.verification_status == 'rejected' %}
-  <div class="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 mb-6 flex items-center gap-3">
-    <svg class="w-5 h-5 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-    </svg>
-    <div>
-      <p class="text-red-300 text-sm font-semibold">Verification rejected.</p>
-      {% if artist.verification_note %}
-      <p class="text-red-300/70 text-xs mt-0.5">Reason: {{ artist.verification_note }}</p>
-      {% endif %}
-    </div>
-  </div>
-  {% endif %}
-
   <!-- Privacy notice -->
   <div class="bg-green-500/10 border border-green-500/20 rounded-xl px-4 py-3 mb-8 flex items-center gap-3">
     <svg class="w-5 h-5 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -59,13 +24,13 @@
             d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
     </svg>
     <p class="text-muted text-sm">
-      <span class="text-white font-semibold">Your listeners' privacy is protected.</span>
-      Stats shown here are aggregated totals only — no individual listener data is shared with artists.
+      <span class="text-white font-semibold">Listener privacy is protected.</span>
+      All stats shown here are aggregated totals only. No individual listener data is shared.
     </p>
   </div>
 
-  <!-- Aggregated stats -->
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+  <!-- Stats -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
     <div class="card text-center">
       <div class="text-3xl font-black text-primary mb-1">{{ tracks.count }}</div>
       <div class="text-muted text-sm">Total Tracks</div>
@@ -79,13 +44,63 @@
       <div class="text-muted text-sm">Total Likes</div>
     </div>
     <div class="card text-center">
-      <div class="text-3xl font-black text-green-400 mb-1">{{ artist.followers.count }}</div>
+      <div class="text-3xl font-black text-green-400 mb-1">
+        {{ artist.followers.count }}
+      </div>
       <div class="text-muted text-sm">Followers</div>
     </div>
   </div>
 
-  <!-- Tracks table with edit/delete -->
-  <div class="card">
+  <!-- Estimated Earnings — Transparent Calculation -->
+  <div class="card border-green-500/30 mb-8">
+    <div class="flex items-center gap-2 mb-4">
+      <h2 class="text-white font-bold text-lg">Estimated Earnings</h2>
+      <span class="badge bg-green-500/20 text-green-400 text-xs">Transparent Calculation</span>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+      <div class="bg-white/5 rounded-xl p-4 text-center">
+        <div class="text-2xl font-black text-green-400 mb-1">
+          ${{ total_estimated }}
+        </div>
+        <div class="text-muted text-xs">Stream-based estimate</div>
+        <div class="text-muted text-xs mt-1">
+          {{ total_plays }} plays × ${{ per_stream_rate }}/stream
+        </div>
+      </div>
+      <div class="bg-white/5 rounded-xl p-4 text-center">
+        <div class="text-2xl font-black text-accent mb-1">
+          ${{ listen_based_earnings }}
+        </div>
+        <div class="text-muted text-xs">Listen-duration estimate</div>
+        <div class="text-muted text-xs mt-1">
+          {{ actual_listen_seconds }}s × ${{ per_second_rate }}/30s
+        </div>
+      </div>
+      <div class="bg-white/5 rounded-xl p-4 text-center">
+        <div class="text-2xl font-black text-yellow-400 mb-1">70%</div>
+        <div class="text-muted text-xs">Your share of revenue pool</div>
+        <div class="text-muted text-xs mt-1">vs ~15-25% on Spotify</div>
+      </div>
+    </div>
+
+    <!-- How it works explanation -->
+    <div class="bg-white/5 rounded-xl p-4 text-sm text-muted leading-relaxed">
+      <p class="text-white font-semibold mb-2">How NapsterLegal pays you — transparently:</p>
+      <p>Every month, 70% of all subscription revenue is pooled. Your share equals
+         <strong class="text-white">(your streams / total platform streams) × pool amount</strong>.
+         You receive payment directly — no label takes a cut first.
+         On Spotify, labels receive 52% before artists see anything.
+         Here, you receive your full share directly.</p>
+      <p class="mt-2 text-xs text-muted">
+        Note: Estimates shown above are based on current stream counts.
+        Actual monthly distribution is calculated on the 1st of each month.
+      </p>
+    </div>
+  </div>
+
+  <!-- Tracks table -->
+  <div class="card mb-8">
     <h2 class="text-white font-bold text-lg mb-6">Your Tracks</h2>
     {% if tracks %}
     <div class="overflow-x-auto">
@@ -96,9 +111,9 @@
             <th class="text-left text-muted text-xs font-semibold uppercase pb-3 pr-4">Genre</th>
             <th class="text-right text-muted text-xs font-semibold uppercase pb-3 pr-4">Plays</th>
             <th class="text-right text-muted text-xs font-semibold uppercase pb-3 pr-4">Likes</th>
+            <th class="text-right text-muted text-xs font-semibold uppercase pb-3 pr-4">Est. Earnings</th>
             <th class="text-center text-muted text-xs font-semibold uppercase pb-3 pr-4">Status</th>
-            <th class="text-center text-muted text-xs font-semibold uppercase pb-3 pr-4">Fingerprint</th>
-            <th class="text-right text-muted text-xs font-semibold uppercase pb-3">Actions</th>
+            <th class="text-right text-muted text-xs font-semibold uppercase pb-3">Uploaded</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-white/5">
@@ -135,6 +150,11 @@
             <td class="py-4 pr-4 text-right">
               <span class="text-white text-sm">{{ track.like_count }}</span>
             </td>
+            <td class="py-4 pr-4 text-right">
+              <span class="text-green-400 text-sm font-semibold">
+                ${% widthratio track.play_count 1 per_stream_rate %}
+              </span>
+            </td>
             <td class="py-4 pr-4 text-center">
               {% if track.is_published %}
                 <span class="badge bg-green-500/20 text-green-400">Live</span>
@@ -142,33 +162,8 @@
                 <span class="badge bg-yellow-500/20 text-yellow-400">Draft</span>
               {% endif %}
             </td>
-            <td class="py-4 pr-4 text-center">
-              <span class="badge text-xs
-                {% if track.acoustid_status == 'passed' %}bg-green-500/20 text-green-400
-                {% elif track.acoustid_status == 'failed' %}bg-red-500/20 text-red-400
-                {% elif track.acoustid_status == 'error' %}bg-yellow-500/20 text-yellow-400
-                {% else %}bg-white/10 text-muted{% endif %}">
-                {{ track.acoustid_status|default:"pending" }}
-              </span>
-            </td>
             <td class="py-4 text-right">
-              <div class="flex items-center justify-end gap-3">
-                <!-- Edit -->
-                <a href="/track/{{ track.id }}/edit/"
-                   class="text-xs text-primary hover:text-indigo-300 transition-colors font-medium">
-                  Edit
-                </a>
-                <!-- Delete -->
-                <form method="POST" action="/track/{{ track.id }}/delete/"
-                      onsubmit="return confirm('Delete \'{{ track.title|escapejs }}\' permanently?');"
-                      class="inline">
-                  {% csrf_token %}
-                  <button type="submit"
-                          class="text-xs text-red-400 hover:text-red-300 transition-colors font-medium">
-                    Delete
-                  </button>
-                </form>
-              </div>
+              <span class="text-muted text-xs">{{ track.uploaded_at|date:"M d, Y" }}</span>
             </td>
           </tr>
           {% endfor %}
@@ -177,16 +172,40 @@
     </div>
     {% else %}
     <div class="text-center py-12">
-      <div class="w-16 h-16 bg-surface rounded-2xl flex items-center justify-center mx-auto mb-4">
-        <svg class="w-8 h-8 text-muted" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M9 18V5l12-2v13M9 18c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/>
-        </svg>
-      </div>
       <p class="text-white font-semibold mb-2">No tracks yet</p>
-      <p class="text-muted text-sm mb-6">Upload your first track and start sharing your music.</p>
+      <p class="text-muted text-sm mb-6">Upload your first track to start earning.</p>
       <a href="/upload/" class="btn-primary">Upload Your First Track</a>
     </div>
     {% endif %}
+  </div>
+
+  <!-- Post Announcement -->
+  <div class="card">
+    <h2 class="text-white font-bold text-lg mb-4">Post Announcement to Followers</h2>
+    <p class="text-muted text-sm mb-4">
+      Reach your followers directly — no algorithm, no middleman.
+    </p>
+    <form method="POST" action="/announcement/post/" class="space-y-4">
+      {% csrf_token %}
+      <div>
+        <label class="block text-sm font-medium text-muted mb-1">Title</label>
+        <input type="text" name="title" class="input-field"
+               placeholder="New track dropping Friday!" required/>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-muted mb-1">Message</label>
+        <textarea name="body" class="input-field" rows="3"
+                  placeholder="Tell your followers what's happening..."
+                  required></textarea>
+      </div>
+      <button type="submit" class="btn-primary flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+        </svg>
+        Post to Followers
+      </button>
+    </form>
   </div>
 </div>
 {% endblock %}

@@ -24,7 +24,7 @@ import json
 
 # Free AcoustID API key — register at https://acoustid.org/api-key
 # For the school project, use this test key or register for free
-ACOUSTID_API_KEY = os.environ.get('ACOUSTID_API_KEY', '7mcE59W7cX')
+ACOUSTID_API_KEY = os.environ.get('ACOUSTID_API_KEY', 'test_key_napsterlegal')
 
 
 def get_fingerprint(audio_file_path):

@@ -85,6 +85,15 @@ class Track(models.Model):
         max_length=20, default='pending',
         help_text='pending / passed / failed / error')
 
+    # AcoustID fingerprinting fields
+    acoustid_checked = models.BooleanField(default=False,
+        help_text='Whether AcoustID fingerprint check has been run')
+    acoustid_result  = models.JSONField(default=dict, blank=True,
+        help_text='Raw AcoustID API response — admin only')
+    acoustid_status  = models.CharField(
+        max_length=20, default='pending',
+        help_text='pending / passed / failed / error')
+
     is_published  = models.BooleanField(default=False)
     uploaded_at   = models.DateTimeField(auto_now_add=True)
 
@@ -106,3 +115,47 @@ class Tag(models.Model):
 
     def __str__(self):
         return self.name
+
+class Announcement(models.Model):
+    """
+    Artists can post announcements directly to their followers.
+    Shown on the artist page — direct fan relationship.
+    """
+    artist     = models.ForeignKey(
+        ArtistProfile, on_delete=models.CASCADE, related_name='announcements')
+    title      = models.CharField(max_length=200)
+    body       = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_pinned  = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.artist.stage_name} — {self.title}"
+
+    class Meta:
+        ordering = ['-is_pinned', '-created_at']
+
+
+class AnnouncementLike(models.Model):
+    user         = models.ForeignKey(
+        'accounts.CustomUser', on_delete=models.CASCADE,
+        related_name='announcement_likes')
+    announcement = models.ForeignKey(
+        Announcement, on_delete=models.CASCADE, related_name='likes')
+    created_at   = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'announcement')
+
+
+class AnnouncementComment(models.Model):
+    user         = models.ForeignKey(
+        'accounts.CustomUser', on_delete=models.CASCADE,
+        related_name='announcement_comments')
+    announcement = models.ForeignKey(
+        Announcement, on_delete=models.CASCADE, related_name='comments')
+    body         = models.TextField()
+    created_at   = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']

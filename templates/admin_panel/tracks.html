@@ -11,6 +11,9 @@
     </a>
     <h1 class="text-2xl font-black text-white">Manage Tracks</h1>
     <span class="badge bg-primary/20 text-primary">{{ tracks.count }} total</span>
+    {% if flagged %}
+    <span class="badge bg-red-500/20 text-red-400">{{ flagged }} flagged</span>
+    {% endif %}
   </div>
 
   <div class="card overflow-x-auto">

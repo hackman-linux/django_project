@@ -21,7 +21,10 @@ def search_view(request):
     genre  = request.GET.get('genre', '')
     sort   = request.GET.get('sort', 'relevance')
 
-    tracks  = Track.objects.filter(is_published=True).select_related('artist', 'genre')
+    # Never show flagged tracks in search results
+    tracks = Track.objects.filter(
+        is_published=True
+    ).exclude(acoustid_status='failed').select_related('artist', 'genre')
     artists = ArtistProfile.objects.all()
     genres  = Genre.objects.all()
 

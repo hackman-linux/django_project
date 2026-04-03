@@ -139,3 +139,7 @@ REST_FRAMEWORK = {
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+
+# ── GeoIP2 for IP-to-country lookup ──────────────────────────────────────────
+import os
+GEOIP_PATH = os.path.join(BASE_DIR, 'geoip')
