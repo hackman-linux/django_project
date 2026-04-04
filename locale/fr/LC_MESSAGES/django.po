@@ -1,0 +1,57 @@
+# French translations for NapsterLegal
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: fr\n"
+
+msgid "Discover"
+msgstr "Découvrir"
+
+msgid "Search"
+msgstr "Rechercher"
+
+msgid "Playlists"
+msgstr "Playlistes"
+
+msgid "Upload"
+msgstr "Téléverser"
+
+msgid "Pricing"
+msgstr "Tarifs"
+
+msgid "Dashboard"
+msgstr "Tableau de bord"
+
+msgid "My Space"
+msgstr "Mon Espace"
+
+msgid "My Profile"
+msgstr "Mon Profil"
+
+msgid "Edit Profile"
+msgstr "Modifier le profil"
+
+msgid "Subscription"
+msgstr "Abonnement"
+
+msgid "Artist Dashboard"
+msgstr "Tableau artiste"
+
+msgid "Admin Panel"
+msgstr "Panneau admin"
+
+msgid "Log Out"
+msgstr "Se déconnecter"
+
+msgid "Log In"
+msgstr "Connexion"
+
+msgid "Get Started"
+msgstr "Commencer"
+
+msgid "Search tracks, artists..."
+msgstr "Chercher des pistes, artistes..."
+
+msgid "EN"
+msgstr "FR"

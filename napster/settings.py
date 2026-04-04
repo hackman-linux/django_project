@@ -17,6 +17,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
 
     # Third-party
     'rest_framework',
@@ -41,6 +42,7 @@ CRISPY_TEMPLATE_PACK = 'tailwind'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -113,6 +115,26 @@ LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
+
+# ── INTERNATIONALISATION ────────────────────────────────────────────────────
+LANGUAGE_CODE = 'en'
+
+LANGUAGES = [
+    ('en',  'English'),
+    ('fr',  'Français'),
+    ('es',  'Español'),
+    ('de',  'Deutsch'),
+    ('pt',  'Português'),
+    ('ar',  'العربية'),
+]
+
+USE_I18N = True
+USE_L10N = True
+
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+]
+
 
 # ── Static & Media files ──────────────────────────────────────────
 STATIC_URL = '/static/'
