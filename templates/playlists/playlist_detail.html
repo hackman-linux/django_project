@@ -63,7 +63,7 @@
         <span class="text-muted text-sm w-6 text-right flex-shrink-0">{{ forloop.counter }}</span>
 
         <div class="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-surface cursor-pointer"
-             onclick="playTrack('{{ pt.track.id }}', '{{ pt.track.title|escapejs }}', '{{ pt.track.artist|escapejs }}', '{% if pt.track.cover_image %}{{ pt.track.cover_image.url }}{% endif %}', '/api/stream/{{ pt.track.id }}/')">
+             onclick="playFromPlaylist('{{ pt.track.id }}')">
           {% if pt.track.cover_image %}
             <img src="{{ pt.track.cover_image.url }}" class="w-full h-full object-cover"/>
           {% else %}
@@ -76,7 +76,7 @@
         </div>
 
         <div class="flex-1 min-w-0 cursor-pointer"
-             onclick="playTrack('{{ pt.track.id }}', '{{ pt.track.title|escapejs }}', '{{ pt.track.artist|escapejs }}', '{% if pt.track.cover_image %}{{ pt.track.cover_image.url }}{% endif %}', '/api/stream/{{ pt.track.id }}/')">
+             onclick="playFromPlaylist('{{ pt.track.id }}')">
           <p class="text-white text-sm font-medium truncate group-hover:text-primary transition-colors">
             {{ pt.track.title }}
           </p>
@@ -107,9 +107,45 @@
 </div>
 
 <script>
+// Build the full playlist track list from Django template data
+const PLAYLIST_TRACKS = [
+  {% for pt in tracks %}
+  {
+    id:     '{{ pt.track.id }}',
+    title:  '{{ pt.track.title|escapejs }}',
+    artist: '{{ pt.track.artist|escapejs }}',
+    cover:  '{% if pt.track.cover_image %}{{ pt.track.cover_image.url }}{% endif %}',
+    url:    '/api/stream/{{ pt.track.id }}/'
+  }{% if not forloop.last %},{% endif %}
+  {% endfor %}
+];
+
+// Load the entire playlist into the player queue, then start at the given index
+function loadPlaylistIntoPlayer(startIndex) {
+  const playerEl = document.getElementById('audio-player');
+  if (!playerEl || !playerEl._x_dataStack) return;
+
+  const playerData = playerEl._x_dataStack[0];
+
+  // Replace the queue with all playlist tracks
+  playerData.queue = [...PLAYLIST_TRACKS];
+  playerData.queueIndex = startIndex;
+  playerData.loadTrack(PLAYLIST_TRACKS[startIndex]);
+}
+
+// Called by "Play All" button — starts from the first track
 function playPlaylist() {
-  const trackButtons = document.querySelectorAll('[onclick^="playTrack"]');
-  if (trackButtons.length > 0) trackButtons[0].click();
+  if (PLAYLIST_TRACKS.length > 0) {
+    loadPlaylistIntoPlayer(0);
+  }
+}
+
+// Called by clicking an individual track row — starts from that track's position
+function playFromPlaylist(trackId) {
+  const index = PLAYLIST_TRACKS.findIndex(t => t.id === trackId);
+  if (index !== -1) {
+    loadPlaylistIntoPlayer(index);
+  }
 }
 </script>
 {% endblock %}

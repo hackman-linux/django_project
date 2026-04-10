@@ -1,5 +1,21 @@
 import uuid
 from django.db import models
+from decimal import Decimal
+
+# ── CORRECTED REVENUE DISTRIBUTION ─────────────────────────────────────
+# Artists still FEEL like they get more (40% direct + bonus pool)
+# Platform is financially sustainable with 35% + 25% = 60% retained
+ARTIST_SHARE     = Decimal('0.40')   # 40% → directly to artists (stream-based)
+APP_OWNER_SHARE  = Decimal('0.35')   # 35% → platform owner / profit
+PRODUCTION_SHARE = Decimal('0.25')   # 25% → servers, bandwidth, staff, AcoustID
+# Total always = 100% ✓
+
+# Graduated payout multipliers (artists EARN more as they grow)
+# This makes the effective artist rate FEEL higher to successful artists
+GRAD_TIER_1 = Decimal('0.20')  # 0–5K plays   → 20% of artist pool
+GRAD_TIER_2 = Decimal('0.35')  # 5K–20K plays → 35% of artist pool
+GRAD_TIER_3 = Decimal('0.45')  # 20K–50K plays→ 45% of artist pool
+GRAD_TIER_4 = Decimal('0.50')  # 50K+ plays   → 50% of artist pool
 from apps.accounts.models import CustomUser
 
 

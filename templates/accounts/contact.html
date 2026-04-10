@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}Contact Admin — NapsterLegal{% endblock %}
+
+{% block content %}
+<div style="max-width:600px;margin:0 auto;padding:2rem 1.25rem;padding-top:5.5rem;">
+  <h1 style="font-family:'Sora',sans-serif;font-size:1.75rem;font-weight:800;
+             color:#F0F4FF;margin-bottom:0.5rem;">Contact Admin</h1>
+  <p style="color:#94A3B8;font-size:0.9rem;margin-bottom:2rem;">
+    Have a question, report, or feedback? Send us a message.
+  </p>
+
+  <div style="background:rgba(20,30,51,0.8);border:1px solid rgba(255,255,255,0.06);
+              border-radius:16px;padding:1.75rem;">
+    <form method="POST" style="display:flex;flex-direction:column;gap:1rem;">
+      {% csrf_token %}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div>
+          <label style="display:block;font-size:0.8125rem;font-weight:600;color:#94A3B8;margin-bottom:0.375rem;">
+            Your Name
+          </label>
+          <input type="text" name="name" value="{{ prefill_name }}" required
+                 style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                        border-radius:10px;padding:0.625rem 0.875rem;color:#F0F4FF;font-size:0.9rem;
+                        outline:none;transition:border-color 0.15s;"
+                 onfocus="this.style.borderColor='#4F8EF7'"
+                 onblur="this.style.borderColor='rgba(255,255,255,0.1)'"/>
+        </div>
+        <div>
+          <label style="display:block;font-size:0.8125rem;font-weight:600;color:#94A3B8;margin-bottom:0.375rem;">
+            Email Address
+          </label>
+          <input type="email" name="email" value="{{ prefill_email }}" required
+                 style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                        border-radius:10px;padding:0.625rem 0.875rem;color:#F0F4FF;font-size:0.9rem;
+                        outline:none;transition:border-color 0.15s;"
+                 onfocus="this.style.borderColor='#4F8EF7'"
+                 onblur="this.style.borderColor='rgba(255,255,255,0.1)'"/>
+        </div>
+      </div>
+
+      <div>
+        <label style="display:block;font-size:0.8125rem;font-weight:600;color:#94A3B8;margin-bottom:0.375rem;">
+          Subject
+        </label>
+        <select name="subject"
+                style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                       border-radius:10px;padding:0.625rem 0.875rem;color:#F0F4FF;font-size:0.9rem;
+                       outline:none;appearance:none;">
+          <option value="General Inquiry">General Inquiry</option>
+          <option value="Account Issue">Account Issue</option>
+          <option value="Report a Track">Report a Track</option>
+          <option value="Artist Verification">Artist Verification</option>
+          <option value="Billing Issue">Billing Issue</option>
+          <option value="Bug Report">Bug Report</option>
+          <option value="Feature Request">Feature Request</option>
+        </select>
+      </div>
+
+      <div>
+        <label style="display:block;font-size:0.8125rem;font-weight:600;color:#94A3B8;margin-bottom:0.375rem;">
+          Message
+        </label>
+        <textarea name="body" rows="5" required
+                  style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                         border-radius:10px;padding:0.625rem 0.875rem;color:#F0F4FF;font-size:0.9rem;
+                         outline:none;resize:vertical;transition:border-color 0.15s;"
+                  onfocus="this.style.borderColor='#4F8EF7'"
+                  onblur="this.style.borderColor='rgba(255,255,255,0.1)'"
+                  placeholder="Describe your issue or question in detail..."></textarea>
+      </div>
+
+      <button type="submit"
+              style="padding:0.875rem;border-radius:12px;border:none;cursor:pointer;
+                     background:linear-gradient(135deg,#4F8EF7,#7C3AED);
+                     color:white;font-size:0.9375rem;font-weight:700;
+                     box-shadow:0 4px 14px rgba(79,142,247,0.35);transition:all 0.2s;"
+              onmouseover="this.style.transform='translateY(-1px)'"
+              onmouseout="this.style.transform='translateY(0)'">
+        Send Message
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,4 +1,4 @@
-# French translations for NapsterLegal
+# French — NapsterLegal (Francophone Africa edition)
 msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -15,16 +15,25 @@ msgid "Playlists"
 msgstr "Playlistes"
 
 msgid "Upload"
-msgstr "Téléverser"
+msgstr "Publier"
 
 msgid "Pricing"
 msgstr "Tarifs"
 
-msgid "Dashboard"
-msgstr "Tableau de bord"
-
 msgid "My Space"
 msgstr "Mon Espace"
+
+msgid "Studio"
+msgstr "Studio"
+
+msgid "Log In"
+msgstr "Connexion"
+
+msgid "Get Started"
+msgstr "Commencer"
+
+msgid "Log Out"
+msgstr "Déconnexion"
 
 msgid "My Profile"
 msgstr "Mon Profil"
@@ -35,23 +44,110 @@ msgstr "Modifier le profil"
 msgid "Subscription"
 msgstr "Abonnement"
 
-msgid "Artist Dashboard"
-msgstr "Tableau artiste"
+msgid "Settings"
+msgstr "Paramètres"
 
-msgid "Admin Panel"
-msgstr "Panneau admin"
+msgid "Language"
+msgstr "Langue"
 
-msgid "Log Out"
-msgstr "Se déconnecter"
+msgid "Audio Quality"
+msgstr "Qualité audio"
 
-msgid "Log In"
-msgstr "Connexion"
+msgid "Save Changes"
+msgstr "Enregistrer"
 
-msgid "Get Started"
-msgstr "Commencer"
+msgid "Play"
+msgstr "Écouter"
+
+msgid "Add to Playlist"
+msgstr "Ajouter à la playliste"
+
+msgid "Like"
+msgstr "J'aime"
+
+msgid "Follow"
+msgstr "Suivre"
+
+msgid "Following"
+msgstr "Abonné"
+
+msgid "Share"
+msgstr "Partager"
+
+msgid "Username"
+msgstr "Nom d'utilisateur"
+
+msgid "Password"
+msgstr "Mot de passe"
+
+msgid "Email"
+msgstr "Courriel"
+
+msgid "Register"
+msgstr "S'inscrire"
+
+msgid "Login"
+msgstr "Se connecter"
+
+msgid "Overview"
+msgstr "Vue d'ensemble"
+
+msgid "Your Tracks"
+msgstr "Vos pistes"
+
+msgid "Total Plays"
+msgstr "Lectures totales"
+
+msgid "Upload Track"
+msgstr "Publier une piste"
+
+msgid "Free"
+msgstr "Gratuit"
+
+msgid "Premium"
+msgstr "Premium"
+
+msgid "per month"
+msgstr "par mois"
+
+msgid "Subscribe"
+msgstr "S'abonner"
+
+msgid "Send Message"
+msgstr "Envoyer"
+
+msgid "Message"
+msgstr "Message"
+
+msgid "Now Playing"
+msgstr "En cours"
+
+msgid "Next"
+msgstr "Suivant"
+
+msgid "Previous"
+msgstr "Précédent"
+
+msgid "Shuffle"
+msgstr "Aléatoire"
+
+msgid "Repeat"
+msgstr "Répéter"
+
+msgid "New Releases"
+msgstr "Nouvelles sorties"
+
+msgid "Trending Now"
+msgstr "Tendances"
+
+msgid "Contact Admin"
+msgstr "Contacter l'admin"
+
+msgid "Subject"
+msgstr "Sujet"
 
 msgid "Search tracks, artists..."
-msgstr "Chercher des pistes, artistes..."
+msgstr "Rechercher pistes, artistes..."
 
-msgid "EN"
-msgstr "FR"
+msgid "No results found"
+msgstr "Aucun résultat"

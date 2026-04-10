@@ -1,0 +1,66 @@
+{% extends 'control/base.html' %}
+{% block title %}Artists{% endblock %}
+{% block page_title %}Artist Verification{% endblock %}
+
+{% block content %}
+<!-- Tab nav -->
+<div style="display:flex;gap:.25rem;margin-bottom:1.25rem;border-bottom:1px solid rgba(255,255,255,.05);padding-bottom:0;">
+  {% for tab_key, tab_label, tab_count in tabs %}
+  <a href="?tab={{ tab_key }}"
+     style="padding:.5rem .875rem;font-size:.875rem;font-weight:600;border-bottom:2px solid transparent;
+            transition:all .15s;
+            {% if tab == tab_key %}color:#EF4444;border-bottom-color:#EF4444;{% else %}color:#4A5568;{% endif %}"
+     onmouseover="this.style.color='#F0F4FF'" onmouseout="this.style.color='{% if tab == tab_key %}#EF4444{% else %}#4A5568{% endif %}'">
+    {{ tab_label }}
+    <span style="margin-left:.3rem;background:rgba(255,255,255,.06);color:#94A3B8;
+                 border-radius:999px;padding:.1rem .4rem;font-size:.625rem;">{{ tab_count }}</span>
+  </a>
+  {% endfor %}
+</div>
+
+<div style="display:flex;flex-direction:column;gap:.75rem;">
+  {% for artist in artists %}
+  <div class="cp-card" style="{% if tab == 'pending' %}border-color:rgba(245,158,11,.2);{% elif tab == 'verified' %}border-color:rgba(52,211,153,.15);{% else %}border-color:rgba(239,68,68,.15);{% endif %}">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;">
+      <div style="display:flex;align-items:flex-start;gap:.875rem;">
+        <div style="width:40px;height:40px;border-radius:10px;flex-shrink:0;
+                    background:linear-gradient(135deg,rgba(239,68,68,.3),rgba(124,58,237,.3));
+                    display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;color:white;">
+          {{ artist.stage_name|first|upper }}</div>
+        <div>
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.25rem;">
+            <p style="font-size:.9375rem;font-weight:700;color:#F0F4FF;">{{ artist.stage_name }}</p>
+            {% if tab == 'verified' %}
+            <svg width="14" height="14" fill="#2DD4BF" viewBox="0 0 24 24">
+              <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
+            {% endif %}
+          </div>
+          <p style="font-size:.75rem;color:#4A5568;">{{ artist.user.username }} · {{ artist.user.email }}</p>
+          {% if artist.real_name %}
+          <p style="font-size:.75rem;color:#94A3B8;margin-top:.25rem;">Real name: <span style="color:#F0F4FF;">{{ artist.real_name }}</span></p>
+          {% else %}
+          <p style="font-size:.75rem;color:#F87171;margin-top:.25rem;">No real name provided</p>
+          {% endif %}
+          {% if artist.existing_work_url %}
+          <a href="{{ artist.existing_work_url }}" target="_blank"
+             style="font-size:.75rem;color:#4F8EF7;display:block;margin-top:.25rem;
+                    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:400px;">
+            {{ artist.existing_work_url }}</a>
+          {% else %}
+          <p style="font-size:.75rem;color:#F87171;margin-top:.25rem;">No work sample URL</p>
+          {% endif %}
+          {% if artist.verification_note %}<p style="font-size:.75rem;color:#FDE68A;margin-top:.25rem;font-style:italic;">Note: {{ artist.verification_note }}</p>{% endif %}
+        </div>
+      </div>
+      <a href="/control/artists/{{ artist.id }}/verify/" class="cp-btn cp-btn-primary" style="white-space:nowrap;flex-shrink:0;">
+        Review →</a>
+    </div>
+  </div>
+  {% empty %}
+  <div class="cp-card" style="text-align:center;padding:2.5rem;">
+    <p style="color:#4A5568;">No artists in this category.</p>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+# German
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: de\n"
+
+msgid "Discover"
+msgstr "Entdecken"
+
+msgid "Search"
+msgstr "Suchen"
+
+msgid "Playlists"
+msgstr "Wiedergabelisten"
+
+msgid "Upload"
+msgstr "Hochladen"
+
+msgid "Pricing"
+msgstr "Preise"
+
+msgid "My Space"
+msgstr "Mein Bereich"
+
+msgid "Log In"
+msgstr "Anmelden"
+
+msgid "Get Started"
+msgstr "Loslegen"
+
+msgid "Log Out"
+msgstr "Abmelden"
+
+msgid "New Releases"
+msgstr "Neue Veröffentlichungen"
+
+msgid "Trending Now"
+msgstr "Trends"
+
+msgid "Search tracks, artists..."
+msgstr "Tracks, Künstler suchen..."

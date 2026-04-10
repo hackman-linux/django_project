@@ -1,0 +1,41 @@
+{% extends 'control/base.html' %}
+{% block title %}Messages{% endblock %}
+{% block page_title %}User Messages{% endblock %}
+
+{% block content %}
+{% if contact_msgs %}
+<div class="cp-card" style="padding:0;overflow:hidden;">
+  <table class="cp-table">
+    <thead><tr><th>From</th><th>Subject</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% for msg in contact_msgs %}
+      <tr>
+        <td>
+          <p style="font-weight:600;color:#F0F4FF;">{{ msg.name }}</p>
+          <p style="font-size:.75rem;color:#4A5568;">{{ msg.email }}</p>
+        </td>
+        <td style="max-width:200px;">
+          <p style="color:#F0F4FF;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ msg.subject }}</p>
+          <p style="font-size:.75rem;color:#4A5568;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ msg.body|truncatechars:60 }}</p>
+        </td>
+        <td>
+          {% if msg.status == 'open' %}<span class="cp-badge" style="background:rgba(79,142,247,.1);color:#93C5FD;border:1px solid rgba(79,142,247,.2);">Open</span>
+          {% elif msg.status == 'replied' %}<span class="cp-badge" style="background:rgba(52,211,153,.1);color:#6EE7B7;border:1px solid rgba(52,211,153,.2);">Replied</span>
+          {% else %}<span class="cp-badge" style="background:rgba(148,163,184,.08);color:#64748B;border:1px solid rgba(148,163,184,.1);">Closed</span>{% endif %}
+        </td>
+        <td style="color:#4A5568;font-size:.75rem;font-family:'DM Mono',monospace;">{{ msg.created_at|date:"M d, Y" }}</td>
+        <td>
+          <a href="/control/messages/{{ msg.id }}/" class="cp-btn cp-btn-secondary" style="font-size:.75rem;">View</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="cp-card" style="text-align:center;padding:3rem;">
+  <p style="color:#4A5568;margin-bottom:.5rem;">No messages yet.</p>
+  <p style="color:#64748B;font-size:.8125rem;">Messages from users via the Contact page will appear here.</p>
+</div>
+{% endif %}
+{% endblock %}

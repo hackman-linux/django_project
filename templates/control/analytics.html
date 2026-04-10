@@ -1,0 +1,71 @@
+{% extends 'control/base.html' %}
+{% block title %}Analytics{% endblock %}
+{% block page_title %}Analytics — MariaDB{% endblock %}
+
+{% block content %}
+{% if error %}
+<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:1rem;margin-bottom:1rem;color:#FCA5A5;">
+  MariaDB connection issue: {{ error }}
+</div>
+{% else %}
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.875rem;margin-bottom:1.25rem;">
+  <div class="cp-card" style="text-align:center;">
+    <div style="font-size:1.5rem;font-weight:700;color:#34D399;font-family:'DM Mono',monospace;">{{ total_events }}</div>
+    <div style="font-size:.6875rem;color:#4A5568;">Play Events</div>
+  </div>
+  <div class="cp-card" style="text-align:center;">
+    <div style="font-size:1.5rem;font-weight:700;color:#34D399;font-family:'DM Mono',monospace;">{{ avg_listen }}s</div>
+    <div style="font-size:.6875rem;color:#4A5568;">Avg Listen</div>
+  </div>
+  <div class="cp-card" style="text-align:center;">
+    <div style="font-size:1.5rem;font-weight:700;color:#34D399;font-family:'DM Mono',monospace;">{{ completed_rate }}%</div>
+    <div style="font-size:.6875rem;color:#4A5568;">Completion Rate</div>
+  </div>
+  <div class="cp-card" style="text-align:center;">
+    <div style="font-size:1.5rem;font-weight:700;color:#34D399;font-family:'DM Mono',monospace;">{{ total_searches }}</div>
+    <div style="font-size:.6875rem;color:#4A5568;">Searches</div>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem;">
+  <!-- Device breakdown -->
+  <div class="cp-card">
+    <h2 style="font-size:.9375rem;font-weight:700;color:#F0F4FF;margin-bottom:.875rem;">Device Breakdown</h2>
+    {% for d in device_stats %}
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.04);">
+      <span style="font-size:.875rem;color:#94A3B8;text-transform:capitalize;">{{ d.device_type }}</span>
+      <span style="font-size:.875rem;font-weight:600;color:#F0F4FF;font-family:'DM Mono',monospace;">{{ d.count }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  <!-- Top countries -->
+  <div class="cp-card">
+    <h2 style="font-size:.9375rem;font-weight:700;color:#F0F4FF;margin-bottom:.875rem;">Top Countries</h2>
+    {% for c in country_stats %}
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.04);">
+      <span style="font-size:.875rem;color:#94A3B8;">{{ c.country_code|default:"Unknown" }}</span>
+      <span style="font-size:.875rem;font-weight:600;color:#F0F4FF;font-family:'DM Mono',monospace;">{{ c.count }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Recent searches -->
+<div class="cp-card">
+  <h2 style="font-size:.9375rem;font-weight:700;color:#F0F4FF;margin-bottom:.875rem;">Recent Searches</h2>
+  <table class="cp-table">
+    <thead><tr><th>Query</th><th>Results</th><th>User</th><th>Time</th></tr></thead>
+    <tbody>
+      {% for s in recent_searches %}
+      <tr>
+        <td style="color:#F0F4FF;">"{{ s.query }}"</td>
+        <td style="font-family:'DM Mono',monospace;">{{ s.results_count }}</td>
+        <td>{% if s.user_id %}<span class="cp-badge" style="background:rgba(79,142,247,.1);color:#93C5FD;border:1px solid rgba(79,142,247,.2);">Logged in</span>{% else %}<span style="color:#4A5568;">Guest</span>{% endif %}</td>
+        <td style="color:#4A5568;font-size:.75rem;font-family:'DM Mono',monospace;">{{ s.timestamp|timesince }} ago</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

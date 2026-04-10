@@ -1,0 +1,65 @@
+{% extends 'control/base.html' %}
+{% block title %}Tracks{% endblock %}
+{% block page_title %}Track Management{% endblock %}
+
+{% block content %}
+<form method="GET" style="display:flex;gap:.625rem;margin-bottom:1.25rem;">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search tracks..."
+         class="cp-input" style="max-width:280px;"/>
+  <select name="status" class="cp-input" style="max-width:150px;">
+    <option value="">All Status</option>
+    <option value="live"    {% if filter_status == 'live'    %}selected{% endif %}>Live</option>
+    <option value="draft"   {% if filter_status == 'draft'   %}selected{% endif %}>Draft</option>
+    <option value="flagged" {% if filter_status == 'flagged' %}selected{% endif %}>Flagged</option>
+  </select>
+  <button type="submit" class="cp-btn cp-btn-primary">Filter</button>
+  <a href="/control/tracks/" class="cp-btn cp-btn-secondary">Clear</a>
+  {% if flagged %}
+  <span class="cp-badge" style="background:rgba(239,68,68,.1);color:#FCA5A5;border:1px solid rgba(239,68,68,.2);align-self:center;">
+    {{ flagged }} flagged</span>
+  {% endif %}
+</form>
+
+<div class="cp-card" style="padding:0;overflow:hidden;">
+  <table class="cp-table">
+    <thead>
+      <tr><th>Track</th><th>Artist</th><th>Genre</th><th>Fingerprint</th><th style="text-align:right;">Plays</th><th>Status</th><th>Date</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for track in tracks %}
+      <tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:.625rem;">
+            <div style="width:32px;height:32px;border-radius:7px;overflow:hidden;flex-shrink:0;background:rgba(255,255,255,.04);">
+              {% if track.cover_image %}<img src="{{ track.cover_image.url }}" style="width:100%;height:100%;object-fit:cover;"/>{% endif %}
+            </div>
+            <span style="font-weight:600;max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;">{{ track.title }}</span>
+          </div>
+        </td>
+        <td style="color:#94A3B8;font-size:.8125rem;">{{ track.artist }}</td>
+        <td>{% if track.genre %}<span class="cp-badge" style="background:rgba(79,142,247,.1);color:#93C5FD;border:1px solid rgba(79,142,247,.2);">{{ track.genre.name }}</span>{% else %}<span style="color:#4A5568;">—</span>{% endif %}</td>
+        <td>
+          {% if track.acoustid_status == 'passed' %}<span class="cp-badge" style="background:rgba(52,211,153,.1);color:#6EE7B7;border:1px solid rgba(52,211,153,.2);">✓ Passed</span>
+          {% elif track.acoustid_status == 'failed' %}<span class="cp-badge" style="background:rgba(239,68,68,.1);color:#FCA5A5;border:1px solid rgba(239,68,68,.2);">✗ Flagged</span>
+          {% elif track.acoustid_status == 'error' %}<span class="cp-badge" style="background:rgba(245,158,11,.1);color:#FDE68A;border:1px solid rgba(245,158,11,.2);">⚠ Error</span>
+          {% else %}<span class="cp-badge" style="background:rgba(148,163,184,.08);color:#64748B;border:1px solid rgba(148,163,184,.1);">Pending</span>{% endif %}
+        </td>
+        <td style="text-align:right;font-family:'DM Mono',monospace;color:#F0F4FF;">{{ track.play_count }}</td>
+        <td>
+          {% if track.acoustid_status == 'failed' %}<span class="cp-badge" style="background:rgba(239,68,68,.1);color:#FCA5A5;border:1px solid rgba(239,68,68,.2);">Flagged</span>
+          {% elif track.is_published %}<span class="cp-badge" style="background:rgba(52,211,153,.1);color:#6EE7B7;border:1px solid rgba(52,211,153,.2);">Live</span>
+          {% else %}<span class="cp-badge" style="background:rgba(245,158,11,.1);color:#FDE68A;border:1px solid rgba(245,158,11,.2);">Draft</span>{% endif %}
+        </td>
+        <td style="color:#4A5568;font-size:.75rem;font-family:'DM Mono',monospace;">{{ track.uploaded_at|date:"M d, Y" }}</td>
+        <td>
+          <a href="/control/tracks/{{ track.id }}/toggle/"
+             style="font-size:.75rem;font-weight:600;{% if track.is_published %}color:#F87171;{% else %}color:#6EE7B7;{% endif %}">
+            {% if track.is_published %}Unpublish{% else %}Publish{% endif %}
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -2,313 +2,317 @@
 {% block title %}Pricing — NapsterLegal{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-16 pt-28">
+<div style="max-width:1100px;margin:0 auto;padding:3rem 1.25rem;padding-top:5rem;">
 
-  <div class="text-center mb-10">
-    <h1 class="text-4xl sm:text-5xl font-black text-white mb-4">
-      Simple, Fair
-      <span class="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Pricing</span>
+  <!-- Hero -->
+  <div style="text-align:center;margin-bottom:3rem;">
+    <p style="font-size:.8rem;font-weight:700;color:#4F8EF7;letter-spacing:.1em;
+               text-transform:uppercase;margin-bottom:.75rem;">Transparent Pricing</p>
+    <h1 style="font-family:'Sora',sans-serif;font-size:2.5rem;font-weight:800;
+               color:#F0F4FF;margin-bottom:1rem;line-height:1.15;">
+      Music that pays artists<br/>
+      <span style="background:linear-gradient(135deg,#4F8EF7,#8B5CF6,#F472B6);
+                   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+                   background-clip:text;">from stream one</span>
     </h1>
-    <p class="text-muted text-lg max-w-2xl mx-auto">
-      70% of every subscription goes directly to the artists you listen to. No label. No middleman.
+    <p style="color:#94A3B8;font-size:1rem;max-width:520px;margin:0 auto;line-height:1.6;">
+      No 50K threshold. Graduated revenue tiers. Full transparency.
     </p>
   </div>
 
-  <!-- Why leave Spotify banner -->
-  <div class="bg-gradient-to-r from-green-500/10 to-accent/10 border border-green-500/20 rounded-2xl p-6 mb-10">
-    <div class="flex flex-col sm:flex-row items-center gap-4">
-      <div class="text-4xl">🎵</div>
-      <div class="flex-1 text-center sm:text-left">
-        <p class="text-white font-bold text-lg mb-1">Why NapsterLegal beats Spotify</p>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
-          {% for item in spotify_comparison %}
-          <div class="bg-white/5 rounded-xl p-3 text-center">
-            <p class="text-red-400 text-xs line-through mb-0.5">{{ item.spotify }}</p>
-            <p class="text-green-400 text-xs font-semibold">{{ item.us }}</p>
-          </div>
-          {% endfor %}
-        </div>
+  <!-- Revenue split bar -->
+  <div style="background:rgba(13,20,32,.9);border:1px solid rgba(255,255,255,.06);
+              border-radius:18px;padding:1.5rem 2rem;margin-bottom:3rem;">
+    <p style="font-size:.75rem;font-weight:700;color:#4A5568;text-align:center;
+               letter-spacing:.08em;text-transform:uppercase;margin-bottom:1.25rem;">
+      How every subscription dollar is split
+    </p>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
+      <div style="text-align:center;padding:1.25rem;border-radius:14px;
+                  background:rgba(79,142,247,.06);border:1px solid rgba(79,142,247,.15);
+                  position:relative;overflow:hidden;">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;
+                    background:linear-gradient(90deg,#4F8EF7,#8B5CF6);"></div>
+        <div style="font-family:'DM Mono',monospace;font-size:2rem;font-weight:800;
+                    color:#4F8EF7;margin-bottom:.375rem;">40%</div>
+        <div style="font-size:.9rem;font-weight:700;color:#F0F4FF;margin-bottom:.375rem;">
+          To Artists</div>
+        <div style="font-size:.75rem;color:#4A5568;line-height:1.4;">
+          Graduated tiers — paid from stream 1</div>
+      </div>
+      <div style="text-align:center;padding:1.25rem;border-radius:14px;
+                  background:rgba(52,211,153,.05);border:1px solid rgba(52,211,153,.15);
+                  position:relative;overflow:hidden;">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;
+                    background:linear-gradient(90deg,#34D399,#2DD4BF);"></div>
+        <div style="font-family:'DM Mono',monospace;font-size:2rem;font-weight:800;
+                    color:#34D399;margin-bottom:.375rem;">35%</div>
+        <div style="font-size:.9rem;font-weight:700;color:#F0F4FF;margin-bottom:.375rem;">
+          Platform Owner</div>
+        <div style="font-size:.75rem;color:#4A5568;line-height:1.4;">
+          Operations, salary, development</div>
+      </div>
+      <div style="text-align:center;padding:1.25rem;border-radius:14px;
+                  background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.15);
+                  position:relative;overflow:hidden;">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;
+                    background:linear-gradient(90deg,#F59E0B,#EF4444);"></div>
+        <div style="font-family:'DM Mono',monospace;font-size:2rem;font-weight:800;
+                    color:#F59E0B;margin-bottom:.375rem;">25%</div>
+        <div style="font-size:.9rem;font-weight:700;color:#F0F4FF;margin-bottom:.375rem;">
+          Production</div>
+        <div style="font-size:.75rem;color:#4A5568;line-height:1.4;">
+          Servers, CDN, APIs, email</div>
       </div>
     </div>
   </div>
 
-  <!-- Tab: Listener / Artist -->
-  <div x-data="{ tab: '{% if request.user.is_artist %}artist{% else %}listener{% endif %}' }" class="mb-12">
-    <div class="flex gap-1 bg-white/5 rounded-2xl p-1 max-w-xs mx-auto mb-8">
-      <button @click="tab = 'listener'"
-              :class="tab === 'listener' ? 'bg-primary text-white shadow-lg' : 'text-muted hover:text-white'"
-              class="flex-1 rounded-xl py-2.5 text-sm font-semibold transition-all">
-        🎧 Listener
-      </button>
-      <button @click="tab = 'artist'"
-              :class="tab === 'artist' ? 'bg-accent text-dark shadow-lg' : 'text-muted hover:text-white'"
-              class="flex-1 rounded-xl py-2.5 text-sm font-semibold transition-all">
-        🎤 Artist
-      </button>
+  <!-- LISTENER PLANS -->
+  <h2 style="font-family:'Sora',sans-serif;font-size:1.25rem;font-weight:800;
+             color:#F0F4FF;margin-bottom:1.25rem;">For Listeners</h2>
+
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2.5rem;">
+
+    <!-- Free -->
+    <div style="background:rgba(13,20,32,.9);border:1px solid rgba(255,255,255,.06);
+                border-radius:20px;padding:1.75rem;position:relative;overflow:hidden;
+                transition:all .25s;"
+         onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 16px 40px rgba(0,0,0,.4)'"
+         onmouseout="this.style.transform='none';this.style.boxShadow='none'">
+      <p style="font-size:.7rem;font-weight:700;color:#4A5568;letter-spacing:.08em;
+                 text-transform:uppercase;margin-bottom:.75rem;">Free</p>
+      <div style="display:flex;align-items:flex-end;gap:.375rem;margin-bottom:.5rem;">
+        <span style="font-family:'DM Mono',monospace;font-size:2.5rem;font-weight:800;color:#F0F4FF;">$0</span>
+        <span style="color:#4A5568;font-size:.875rem;margin-bottom:.5rem;">/month</span>
+      </div>
+      <p style="color:#94A3B8;font-size:.8125rem;margin-bottom:1.25rem;line-height:1.5;">
+        Discover unlimited music with ads.</p>
+      <ul style="list-style:none;padding:0;margin:0 0 1.5rem;display:flex;flex-direction:column;gap:.5rem;">
+        {% for f in free_features %}
+        <li style="display:flex;align-items:flex-start;gap:.5rem;font-size:.8125rem;color:#94A3B8;">
+          <svg width="13" height="13" fill="none" stroke="#34D399" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:2px;">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+          </svg>{{ f }}
+        </li>
+        {% endfor %}
+      </ul>
+      <a href="/accounts/register/"
+         style="display:block;text-align:center;padding:.75rem;border-radius:10px;
+                background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+                color:#94A3B8;font-size:.875rem;font-weight:600;text-decoration:none;">
+        Get Started Free
+      </a>
     </div>
 
-    <!-- ── LISTENER PLANS ── -->
-    <div x-show="tab === 'listener'" x-transition>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-
-        <!-- Free -->
-        <div class="card flex flex-col">
-          <div class="mb-6">
-            <h3 class="text-white font-black text-xl mb-2">Free</h3>
-            <div class="flex items-baseline gap-1 mb-3">
-              <span class="text-4xl font-black text-white">$0</span>
-              <span class="text-muted text-sm">/month</span>
-            </div>
-            <div class="badge bg-white/10 text-muted text-xs mb-3">MP3 128kbps only</div>
-          </div>
-          <ul class="space-y-2.5 flex-1 mb-6">
-            {% for f in free_features %}
-            <li class="flex items-start gap-2">
-              <svg class="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-              </svg>
-              <span class="text-muted text-sm">{{ f }}</span>
-            </li>
-            {% endfor %}
-          </ul>
-          {% if user.is_authenticated %}
-            <span class="btn-secondary text-center py-3 opacity-60 cursor-default">Current Plan</span>
-          {% else %}
-            <a href="/accounts/register/" class="btn-secondary text-center py-3 block">Start Free</a>
-          {% endif %}
-        </div>
-
-        <!-- Premium Listener -->
-        <div class="card border-primary/60 shadow-lg shadow-primary/20 flex flex-col relative">
-          <div class="absolute -top-3 left-1/2 -translate-x-1/2">
-            <span class="badge bg-primary text-white px-4 py-1 text-xs font-bold">Most Popular</span>
-          </div>
-          <div class="mb-6">
-            <h3 class="text-white font-black text-xl mb-2">Premium</h3>
-            <div class="flex items-baseline gap-1 mb-1">
-              <span class="text-4xl font-black text-primary">$4.99</span>
-              <span class="text-muted text-sm">/month</span>
-            </div>
-            <p class="text-muted text-xs mb-3">or $39.99/year <span class="text-green-400">(save $19)</span></p>
-            <div class="badge bg-primary/20 text-primary text-xs">FLAC + WAV Lossless</div>
-          </div>
-          <ul class="space-y-2.5 flex-1 mb-6">
-            {% for f in premium_features %}
-            <li class="flex items-start gap-2">
-              <svg class="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-              </svg>
-              <span class="text-muted text-sm">{{ f }}</span>
-            </li>
-            {% endfor %}
-          </ul>
-          <a href="{% if user.is_authenticated %}/pricing/subscribe/premium/{% else %}/accounts/register/{% endif %}"
-             class="btn-primary text-center py-3 block">
-            {% if user.is_authenticated %}Upgrade to Premium{% else %}Get Started{% endif %}
-          </a>
-        </div>
-
-        <!-- Listener Pro -->
-        <div class="card border-accent/40 flex flex-col">
-          <div class="mb-6">
-            <h3 class="text-white font-black text-xl mb-2">Listener Pro</h3>
-            <div class="flex items-baseline gap-1 mb-1">
-              <span class="text-4xl font-black text-accent">$9.99</span>
-              <span class="text-muted text-sm">/month</span>
-            </div>
-            <p class="text-muted text-xs mb-3">or $79.99/year <span class="text-green-400">(save $40)</span></p>
-            <div class="badge bg-accent/20 text-accent text-xs">FLAC + WAV + Early Access</div>
-          </div>
-          <ul class="space-y-2.5 flex-1 mb-6">
-            {% for f in listener_pro_features %}
-            <li class="flex items-start gap-2">
-              <svg class="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-              </svg>
-              <span class="text-muted text-sm">{{ f }}</span>
-            </li>
-            {% endfor %}
-          </ul>
-          <a href="{% if user.is_authenticated %}/pricing/subscribe/listener_pro/{% else %}/accounts/register/{% endif %}"
-             class="btn-accent text-center py-3 block">Get Listener Pro</a>
-        </div>
-
+    <!-- Premium Listener $4.99 -->
+    <div style="background:rgba(13,20,32,.95);
+                border:1.5px solid rgba(79,142,247,.4);
+                border-radius:20px;padding:1.75rem;position:relative;overflow:hidden;
+                box-shadow:0 0 40px rgba(79,142,247,.1);
+                transition:all .25s;"
+         onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 20px 50px rgba(79,142,247,.2)'"
+         onmouseout="this.style.transform='none';this.style.boxShadow='0 0 40px rgba(79,142,247,.1)'">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;
+                  background:linear-gradient(90deg,#4F8EF7,#8B5CF6);"></div>
+      <div style="position:absolute;top:14px;right:14px;">
+        <span style="background:rgba(79,142,247,.2);color:#93C5FD;
+                     border:1px solid rgba(79,142,247,.3);border-radius:999px;
+                     padding:.2rem .625rem;font-size:.6rem;font-weight:700;">POPULAR</span>
       </div>
+      <p style="font-size:.7rem;font-weight:700;color:#4F8EF7;letter-spacing:.08em;
+                 text-transform:uppercase;margin-bottom:.75rem;">Premium Listener</p>
+      <div style="display:flex;align-items:flex-end;gap:.375rem;margin-bottom:.5rem;">
+        <span style="font-family:'DM Mono',monospace;font-size:2.5rem;font-weight:800;color:#F0F4FF;">$4.99</span>
+        <span style="color:#4A5568;font-size:.875rem;margin-bottom:.5rem;">/month</span>
+      </div>
+      <p style="color:#94A3B8;font-size:.8125rem;margin-bottom:1.25rem;line-height:1.5;">
+        Ad-free listening with offline downloads.</p>
+      <ul style="list-style:none;padding:0;margin:0 0 1.5rem;display:flex;flex-direction:column;gap:.5rem;">
+        {% for f in premium_features %}
+        <li style="display:flex;align-items:flex-start;gap:.5rem;font-size:.8125rem;color:#94A3B8;">
+          <svg width="13" height="13" fill="none" stroke="#34D399" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:2px;">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+          </svg>{{ f }}
+        </li>
+        {% endfor %}
+      </ul>
+      <a href="/pricing/subscribe/premium_listener/"
+         style="display:block;text-align:center;padding:.75rem;border-radius:10px;
+                background:linear-gradient(135deg,#4F8EF7,#7C3AED);
+                color:white;font-size:.875rem;font-weight:700;text-decoration:none;
+                box-shadow:0 4px 14px rgba(79,142,247,.35);">
+        Subscribe — $4.99/mo
+      </a>
     </div>
 
-    <!-- ── ARTIST PLANS ── -->
-    <div x-show="tab === 'artist'" x-transition>
-      <div class="bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3 mb-6 flex items-start gap-3">
-        <svg class="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        <p class="text-yellow-300 text-sm">
-          <strong>Artist plans require a monthly subscription</strong> to maintain an active artist account and receive royalty payments.
-          This covers platform costs and ensures only serious artists participate. Your first 30 days are free.
-        </p>
+    <!-- Listener Pro $9.99 -->
+    <div style="background:rgba(13,20,32,.9);border:1px solid rgba(139,92,246,.2);
+                border-radius:20px;padding:1.75rem;position:relative;overflow:hidden;
+                transition:all .25s;"
+         onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 16px 40px rgba(0,0,0,.4)'"
+         onmouseout="this.style.transform='none';this.style.boxShadow='none'">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;
+                  background:linear-gradient(90deg,#8B5CF6,#F472B6);"></div>
+      <p style="font-size:.7rem;font-weight:700;color:#8B5CF6;letter-spacing:.08em;
+                 text-transform:uppercase;margin-bottom:.75rem;">Listener Pro</p>
+      <div style="display:flex;align-items:flex-end;gap:.375rem;margin-bottom:.5rem;">
+        <span style="font-family:'DM Mono',monospace;font-size:2.5rem;font-weight:800;color:#F0F4FF;">$9.99</span>
+        <span style="color:#4A5568;font-size:.875rem;margin-bottom:.5rem;">/month</span>
       </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-
-        <!-- Artist Starter -->
-        <div class="card flex flex-col">
-          <div class="mb-6">
-            <h3 class="text-white font-black text-xl mb-2">Artist Starter</h3>
-            <div class="flex items-baseline gap-1 mb-1">
-              <span class="text-4xl font-black text-white">$2.99</span>
-              <span class="text-muted text-sm">/month</span>
-            </div>
-            <p class="text-muted text-xs mb-3">or $24.99/year <span class="text-green-400">(save $11)</span></p>
-            <div class="badge bg-white/10 text-muted text-xs">Up to 10 tracks · MP3</div>
-          </div>
-          <ul class="space-y-2.5 flex-1 mb-6">
-            {% for f in artist_starter_features %}
-            <li class="flex items-start gap-2">
-              <svg class="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-              </svg>
-              <span class="text-muted text-sm">{{ f }}</span>
-            </li>
-            {% endfor %}
-          </ul>
-          <a href="{% if user.is_authenticated %}/pricing/subscribe/artist_starter/{% else %}/accounts/register/?type=artist{% endif %}"
-             class="btn-secondary text-center py-3 block">Start Artist Starter</a>
-        </div>
-
-        <!-- Artist Pro (most popular for artists) -->
-        <div class="card border-accent/60 shadow-lg shadow-accent/20 flex flex-col relative">
-          <div class="absolute -top-3 left-1/2 -translate-x-1/2">
-            <span class="badge bg-accent text-dark px-4 py-1 text-xs font-bold">Best for Artists</span>
-          </div>
-          <div class="mb-6">
-            <h3 class="text-white font-black text-xl mb-2">Artist Pro</h3>
-            <div class="flex items-baseline gap-1 mb-1">
-              <span class="text-4xl font-black text-accent">$9.99</span>
-              <span class="text-muted text-sm">/month</span>
-            </div>
-            <p class="text-muted text-xs mb-3">or $79.99/year <span class="text-green-400">(save $40)</span></p>
-            <div class="badge bg-accent/20 text-accent text-xs">Unlimited · FLAC/WAV</div>
-          </div>
-          <ul class="space-y-2.5 flex-1 mb-6">
-            {% for f in artist_pro_features %}
-            <li class="flex items-start gap-2">
-              <svg class="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-              </svg>
-              <span class="text-muted text-sm">{{ f }}</span>
-            </li>
-            {% endfor %}
-          </ul>
-          <a href="{% if user.is_authenticated %}/pricing/subscribe/artist_pro/{% else %}/accounts/register/?type=artist{% endif %}"
-             class="btn-accent text-center py-3 block">Get Artist Pro</a>
-        </div>
-
-        <!-- Artist Label -->
-        <div class="card border-yellow-500/40 flex flex-col">
-          <div class="mb-6">
-            <h3 class="text-white font-black text-xl mb-2">Artist Label</h3>
-            <div class="flex items-baseline gap-1 mb-1">
-              <span class="text-4xl font-black text-yellow-400">$24.99</span>
-              <span class="text-muted text-sm">/month</span>
-            </div>
-            <p class="text-muted text-xs mb-3">or $199.99/year <span class="text-green-400">(save $100)</span></p>
-            <div class="badge bg-yellow-500/20 text-yellow-400 text-xs">Multiple artists · Priority</div>
-          </div>
-          <ul class="space-y-2.5 flex-1 mb-6">
-            {% for f in artist_label_features %}
-            <li class="flex items-start gap-2">
-              <svg class="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-              </svg>
-              <span class="text-muted text-sm">{{ f }}</span>
-            </li>
-            {% endfor %}
-          </ul>
-          <a href="{% if user.is_authenticated %}/pricing/subscribe/artist_label/{% else %}/accounts/register/?type=artist{% endif %}"
-             class="btn-secondary border-yellow-500/40 text-yellow-400 text-center py-3 block">
-            Get Artist Label
-          </a>
-        </div>
-
-      </div>
-
-      <!-- Royalty explanation -->
-      <div class="card border-green-500/20">
-        <h3 class="text-white font-bold mb-4 flex items-center gap-2">
-          <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-          How Your Royalties Are Calculated
-        </h3>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-          <div class="bg-white/5 rounded-xl p-4">
-            <div class="text-2xl font-black text-green-400 mb-1">70%</div>
-            <p class="text-white text-sm font-semibold">Artist Pool</p>
-            <p class="text-muted text-xs mt-1">Of all subscription revenue goes to artists every month</p>
-          </div>
-          <div class="bg-white/5 rounded-xl p-4">
-            <div class="text-2xl font-black text-primary mb-1">÷ Streams</div>
-            <p class="text-white text-sm font-semibold">Your Share</p>
-            <p class="text-muted text-xs mt-1">(Your streams ÷ Total platform streams) × Artist pool</p>
-          </div>
-          <div class="bg-white/5 rounded-xl p-4">
-            <div class="text-2xl font-black text-accent mb-1">Direct</div>
-            <p class="text-white text-sm font-semibold">No Middleman</p>
-            <p class="text-muted text-xs mt-1">Payment sent directly to you. No label takes a cut.</p>
-          </div>
-        </div>
-        <p class="text-muted text-xs text-center mt-4">
-          Spotify pays $0.003–$0.005/stream with labels taking 52%. NapsterLegal pays you directly from the pool.
-        </p>
-      </div>
-    </div>
-
-  </div><!-- end x-data tab -->
-
-  <!-- Revenue split -->
-  <div class="card border-white/10 mb-12">
-    <h2 class="text-white font-bold text-xl mb-6 text-center">Platform Revenue Split</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
-      <div>
-        <div class="text-3xl font-black text-primary mb-2">70%</div>
-        <p class="text-white font-semibold text-sm mb-1">To Artists</p>
-        <p class="text-muted text-xs">Monthly pool split proportionally by streams.</p>
-      </div>
-      <div class="border-x border-white/10">
-        <div class="text-3xl font-black text-accent mb-2">20%</div>
-        <p class="text-white font-semibold text-sm mb-1">Operations</p>
-        <p class="text-muted text-xs">Servers, storage, AcoustID, payment processing.</p>
-      </div>
-      <div>
-        <div class="text-3xl font-black text-green-400 mb-2">10%</div>
-        <p class="text-white font-semibold text-sm mb-1">Platform Growth</p>
-        <p class="text-muted text-xs">Reinvested in features and community.</p>
-      </div>
+      <p style="color:#94A3B8;font-size:.8125rem;margin-bottom:1.25rem;line-height:1.5;">
+        Lossless FLAC quality — the audiophile plan.</p>
+      <ul style="list-style:none;padding:0;margin:0 0 1.5rem;display:flex;flex-direction:column;gap:.5rem;">
+        {% for f in pro_features %}
+        <li style="display:flex;align-items:flex-start;gap:.5rem;font-size:.8125rem;color:#94A3B8;">
+          <svg width="13" height="13" fill="none" stroke="#34D399" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:2px;">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+          </svg>{{ f }}
+        </li>
+        {% endfor %}
+      </ul>
+      <a href="/pricing/subscribe/listener_pro/"
+         style="display:block;text-align:center;padding:.75rem;border-radius:10px;
+                background:linear-gradient(135deg,#8B5CF6,#F472B6);
+                color:white;font-size:.875rem;font-weight:700;text-decoration:none;
+                box-shadow:0 4px 14px rgba(139,92,246,.3);">
+        Subscribe — $9.99/mo
+      </a>
     </div>
   </div>
 
-  <!-- FAQ -->
-  <div class="max-w-2xl mx-auto">
-    <h2 class="text-white font-bold text-xl mb-6 text-center">Frequently Asked Questions</h2>
-    <div x-data="{ open: null }" class="space-y-3">
-      {% for item in faq_items %}
-      <div class="card">
-        <button @click="open = open === {{ forloop.counter }} ? null : {{ forloop.counter }}"
-                class="w-full flex items-center justify-between text-left">
-          <span class="text-white font-semibold text-sm">{{ item.q }}</span>
-          <svg class="w-4 h-4 text-muted flex-shrink-0 transition-transform"
-               :class="open === {{ forloop.counter }} ? 'rotate-180' : ''"
-               fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-          </svg>
-        </button>
-        <div x-show="open === {{ forloop.counter }}" x-transition class="mt-3 text-muted text-sm leading-relaxed">
-          {{ item.a }}
+  <!-- ARTIST PLANS -->
+  <h2 style="font-family:'Sora',sans-serif;font-size:1.25rem;font-weight:800;
+             color:#F0F4FF;margin-bottom:1.25rem;">For Artists</h2>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:3rem;">
+
+    <!-- Artist Pro $9.99 -->
+    <div style="background:rgba(13,20,32,.9);border:1px solid rgba(45,212,191,.2);
+                border-radius:20px;padding:1.75rem;position:relative;overflow:hidden;
+                transition:all .25s;"
+         onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 16px 40px rgba(0,0,0,.4)'"
+         onmouseout="this.style.transform='none';this.style.boxShadow='none'">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;
+                  background:linear-gradient(90deg,#2DD4BF,#4F8EF7);"></div>
+      <p style="font-size:.7rem;font-weight:700;color:#2DD4BF;letter-spacing:.08em;
+                 text-transform:uppercase;margin-bottom:.75rem;">Artist Pro</p>
+      <div style="display:flex;align-items:flex-end;gap:.375rem;margin-bottom:.5rem;">
+        <span style="font-family:'DM Mono',monospace;font-size:2.5rem;font-weight:800;color:#F0F4FF;">$9.99</span>
+        <span style="color:#4A5568;font-size:.875rem;margin-bottom:.5rem;">/month</span>
+      </div>
+      <p style="color:#94A3B8;font-size:.8125rem;margin-bottom:.875rem;line-height:1.5;">
+        Professional tools for independent artists.</p>
+      <!-- Graduated tiers -->
+      <div style="background:rgba(45,212,191,.05);border:1px solid rgba(45,212,191,.12);
+                  border-radius:10px;padding:.75rem;margin-bottom:1rem;">
+        <p style="font-size:.7rem;font-weight:700;color:#2DD4BF;margin-bottom:.5rem;">
+          Revenue Tiers — earn from stream 1</p>
+        <div style="display:flex;gap:.375rem;flex-wrap:wrap;">
+          <span style="font-size:.625rem;font-weight:600;background:rgba(255,255,255,.04);
+                       color:#4A5568;border:1px solid rgba(255,255,255,.06);border-radius:999px;padding:.2rem .5rem;">
+            0–5K: 20%</span>
+          <span style="font-size:.625rem;font-weight:600;background:rgba(255,255,255,.04);
+                       color:#4A5568;border:1px solid rgba(255,255,255,.06);border-radius:999px;padding:.2rem .5rem;">
+            5K–20K: 35%</span>
+          <span style="font-size:.625rem;font-weight:600;background:rgba(255,255,255,.04);
+                       color:#4A5568;border:1px solid rgba(255,255,255,.06);border-radius:999px;padding:.2rem .5rem;">
+            20K–50K: 45%</span>
+          <span style="font-size:.625rem;font-weight:700;background:rgba(52,211,153,.15);
+                       color:#6EE7B7;border:1px solid rgba(52,211,153,.25);border-radius:999px;padding:.2rem .5rem;">
+            50K+: 50% ✓</span>
         </div>
       </div>
-      {% endfor %}
+      <ul style="list-style:none;padding:0;margin:0 0 1.5rem;display:flex;flex-direction:column;gap:.5rem;">
+        {% for f in artist_pro_features %}
+        <li style="display:flex;align-items:flex-start;gap:.5rem;font-size:.8125rem;color:#94A3B8;">
+          <svg width="13" height="13" fill="none" stroke="#2DD4BF" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:2px;">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+          </svg>{{ f }}
+        </li>
+        {% endfor %}
+      </ul>
+      <a href="/pricing/subscribe/artist_pro/"
+         style="display:block;text-align:center;padding:.75rem;border-radius:10px;
+                background:linear-gradient(135deg,#2DD4BF,#4F8EF7);
+                color:white;font-size:.875rem;font-weight:700;text-decoration:none;
+                box-shadow:0 4px 14px rgba(45,212,191,.25);">
+        Start Artist Pro — $9.99/mo
+      </a>
+    </div>
+
+    <!-- Artist Label $29.99 -->
+    <div style="background:rgba(13,20,32,.9);border:1px solid rgba(245,158,11,.2);
+                border-radius:20px;padding:1.75rem;position:relative;overflow:hidden;
+                transition:all .25s;"
+         onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 16px 40px rgba(0,0,0,.4)'"
+         onmouseout="this.style.transform='none';this.style.boxShadow='none'">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;
+                  background:linear-gradient(90deg,#F59E0B,#EF4444);"></div>
+      <div style="position:absolute;top:14px;right:14px;">
+        <span style="background:rgba(245,158,11,.15);color:#FDE68A;
+                     border:1px solid rgba(245,158,11,.25);border-radius:999px;
+                     padding:.2rem .625rem;font-size:.6rem;font-weight:700;">LABEL</span>
+      </div>
+      <p style="font-size:.7rem;font-weight:700;color:#F59E0B;letter-spacing:.08em;
+                 text-transform:uppercase;margin-bottom:.75rem;">Artist Label</p>
+      <div style="display:flex;align-items:flex-end;gap:.375rem;margin-bottom:.5rem;">
+        <span style="font-family:'DM Mono',monospace;font-size:2.5rem;font-weight:800;color:#F0F4FF;">$29.99</span>
+        <span style="color:#4A5568;font-size:.875rem;margin-bottom:.5rem;">/month</span>
+      </div>
+      <p style="color:#94A3B8;font-size:.8125rem;margin-bottom:.875rem;line-height:1.5;">
+        For labels and multi-artist operations.</p>
+      <div style="background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.12);
+                  border-radius:10px;padding:.75rem;margin-bottom:1rem;">
+        <p style="font-size:.7rem;font-weight:700;color:#F59E0B;margin-bottom:.5rem;">
+          Revenue Tiers — earn from stream 1</p>
+        <div style="display:flex;gap:.375rem;flex-wrap:wrap;">
+          <span style="font-size:.625rem;font-weight:600;background:rgba(255,255,255,.04);
+                       color:#4A5568;border:1px solid rgba(255,255,255,.06);border-radius:999px;padding:.2rem .5rem;">
+            0–5K: 30%</span>
+          <span style="font-size:.625rem;font-weight:600;background:rgba(255,255,255,.04);
+                       color:#4A5568;border:1px solid rgba(255,255,255,.06);border-radius:999px;padding:.2rem .5rem;">
+            5K–20K: 40%</span>
+          <span style="font-size:.625rem;font-weight:600;background:rgba(255,255,255,.04);
+                       color:#4A5568;border:1px solid rgba(255,255,255,.06);border-radius:999px;padding:.2rem .5rem;">
+            20K–50K: 47%</span>
+          <span style="font-size:.625rem;font-weight:700;background:rgba(245,158,11,.15);
+                       color:#FDE68A;border:1px solid rgba(245,158,11,.25);border-radius:999px;padding:.2rem .5rem;">
+            50K+: 50% ✓</span>
+        </div>
+      </div>
+      <ul style="list-style:none;padding:0;margin:0 0 1.5rem;display:flex;flex-direction:column;gap:.5rem;">
+        {% for f in label_features %}
+        <li style="display:flex;align-items:flex-start;gap:.5rem;font-size:.8125rem;color:#94A3B8;">
+          <svg width="13" height="13" fill="none" stroke="#F59E0B" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:2px;">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+          </svg>{{ f }}
+        </li>
+        {% endfor %}
+      </ul>
+      <a href="/pricing/subscribe/artist_label/"
+         style="display:block;text-align:center;padding:.75rem;border-radius:10px;
+                background:linear-gradient(135deg,#F59E0B,#EF4444);
+                color:white;font-size:.875rem;font-weight:700;text-decoration:none;
+                box-shadow:0 4px 14px rgba(245,158,11,.3);">
+        Start Artist Label — $29.99/mo
+      </a>
     </div>
   </div>
 
+  <!-- Rights protection -->
+  <div style="background:rgba(239,68,68,.04);border:1px solid rgba(239,68,68,.1);
+              border-radius:18px;padding:1.75rem;text-align:center;">
+    <svg width="32" height="32" fill="none" stroke="#EF4444" viewBox="0 0 24 24"
+         style="margin:0 auto .875rem;">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+    </svg>
+    <h3 style="font-family:'Sora',sans-serif;font-size:1.125rem;font-weight:800;
+               color:#F0F4FF;margin-bottom:.625rem;">Your Rights Are Protected</h3>
+    <p style="color:#94A3B8;font-size:.875rem;max-width:600px;margin:0 auto;line-height:1.6;">
+      AcoustID fingerprint on every upload. Duplicate tracks blocked before publishing.
+      24-hour human review guarantee. DMCA compliant. Full copyright retained by you.
+    </p>
+  </div>
 </div>
 {% endblock %}

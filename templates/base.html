@@ -7,6 +7,7 @@
 
   <!-- Tailwind CSS -->
   {% load static %}
+  {% load i18n %}
   <link rel="stylesheet" href="{% static 'css/output.css' %}"/>
 
   <!-- Inter Font -->
@@ -49,8 +50,10 @@
           {% if user.is_authenticated %}
             <a href="/playlists/" class="nav-link">Playlists</a>
             {% if user.is_artist %}
-            <a href="/upload/" class="nav-link">Upload</a>
-              <a href="/dashboard/" class="nav-link">Dashboard</a>
+              <a href="/upload/" class="nav-link">Upload</a>
+              <a href="/accounts/dashboard/artist/" class="nav-link" style="color:#4F8EF7;font-weight:600;">🎵 Studio</a>
+            {% else %}
+              <a href="/accounts/dashboard/listener/" class="nav-link">My Space</a>
             {% endif %}
           {% endif %}
         </div>
@@ -68,6 +71,51 @@
 
         <!-- Auth buttons -->
         <div class="hidden md:flex items-center gap-3">
+          
+          
+          
+          <!-- LANGUAGE SWITCHER — working i18n -->
+          <div x-data="{ lo: false }" style="position:relative;">
+            <button @click="lo=!lo" @click.outside="lo=false"
+                    style="display:flex;align-items:center;gap:5px;padding:5px 10px;
+                           border-radius:8px;border:1px solid rgba(255,255,255,.1);
+                           background:rgba(255,255,255,.04);cursor:pointer;
+                           color:#94A3B8;font-size:.8rem;font-weight:600;transition:all .15s;">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/>
+              </svg>
+              <span>{{ LANGUAGE_CODE|upper|slice:":2" }}</span>
+            </button>
+            <div x-show="lo" x-transition
+                 style="position:absolute;right:0;top:calc(100% + 4px);
+                        min-width:145px;background:#0D1420;
+                        border:1px solid rgba(255,255,255,.08);border-radius:10px;
+                        padding:5px;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.5);">
+              {% for code, name, flag in lang_options %}
+              <form method="post" action="{% url 'set_language' %}" style="margin:0;padding:0;">
+                {% csrf_token %}
+                <input type="hidden" name="language" value="{{ code }}"/>
+                <input type="hidden" name="next" value="{{ request.get_full_path }}"/>
+                <button type="submit"
+                        style="display:flex;align-items:center;gap:7px;width:100%;
+                               padding:6px 9px;border:none;border-radius:7px;cursor:pointer;
+                               font-size:.8rem;text-align:left;transition:all .12s;font-family:inherit;
+                               {% if LANGUAGE_CODE == code %}
+                               background:rgba(79,142,247,.15);color:#93C5FD;font-weight:700;
+                               {% else %}
+                               background:transparent;color:#94A3B8;font-weight:400;
+                               {% endif %}">
+                  <span style="font-size:.9rem;">{{ flag }}</span>
+                  <span>{{ name }}</span>
+                </button>
+              </form>
+              {% endfor %}
+            </div>
+          </div>
+
+
+
           {% if user.is_authenticated %}
             <!-- User menu -->
             <div class="relative" x-data="{ open: false }">
@@ -109,11 +157,23 @@
                 {% endif %}
                 {% if user.is_staff or user.is_superuser %}
                 <div class="border-t border-white/5"></div>
-                <a href="/accounts/manage/" class="flex items-center gap-3 px-4 py-3 text-sm text-yellow-400 hover:text-yellow-300 hover:bg-white/5 transition-colors">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                  Admin Panel
+                <a href="/control/" class="flex items-center gap-3 px-4 py-3 text-sm text-yellow-400 hover:text-yellow-300 hover:bg-white/5 transition-colors">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                  </svg>
+                  Control Panel
                 </a>
                 {% endif %}
+                <div class="border-t border-white/5"></div>
+                <a href="/accounts/contact/" class="flex items-center gap-3 px-4 py-3 text-sm text-muted hover:text-white hover:bg-white/5 transition-colors">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                  Contact Admin
+                </a>
+                <a href="/accounts/settings/" class="flex items-center gap-3 px-4 py-3 text-sm text-muted hover:text-white hover:bg-white/5 transition-colors">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                  Settings
+                </a>
                 <div class="border-t border-white/5"></div>
                 <a href="/accounts/logout/" class="flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:text-red-300 hover:bg-white/5 transition-colors">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
@@ -218,7 +278,12 @@
         </div>
       </div>
       <div class="border-t border-white/5 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-        <p class="text-muted text-xs">© 2026 NapsterLegal. School Project. All rights reserved.</p>
+        <p class="text-muted text-xs">© 2026 NapsterLegal. School Project. All rights reserved.
+          &nbsp;·&nbsp;
+          <a href="/control/login/" class="text-muted hover:text-white transition-colors text-xs">
+            Admin Portal
+          </a>
+        </p>
         <div class="flex items-center gap-2">
           <span class="badge bg-green-500/20 text-green-400">Legal & Licensed</span>
           <span class="badge bg-primary/20 text-primary">GDPR Compliant</span>
@@ -229,7 +294,25 @@
 
   <!-- Player + Search JS -->
   {% load static %}
+  {% load i18n %}
   <script src="{% static 'js/player.js' %}"></script>
+  <script src="{% static 'js/player_persist.js' %}"></script>
 
+
+  <script>
+  // Stop and clear player state when entering settings page
+  if (window.location.pathname.includes('/settings') ||
+      window.location.pathname.includes('/control/')) {
+    sessionStorage.removeItem('nl_player_state');
+    document.addEventListener('DOMContentLoaded', function() {
+      const el = document.getElementById('audio-player');
+      if (!el) return;
+      try {
+        const p = Alpine.$data(el);
+        if (p && p.playing) p.pause();
+      } catch(e) {}
+    });
+  }
+  </script>
 </body>
 </html>

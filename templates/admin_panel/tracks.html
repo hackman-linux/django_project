@@ -3,91 +3,189 @@
 
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 py-12 pt-24">
+
+  <!-- Header -->
   <div class="flex items-center gap-4 mb-8">
-    <a href="/accounts/manage/" class="text-muted hover:text-white transition-colors">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <a href="/accounts/manage/"
+       style="display:inline-flex;align-items:center;color:var(--text-muted);
+              transition:color 0.15s;"
+       onmouseover="this.style.color='var(--text-primary)'"
+       onmouseout="this.style.color='var(--text-muted)'">
+      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
       </svg>
     </a>
-    <h1 class="text-2xl font-black text-white">Manage Tracks</h1>
-    <span class="badge bg-primary/20 text-primary">{{ tracks.count }} total</span>
+    <h1 style="font-family:'Sora',sans-serif;font-size:1.5rem;font-weight:800;
+               color:var(--text-primary);margin:0;">Manage Tracks</h1>
+    <span style="background:rgba(79,142,247,0.15);color:#93C5FD;border:1px solid rgba(79,142,247,0.2);
+                 border-radius:999px;padding:0.2rem 0.75rem;font-size:0.75rem;font-weight:600;">
+      {{ tracks.count }} total
+    </span>
     {% if flagged %}
-    <span class="badge bg-red-500/20 text-red-400">{{ flagged }} flagged</span>
+    <span style="background:rgba(239,68,68,0.15);color:#FCA5A5;border:1px solid rgba(239,68,68,0.2);
+                 border-radius:999px;padding:0.2rem 0.75rem;font-size:0.75rem;font-weight:600;">
+      {{ flagged }} flagged
+    </span>
     {% endif %}
   </div>
 
-  <div class="card overflow-x-auto">
-    <table class="w-full">
-      <thead>
-        <tr class="border-b border-white/10">
-          <th class="text-left text-muted text-xs uppercase pb-3 pr-4">Track</th>
-          <th class="text-center text-muted text-xs uppercase pb-3 pr-4">Fingerprint</th>
-          <th class="text-left text-muted text-xs uppercase pb-3 pr-4">Artist</th>
-          <th class="text-left text-muted text-xs uppercase pb-3 pr-4">Genre</th>
-          <th class="text-right text-muted text-xs uppercase pb-3 pr-4">Plays</th>
-          <th class="text-center text-muted text-xs uppercase pb-3 pr-4">Status</th>
-          <th class="text-left text-muted text-xs uppercase pb-3 pr-4">Uploaded</th>
-          <th class="text-center text-muted text-xs uppercase pb-3">Action</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-white/5">
-        {% for track in tracks %}
-        <td class="py-3 pr-4 text-center">
-  <span class="badge text-xs
-    {% if track.acoustid_status == 'passed' %}bg-green-500/20 text-green-400
-    {% elif track.acoustid_status == 'failed' %}bg-red-500/20 text-red-400
-    {% elif track.acoustid_status == 'error' %}bg-yellow-500/20 text-yellow-400
-    {% else %}bg-white/10 text-muted{% endif %}">
-    {{ track.acoustid_status|default:"—" }}
-  </span>
-</td>
-        <tr class="hover:bg-white/3 transition-colors">
-          <td class="py-3 pr-4">
-            <div class="flex items-center gap-2">
-              <div class="w-8 h-8 rounded-lg overflow-hidden bg-surface flex-shrink-0">
-                {% if track.cover_image %}
-                  <img src="{{ track.cover_image.url }}" class="w-full h-full object-cover"/>
-                {% else %}
-                  <div class="w-full h-full bg-gradient-to-br from-primary/30 to-accent/20"></div>
-                {% endif %}
+  <!-- Table card -->
+  <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;overflow:hidden;">
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border);">
+            <th style="text-align:left;padding:0.875rem 1rem;font-size:0.7rem;font-weight:700;
+                       letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);">Track</th>
+            <th style="text-align:center;padding:0.875rem 1rem;font-size:0.7rem;font-weight:700;
+                       letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);">Fingerprint</th>
+            <th style="text-align:left;padding:0.875rem 1rem;font-size:0.7rem;font-weight:700;
+                       letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);">Artist</th>
+            <th style="text-align:left;padding:0.875rem 1rem;font-size:0.7rem;font-weight:700;
+                       letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);">Genre</th>
+            <th style="text-align:right;padding:0.875rem 1rem;font-size:0.7rem;font-weight:700;
+                       letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);">Plays</th>
+            <th style="text-align:center;padding:0.875rem 1rem;font-size:0.7rem;font-weight:700;
+                       letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);">Status</th>
+            <th style="text-align:left;padding:0.875rem 1rem;font-size:0.7rem;font-weight:700;
+                       letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);">Uploaded</th>
+            <th style="text-align:center;padding:0.875rem 1rem;font-size:0.7rem;font-weight:700;
+                       letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for track in tracks %}
+          <tr style="border-bottom:1px solid var(--border);transition:background 0.15s;"
+              onmouseover="this.style.background='var(--bg-hover)'"
+              onmouseout="this.style.background='transparent'">
+
+            <!-- Track title + cover -->
+            <td style="padding:0.875rem 1rem;">
+              <div style="display:flex;align-items:center;gap:0.75rem;">
+                <div style="width:36px;height:36px;border-radius:8px;overflow:hidden;
+                            flex-shrink:0;background:var(--bg-elevated);">
+                  {% if track.cover_image %}
+                    <img src="{{ track.cover_image.url }}"
+                         style="width:100%;height:100%;object-fit:cover;"/>
+                  {% else %}
+                    <div style="width:100%;height:100%;
+                                background:linear-gradient(135deg,rgba(79,142,247,0.3),rgba(45,212,191,0.2));"></div>
+                  {% endif %}
+                </div>
+                <a href="/track/{{ track.id }}/"
+                   style="color:var(--text-primary);font-size:0.875rem;font-weight:600;
+                          text-decoration:none;max-width:160px;
+                          white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;"
+                   onmouseover="this.style.color='var(--aurora-blue)'"
+                   onmouseout="this.style.color='var(--text-primary)'">
+                  {{ track.title }}
+                </a>
               </div>
-              <a href="/track/{{ track.id }}/"
-                 class="text-white text-sm font-medium hover:text-primary transition-colors truncate max-w-32">
-                {{ track.title }}
+            </td>
+
+            <!-- Fingerprint status -->
+            <td style="padding:0.875rem 1rem;text-align:center;">
+              {% if track.acoustid_status == 'passed' %}
+                <span style="background:rgba(52,211,153,0.12);color:#6EE7B7;
+                             border:1px solid rgba(52,211,153,0.2);border-radius:999px;
+                             padding:0.2rem 0.625rem;font-size:0.7rem;font-weight:600;">
+                  ✓ Passed
+                </span>
+              {% elif track.acoustid_status == 'failed' %}
+                <span style="background:rgba(239,68,68,0.12);color:#FCA5A5;
+                             border:1px solid rgba(239,68,68,0.2);border-radius:999px;
+                             padding:0.2rem 0.625rem;font-size:0.7rem;font-weight:600;">
+                  ✗ Flagged
+                </span>
+              {% elif track.acoustid_status == 'error' %}
+                <span style="background:rgba(245,158,11,0.12);color:#FDE68A;
+                             border:1px solid rgba(245,158,11,0.2);border-radius:999px;
+                             padding:0.2rem 0.625rem;font-size:0.7rem;font-weight:600;">
+                  ⚠ Error
+                </span>
+              {% else %}
+                <span style="background:rgba(148,163,184,0.1);color:#94A3B8;
+                             border:1px solid rgba(148,163,184,0.15);border-radius:999px;
+                             padding:0.2rem 0.625rem;font-size:0.7rem;font-weight:600;">
+                  — Pending
+                </span>
+              {% endif %}
+            </td>
+
+            <!-- Artist -->
+            <td style="padding:0.875rem 1rem;">
+              <span style="color:var(--text-secondary);font-size:0.875rem;">
+                {{ track.artist }}
+              </span>
+            </td>
+
+            <!-- Genre -->
+            <td style="padding:0.875rem 1rem;">
+              {% if track.genre %}
+                <span style="background:rgba(79,142,247,0.12);color:#93C5FD;
+                             border:1px solid rgba(79,142,247,0.2);border-radius:999px;
+                             padding:0.2rem 0.625rem;font-size:0.7rem;font-weight:600;">
+                  {{ track.genre.name }}
+                </span>
+              {% else %}
+                <span style="color:var(--text-muted);font-size:0.875rem;">—</span>
+              {% endif %}
+            </td>
+
+            <!-- Plays -->
+            <td style="padding:0.875rem 1rem;text-align:right;">
+              <span style="color:var(--text-primary);font-size:0.875rem;font-weight:600;">
+                {{ track.play_count }}
+              </span>
+            </td>
+
+            <!-- Status -->
+            <td style="padding:0.875rem 1rem;text-align:center;">
+              {% if track.acoustid_status == 'failed' %}
+                <span style="background:rgba(239,68,68,0.12);color:#FCA5A5;
+                             border:1px solid rgba(239,68,68,0.2);border-radius:999px;
+                             padding:0.2rem 0.625rem;font-size:0.7rem;font-weight:700;">
+                  Flagged
+                </span>
+              {% elif track.is_published %}
+                <span style="background:rgba(52,211,153,0.12);color:#6EE7B7;
+                             border:1px solid rgba(52,211,153,0.2);border-radius:999px;
+                             padding:0.2rem 0.625rem;font-size:0.7rem;font-weight:600;">
+                  Live
+                </span>
+              {% else %}
+                <span style="background:rgba(245,158,11,0.12);color:#FDE68A;
+                             border:1px solid rgba(245,158,11,0.2);border-radius:999px;
+                             padding:0.2rem 0.625rem;font-size:0.7rem;font-weight:600;">
+                  Draft
+                </span>
+              {% endif %}
+            </td>
+
+            <!-- Uploaded date -->
+            <td style="padding:0.875rem 1rem;">
+              <span style="color:var(--text-muted);font-size:0.8125rem;">
+                {{ track.uploaded_at|date:"M d, Y" }}
+              </span>
+            </td>
+
+            <!-- Action -->
+            <td style="padding:0.875rem 1rem;text-align:center;">
+              <a href="/accounts/manage/tracks/{{ track.id }}/toggle/"
+                 style="font-size:0.8125rem;font-weight:600;text-decoration:none;
+                        {% if track.is_published %}color:#F87171;{% else %}color:#6EE7B7;{% endif %}
+                        transition:opacity 0.15s;"
+                 onmouseover="this.style.opacity='0.7'"
+                 onmouseout="this.style.opacity='1'">
+                {% if track.is_published %}Unpublish{% else %}Publish{% endif %}
               </a>
-            </div>
-          </td>
-          <td class="py-3 pr-4">
-            <span class="text-muted text-sm">{{ track.artist }}</span>
-          </td>
-          <td class="py-3 pr-4">
-            {% if track.genre %}
-              <span class="badge bg-primary/20 text-primary text-xs">{{ track.genre.name }}</span>
-            {% else %}
-              <span class="text-muted text-xs">—</span>
-            {% endif %}
-          </td>
-          <td class="py-3 pr-4 text-right">
-            <span class="text-white text-sm">{{ track.play_count }}</span>
-          </td>
-          <td class="py-3 pr-4 text-center">
-            <span class="badge {% if track.is_published %}bg-green-500/20 text-green-400{% else %}bg-yellow-500/20 text-yellow-400{% endif %}">
-              {% if track.is_published %}Live{% else %}Draft{% endif %}
-            </span>
-          </td>
-          <td class="py-3 pr-4">
-            <span class="text-muted text-xs">{{ track.uploaded_at|date:"M d, Y" }}</span>
-          </td>
-          <td class="py-3 text-center">
-            <a href="/accounts/manage/tracks/{{ track.id }}/toggle/"
-               class="text-xs {% if track.is_published %}text-red-400 hover:text-red-300{% else %}text-green-400 hover:text-green-300{% endif %} transition-colors">
-              {% if track.is_published %}Unpublish{% else %}Publish{% endif %}
-            </a>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
+
 </div>
 {% endblock %}

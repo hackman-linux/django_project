@@ -159,3 +159,35 @@ class AnnouncementComment(models.Model):
 
     class Meta:
         ordering = ['created_at']
+
+
+class OfflineDownload(models.Model):
+    """
+    Tracks which users have downloaded which tracks for offline use.
+    Quality depends on subscription tier.
+    """
+    QUALITY_128  = '128kbps'
+    QUALITY_320  = '320kbps'
+    QUALITY_FLAC = 'flac'
+
+    user      = models.ForeignKey(
+        'accounts.CustomUser', on_delete=models.CASCADE,
+        related_name='offline_downloads')
+    track     = models.ForeignKey(
+        Track, on_delete=models.CASCADE,
+        related_name='offline_downloads')
+    quality   = models.CharField(max_length=10, default=QUALITY_128)
+    downloaded_at = models.DateTimeField(auto_now_add=True)
+    expires_at    = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ['user', 'track']
+        ordering = ['-downloaded_at']
+
+    def __str__(self):
+        return f"{self.user.username} → {self.track.title} ({self.quality})"
+
+    @property
+    def is_expired(self):
+        from django.utils import timezone
+        return self.expires_at and self.expires_at < timezone.now()

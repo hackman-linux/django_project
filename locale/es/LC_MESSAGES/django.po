@@ -1,0 +1,41 @@
+# Spanish
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: es\n"
+
+msgid "Discover"
+msgstr "Descubrir"
+
+msgid "Search"
+msgstr "Buscar"
+
+msgid "Playlists"
+msgstr "Listas de reproducción"
+
+msgid "Upload"
+msgstr "Subir"
+
+msgid "Pricing"
+msgstr "Precios"
+
+msgid "My Space"
+msgstr "Mi Espacio"
+
+msgid "Log In"
+msgstr "Iniciar sesión"
+
+msgid "Get Started"
+msgstr "Comenzar"
+
+msgid "Log Out"
+msgstr "Cerrar sesión"
+
+msgid "New Releases"
+msgstr "Nuevos lanzamientos"
+
+msgid "Trending Now"
+msgstr "Tendencias"
+
+msgid "Search tracks, artists..."
+msgstr "Buscar pistas, artistas..."

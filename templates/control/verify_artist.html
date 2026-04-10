@@ -1,0 +1,81 @@
+{% extends 'control/base.html' %}
+{% block title %}Verify Artist{% endblock %}
+{% block page_title %}Review: {{ artist.stage_name }}{% endblock %}
+
+{% block content %}
+<div style="max-width:640px;">
+  <div class="cp-card" style="margin-bottom:1.25rem;">
+    <h2 style="font-size:.9375rem;font-weight:700;color:#F0F4FF;margin-bottom:1rem;">Artist Information</h2>
+    {% for label, value, color in artist_info %}
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;
+                padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.04);">
+      <span style="font-size:.8125rem;color:#4A5568;">{{ label }}</span>
+      <span style="font-size:.8125rem;color:{{ color }};text-align:right;max-width:60%;">{{ value }}</span>
+    </div>
+    {% endfor %}
+    {% if artist.existing_work_url %}
+    <div style="margin-top:.75rem;">
+      <a href="{{ artist.existing_work_url }}" target="_blank"
+         style="display:inline-flex;align-items:center;gap:.375rem;padding:.5rem .875rem;
+                border-radius:8px;background:rgba(79,142,247,.1);color:#93C5FD;font-size:.8125rem;font-weight:600;">
+        Open Work Sample ↗</a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Tracks by this artist -->
+  {% if artist.tracks.all %}
+  <div class="cp-card" style="margin-bottom:1.25rem;">
+    <h2 style="font-size:.9375rem;font-weight:700;color:#F0F4FF;margin-bottom:.75rem;">Uploaded Tracks</h2>
+    {% for track in artist.tracks.all %}
+    <div style="display:flex;align-items:center;justify-content:space-between;
+                padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.04);">
+      <p style="font-size:.8125rem;color:#F0F4FF;">{{ track.title }}</p>
+      <div style="display:flex;gap:.375rem;">
+        {% if track.acoustid_status == 'passed' %}<span class="cp-badge" style="background:rgba(52,211,153,.1);color:#6EE7B7;border:1px solid rgba(52,211,153,.2);">✓ Passed</span>
+        {% elif track.acoustid_status == 'failed' %}<span class="cp-badge" style="background:rgba(239,68,68,.1);color:#FCA5A5;border:1px solid rgba(239,68,68,.2);">✗ Flagged</span>
+        {% else %}<span class="cp-badge" style="background:rgba(148,163,184,.08);color:#64748B;border:1px solid rgba(148,163,184,.1);">{{ track.acoustid_status }}</span>{% endif %}
+        {% if track.is_published %}<span class="cp-badge" style="background:rgba(52,211,153,.1);color:#6EE7B7;border:1px solid rgba(52,211,153,.2);">Live</span>
+        {% else %}<span class="cp-badge" style="background:rgba(245,158,11,.1);color:#FDE68A;border:1px solid rgba(245,158,11,.2);">Draft</span>{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Decision form -->
+  <div class="cp-card">
+    <h2 style="font-size:.9375rem;font-weight:700;color:#F0F4FF;margin-bottom:1rem;">Verification Decision</h2>
+    <!-- Checklist -->
+    <div style="background:rgba(255,255,255,.02);border-radius:10px;padding:.875rem;margin-bottom:1rem;">
+      <p style="font-size:.75rem;font-weight:700;color:#94A3B8;margin-bottom:.625rem;">Before deciding:</p>
+      {% for check in checklist %}
+      <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;margin-bottom:.375rem;">
+        <input type="checkbox" style="accent-color:#EF4444;"/>
+        <span style="font-size:.8125rem;color:#4A5568;">{{ check }}</span>
+      </label>
+      {% endfor %}
+    </div>
+    <form method="POST" style="display:flex;flex-direction:column;gap:.875rem;">
+      {% csrf_token %}
+      <div>
+        <label style="display:block;font-size:.75rem;font-weight:600;color:#4A5568;margin-bottom:.3rem;">Decision</label>
+        <select name="verification_status" class="cp-input">
+          <option value="pending"  {% if artist.verification_status == 'pending'  %}selected{% endif %}>Pending Review</option>
+          <option value="verified" {% if artist.verification_status == 'verified' %}selected{% endif %}>Verified</option>
+          <option value="rejected" {% if artist.verification_status == 'rejected' %}selected{% endif %}>Rejected</option>
+        </select>
+      </div>
+      <div>
+        <label style="display:block;font-size:.75rem;font-weight:600;color:#4A5568;margin-bottom:.3rem;">Note to Artist (optional)</label>
+        <textarea name="verification_note" rows="3" class="cp-input"
+                  placeholder="Explain your decision...">{{ artist.verification_note }}</textarea>
+      </div>
+      <div style="display:flex;gap:.625rem;">
+        <button type="submit" class="cp-btn cp-btn-primary" style="flex:1;">Save Decision</button>
+        <a href="/control/artists/" class="cp-btn cp-btn-secondary" style="flex:1;justify-content:center;">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

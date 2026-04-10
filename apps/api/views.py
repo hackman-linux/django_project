@@ -2,6 +2,11 @@ from django.http import FileResponse, Http404, JsonResponse
 from django.views.decorators.http import require_GET, require_POST
 from django.shortcuts import get_object_or_404
 from apps.music.models import Track
+from apps.music.models import Track, OfflineDownload
+from django.utils import timezone
+from datetime import timedelta
+import os
+from django.contrib.auth.decorators import login_required
 
 
 def _get_client_ip(request):
@@ -164,3 +169,88 @@ def log_listen(request):
         print(f"[Analytics] log_listen error: {e}")
 
     return JsonResponse({'status': 'ok'})
+
+
+@login_required
+def download_track(request, track_id):
+    """
+    Serve track for offline use based on subscription tier.
+    
+    Quality tiers:
+        Free tier:       128kbps (MP3)
+        Premium/Artist:  320kbps (MP3)
+        Listener Pro:    FLAC lossless
+        Artist Label:    FLAC lossless
+    """
+
+    track = get_object_or_404(Track, id=track_id, is_published=True)
+    
+    if not track.audio_file:
+        return JsonResponse({'error': 'No audio file'}, status=404)
+
+    user = request.user
+    
+    # Determine quality based on subscription
+    plan = getattr(user, 'subscription_plan', 'free')
+    quality_map = {
+        'free':            ('128kbps', 0),       # free: 0 days (no offline)
+        'premium_listener':('320kbps', 30),      # 30 day offline
+        'listener_pro':    ('flac',    30),       # 30 day FLAC offline
+        'artist_pro':      ('320kbps', 30),
+        'artist_label':    ('flac',    30),
+    }
+    
+    quality, days = quality_map.get(plan, ('128kbps', 0))
+    
+    if days == 0:
+        return JsonResponse({
+            'error': 'Offline downloads require a paid subscription.',
+            'upgrade_url': '/pricing/',
+        }, status=403)
+
+    # Record the download
+    expires = timezone.now() + timedelta(days=days)
+    dl, created = OfflineDownload.objects.update_or_create(
+        user=user, track=track,
+        defaults={'quality': quality, 'expires_at': expires,
+                  'downloaded_at': timezone.now()}
+    )
+
+    # Serve the file
+    from django.http import FileResponse
+    response = FileResponse(
+        open(track.audio_file.path, 'rb'),
+        content_type='audio/mpeg',
+        as_attachment=True,
+        filename=f"{track.title} — {track.artist}.mp3"
+    )
+    response['X-Quality']    = quality
+    response['X-Expires']    = expires.isoformat()
+    response['X-Track-Id']   = str(track.id)
+    return response
+
+
+@login_required  
+def my_downloads(request):
+    """List user's offline downloads."""
+    from apps.music.models import OfflineDownload
+    from django.utils import timezone
+    
+    downloads = OfflineDownload.objects.filter(
+        user=request.user,
+        expires_at__gt=timezone.now()
+    ).select_related('track', 'track__artist')
+    
+    return JsonResponse({
+        'downloads': [
+            {
+                'track_id':    str(d.track.id),
+                'title':       d.track.title,
+                'artist':      str(d.track.artist),
+                'quality':     d.quality,
+                'expires_at':  d.expires_at.isoformat(),
+                'cover':       d.track.cover_image.url if d.track.cover_image else None,
+            }
+            for d in downloads
+        ]
+    })

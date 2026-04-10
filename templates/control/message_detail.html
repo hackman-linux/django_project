@@ -1,0 +1,43 @@
+{% extends 'control/base.html' %}
+{% block title %}Message{% endblock %}
+{% block page_title %}Message from {{ msg.name }}{% endblock %}
+
+{% block content %}
+<div style="max-width:640px;">
+  <div class="cp-card" style="margin-bottom:1.25rem;">
+    <div style="display:flex;justify-content:space-between;margin-bottom:1rem;">
+      <div>
+        <p style="font-size:.9375rem;font-weight:700;color:#F0F4FF;">{{ msg.subject }}</p>
+        <p style="font-size:.8125rem;color:#4A5568;margin-top:.25rem;">From: {{ msg.name }} &lt;{{ msg.email }}&gt;</p>
+        <p style="font-size:.75rem;color:#4A5568;">{{ msg.created_at|date:"F d, Y — H:i" }}</p>
+      </div>
+      <span class="cp-badge" style="{% if msg.status == 'open' %}background:rgba(79,142,247,.1);color:#93C5FD;border:1px solid rgba(79,142,247,.2);
+                                     {% elif msg.status == 'replied' %}background:rgba(52,211,153,.1);color:#6EE7B7;border:1px solid rgba(52,211,153,.2);
+                                     {% else %}background:rgba(148,163,184,.08);color:#64748B;border:1px solid rgba(148,163,184,.1);{% endif %}">
+        {{ msg.get_status_display }}</span>
+    </div>
+    <div style="background:rgba(255,255,255,.02);border-radius:10px;padding:1rem;
+                color:#94A3B8;font-size:.875rem;line-height:1.7;white-space:pre-wrap;">{{ msg.body }}</div>
+  </div>
+
+  {% if msg.reply_body %}
+  <div class="cp-card" style="margin-bottom:1.25rem;border-color:rgba(52,211,153,.15);">
+    <p style="font-size:.8125rem;font-weight:600;color:#6EE7B7;margin-bottom:.625rem;">Your Reply</p>
+    <div style="color:#94A3B8;font-size:.875rem;line-height:1.7;white-space:pre-wrap;">{{ msg.reply_body }}</div>
+  </div>
+  {% else %}
+  <div class="cp-card">
+    <h2 style="font-size:.9375rem;font-weight:700;color:#F0F4FF;margin-bottom:.875rem;">Reply</h2>
+    <form method="POST" style="display:flex;flex-direction:column;gap:.875rem;">
+      {% csrf_token %}
+      <textarea name="reply" rows="5" class="cp-input"
+                placeholder="Write your reply..."></textarea>
+      <div style="display:flex;gap:.625rem;">
+        <button type="submit" class="cp-btn cp-btn-primary">Send Reply</button>
+        <a href="/control/messages/" class="cp-btn cp-btn-secondary">Back</a>
+      </div>
+    </form>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

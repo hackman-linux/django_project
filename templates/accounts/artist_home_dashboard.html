@@ -1,7 +1,15 @@
-{% extends 'base.html' %}
-{% block title %}Artist Dashboard — NapsterLegal{% endblock %}
-
-{% block content %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Artist Studio — NapsterLegal</title>
+  <link rel="stylesheet" href="{% static 'css/output.css' %}"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body style="background:#080C14;color:#F0F4FF;font-family:'DM Sans',sans-serif;margin:0;">
 <div class="flex min-h-screen pt-16">
 
   <!-- Sidebar -->
@@ -202,4 +210,9 @@
     </div>
   </main>
 </div>
-{% endblock %}
+
+{% include 'components/player.html' %}
+{% load static %}
+<script src="{% static 'js/player.js' %}"></script>
+</body>
+</html>

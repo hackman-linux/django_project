@@ -2,291 +2,411 @@
 {% block title %}Upload Track — NapsterLegal{% endblock %}
 
 {% block content %}
-<div class="max-w-3xl mx-auto px-4 py-12 pt-24">
+<div style="max-width:760px;margin:0 auto;padding:2rem 1.25rem;padding-top:5rem;">
 
   <!-- Header -->
-  <div class="mb-8">
-    <h1 class="text-3xl font-black text-white mb-2">Upload a Track</h1>
-    <p class="text-muted">Share your music with the world. Fill in the details below.</p>
-  </div>
-
-  <!-- Verification status notice -->
-  {% if verification_notice %}
-  <div class="{% if artist.verification_status == 'rejected' %}bg-red-500/10 border-red-500/20{% else %}bg-yellow-500/10 border-yellow-500/20{% endif %} border rounded-xl px-4 py-3 mb-6 flex items-start gap-3">
-    <svg class="w-5 h-5 {% if artist.verification_status == 'rejected' %}text-red-400{% else %}text-yellow-400{% endif %} flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-    </svg>
-    <p class="text-sm {% if artist.verification_status == 'rejected' %}text-red-300{% else %}text-yellow-300{% endif %}">
-      {{ verification_notice }}
+  <div style="margin-bottom:2rem;">
+    <h1 style="font-family:'Sora',sans-serif;font-size:1.75rem;font-weight:800;
+               color:#F0F4FF;margin-bottom:0.375rem;">Upload a Track</h1>
+    <p style="color:#94A3B8;font-size:0.9rem;">
+      Your track will be fingerprint-checked before publishing.
+      If a duplicate is detected it will be held for admin review — not deleted.
     </p>
   </div>
-  {% endif %}
 
-  <!-- AcoustID rejection error -->
-  {% if acoustid_error %}
-  <div class="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 mb-6">
-    <p class="text-red-400 text-sm font-semibold mb-1">⚠ Upload Rejected — Copyright Match Found</p>
-    <p class="text-red-300 text-sm">{{ acoustid_error }}</p>
-    {% if acoustid_matches %}
-    <div class="mt-3 space-y-1 border-t border-red-500/20 pt-3">
-      {% for match in acoustid_matches %}
-      <p class="text-muted text-xs">Matched: "{{ match.title }}" by {{ match.artist }} ({{ match.score|floatformat:0 }}% confidence)</p>
-      {% endfor %}
+  <!-- Artist verification warning -->
+  {% if request.user.artist_profile.verification_status == 'pending' %}
+  <div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);
+              border-radius:12px;padding:.875rem 1rem;margin-bottom:1.5rem;
+              display:flex;align-items:flex-start;gap:.75rem;">
+    <svg width="20" height="20" fill="none" stroke="#F59E0B" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:2px;">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+    </svg>
+    <div>
+      <p style="font-weight:700;color:#FDE68A;font-size:.875rem;margin-bottom:.25rem;">
+        Your artist account is pending verification</p>
+      <p style="color:#94A3B8;font-size:.8125rem;">
+        You can upload tracks, but they will be reviewed by an admin before going live.
+        Verified artists get auto-published on clean fingerprint.
+      </p>
     </div>
-    {% endif %}
   </div>
   {% endif %}
 
-  <div class="card" x-data="{
-    lyricsDetecting: false,
-    lyricsDetected: false,
-    detectedLyrics: '',
-    audioFileName: '',
-    onAudioChange(e) {
-      const file = e.target.files[0];
-      this.audioFileName = file ? file.name : '';
-      this.lyricsDetected = false;
-      this.detectedLyrics = '';
-    },
-    async detectLyrics() {
-      const audioInput = document.getElementById('id_audio_file');
-      if (!audioInput.files[0]) {
-        alert('Please select an audio file first.');
-        return;
-      }
-      this.lyricsDetecting = true;
-      // Simulate processing delay — real detection runs server-side on upload
-      // This sends the file to a detection endpoint
-      const formData = new FormData();
-      formData.append('audio_file', audioInput.files[0]);
-      const csrfToken = document.cookie
-        .split(';').find(c => c.trim().startsWith('csrftoken='))?.split('=')[1];
-      try {
-        const resp = await fetch('/api/detect-lyrics/', {
-          method: 'POST',
-          headers: { 'X-CSRFToken': csrfToken },
-          body: formData
-        });
-        const data = await resp.json();
-        this.lyricsDetecting = false;
-        if (data.lyrics) {
-          this.detectedLyrics = data.lyrics;
-          this.lyricsDetected = true;
-        } else {
-          alert(data.message || 'No lyrics detected. This may be an instrumental track.');
-        }
-      } catch(err) {
-        this.lyricsDetecting = false;
-        alert('Detection failed. You can add lyrics manually below.');
-      }
-    },
-    acceptLyrics() {
-      document.getElementById('id_lyrics').value = this.detectedLyrics;
-      this.lyricsDetected = false;
-      this.detectedLyrics = '';
-    },
-    rejectLyrics() {
-      this.lyricsDetected = false;
-      this.detectedLyrics = '';
-    }
-  }">
-    <form method="POST" enctype="multipart/form-data" class="space-y-6">
-      {% csrf_token %}
+  <form method="POST" enctype="multipart/form-data" x-data="uploadForm()">
+    {% csrf_token %}
 
-      <!-- Audio file -->
-      <div>
-        <label class="block text-sm font-semibold text-white mb-2">
-          Audio File <span class="text-red-400">*</span>
-        </label>
-        <input type="file" name="audio_file" id="id_audio_file" required
-               accept="audio/mpeg,audio/flac,audio/wav,audio/*"
-               class="input-field"
-               @change="onAudioChange($event)"/>
-        <p class="text-muted text-xs mt-1">Accepted formats: MP3, FLAC, WAV (max 50MB)</p>
-        {% if form.audio_file.errors %}
-          <p class="text-red-400 text-xs mt-1">{{ form.audio_file.errors.0 }}</p>
-        {% endif %}
-      </div>
+    <div style="display:flex;flex-direction:column;gap:1.25rem;">
 
-      <!-- Title -->
-      <div>
-        <label class="block text-sm font-semibold text-white mb-2">
-          Title <span class="text-red-400">*</span>
-        </label>
-        {{ form.title }}
-        {% if form.title.errors %}
-          <p class="text-red-400 text-xs mt-1">{{ form.title.errors.0 }}</p>
-        {% endif %}
-      </div>
-
-      <!-- Cover image -->
-      <div>
-        <label class="block text-sm font-semibold text-white mb-2">Cover Image</label>
-        {{ form.cover_image }}
-        <p class="text-muted text-xs mt-1">Square image recommended (JPG, PNG)</p>
-      </div>
-
-      <!-- Genre — ALL genres from DB, grouped by color -->
-      <div>
-        <label class="block text-sm font-semibold text-white mb-2">Genre</label>
-        <select name="genre" id="id_genre" class="input-field">
-          <option value="">— Select a genre —</option>
-          {% for genre in all_genres %}
-          <option value="{{ genre.id }}"
-            {% if form.genre.value == genre.id|stringformat:"s" %}selected{% endif %}>
-            {{ genre.name }}
-          </option>
-          {% endfor %}
-        </select>
-        {% if form.genre.errors %}
-          <p class="text-red-400 text-xs mt-1">{{ form.genre.errors.0 }}</p>
-        {% endif %}
-
-        <!-- Genre color preview chips -->
-        <div class="flex flex-wrap gap-1.5 mt-2" id="genre-chips">
-          {% for genre in all_genres %}
-          <button type="button"
-                  onclick="document.getElementById('id_genre').value='{{ genre.id }}'; highlightGenre(this);"
-                  class="genre-chip text-xs px-2 py-0.5 rounded-full border border-white/10 text-white/60 hover:text-white transition-colors"
-                  style="background-color: {{ genre.color_hex }}20; border-color: {{ genre.color_hex }}40;"
-                  data-genre-id="{{ genre.id }}">
-            {{ genre.name }}
-          </button>
-          {% endfor %}
-        </div>
-      </div>
-
-      <!-- License -->
-      <div>
-        <label class="block text-sm font-semibold text-white mb-2">License</label>
-        {{ form.license_type }}
-        <p class="text-muted text-xs mt-1">
-          CC BY = others can remix with credit ·
-          CC BY-NC = non-commercial only ·
-          All Rights Reserved = full copyright
-        </p>
-      </div>
-
-      <!-- BPM + Preview start -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-semibold text-white mb-2">BPM (optional)</label>
-          {{ form.bpm }}
-        </div>
-        <div>
-          <label class="block text-sm font-semibold text-white mb-2">Preview Start (seconds)</label>
-          {{ form.preview_start }}
-        </div>
-      </div>
-
-      <!-- Lyrics with AI detection -->
-      <div>
-        <div class="flex items-center justify-between mb-2">
-          <label class="block text-sm font-semibold text-white">Lyrics (optional)</label>
-          <button type="button"
-                  @click="detectLyrics()"
-                  :disabled="lyricsDetecting"
-                  class="flex items-center gap-1.5 text-xs text-accent border border-accent/30
-                         hover:bg-accent/10 rounded-lg px-3 py-1.5 transition-colors
-                         disabled:opacity-50 disabled:cursor-not-allowed">
-            <svg class="w-3.5 h-3.5" :class="lyricsDetecting ? 'animate-spin' : ''"
-                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M5 3l14 9-14 9V3z"/>
-            </svg>
-            <span x-text="lyricsDetecting ? 'Detecting...' : '✦ Auto-detect lyrics'"></span>
-          </button>
-        </div>
-
-        <!-- Detected lyrics proposal box -->
-        <div x-show="lyricsDetected" x-transition
-             class="bg-accent/10 border border-accent/20 rounded-xl p-4 mb-3">
-          <div class="flex items-center justify-between mb-2">
-            <p class="text-accent text-sm font-semibold">✦ Lyrics detected — review before accepting</p>
-          </div>
-          <pre class="text-muted text-xs leading-relaxed whitespace-pre-wrap max-h-40 overflow-y-auto mb-3"
-               x-text="detectedLyrics"></pre>
-          <div class="flex gap-2">
-            <button type="button" @click="acceptLyrics()"
-                    class="btn-primary text-xs px-4 py-2">
-              ✓ Accept & Add to Form
-            </button>
-            <button type="button" @click="rejectLyrics()"
-                    class="btn-secondary text-xs px-4 py-2">
-              ✗ Discard
-            </button>
-          </div>
-        </div>
-
-        {{ form.lyrics }}
-        <p class="text-muted text-xs mt-1">
-          Click "Auto-detect lyrics" after selecting your audio file, or paste manually.
-        </p>
-      </div>
-
-      <!-- Checkboxes -->
-      <div class="flex flex-wrap gap-6">
-        <label class="flex items-center gap-3 cursor-pointer group">
-          {{ form.is_explicit }}
-          <span class="text-muted text-sm group-hover:text-white transition-colors">
-            This track contains explicit content
-          </span>
-        </label>
-        <label class="flex items-center gap-3 cursor-pointer group">
-          {{ form.is_published }}
-          <span class="text-muted text-sm group-hover:text-white transition-colors">
-            Publish immediately
-          </span>
-        </label>
-      </div>
-
-      <!-- Rights confirmation -->
-      <div class="bg-primary/10 border border-primary/20 rounded-xl p-4">
-        <label class="flex items-start gap-3 cursor-pointer">
-          <input type="checkbox" required
-                 class="mt-1 rounded border-white/20 bg-white/5 text-primary focus:ring-primary"/>
-          <span class="text-sm text-muted leading-relaxed">
-            <span class="text-white font-semibold">I confirm</span> that I own all rights
-            to this track and that uploading it does not violate any copyright. I agree to
-            NapsterLegal's Terms of Service.
-          </span>
-        </label>
-      </div>
-
-      <!-- Submit -->
-      <div class="flex items-center gap-4">
-        <button type="submit" class="btn-primary flex items-center gap-2 text-base px-8 py-4">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <!-- ── AUDIO FILE UPLOAD ── -->
+      <div style="background:rgba(13,20,32,.8);border:1px solid rgba(255,255,255,.06);
+                  border-radius:16px;padding:1.5rem;">
+        <h2 style="font-size:.9375rem;font-weight:700;color:#F0F4FF;margin-bottom:1rem;
+                   display:flex;align-items:center;gap:.5rem;">
+          <svg width="16" height="16" fill="none" stroke="#4F8EF7" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                  d="M9 19V6l12-3v13M9 19c0 1.1-1.34 2-3 2s-3-.9-3-2z"/>
           </svg>
-          Upload Track
-        </button>
-        <a href="/dashboard/" class="btn-secondary px-6 py-4">Cancel</a>
+          Audio File
+        </h2>
+
+        <!-- Drop zone -->
+        <label for="id_audio_file"
+               style="display:block;border:2px dashed rgba(79,142,247,.3);
+                      border-radius:14px;padding:2rem;text-align:center;
+                      cursor:pointer;transition:all .2s;position:relative;"
+               x-bind:style="audioSelected ?
+                 'border-color:rgba(52,211,153,.5);background:rgba(52,211,153,.04);' :
+                 'border-color:rgba(79,142,247,.3);'"
+               @dragover.prevent="$el.style.borderColor='rgba(79,142,247,.6)'"
+               @dragleave="$el.style.borderColor='rgba(79,142,247,.3)'"
+               @drop.prevent="handleFileDrop($event)">
+
+          <template x-if="!audioSelected">
+            <div>
+              <div style="width:52px;height:52px;border-radius:14px;margin:0 auto .875rem;
+                          background:rgba(79,142,247,.1);
+                          display:flex;align-items:center;justify-content:center;">
+                <svg width="26" height="26" fill="none" stroke="#4F8EF7" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                </svg>
+              </div>
+              <p style="color:#F0F4FF;font-weight:600;margin-bottom:.375rem;">
+                Drop your audio file here or
+                <span style="color:#4F8EF7;text-decoration:underline;">browse</span>
+              </p>
+              <p style="color:#4A5568;font-size:.8125rem;">MP3, WAV, FLAC, OGG — Max 200MB</p>
+            </div>
+          </template>
+
+          <template x-if="audioSelected">
+            <div>
+              <div style="width:52px;height:52px;border-radius:14px;margin:0 auto .875rem;
+                          background:rgba(52,211,153,.1);
+                          display:flex;align-items:center;justify-content:center;">
+                <svg width="26" height="26" fill="none" stroke="#34D399" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <p style="color:#34D399;font-weight:600;margin-bottom:.25rem;" x-text="audioName"></p>
+              <p style="color:#4A5568;font-size:.8125rem;" x-text="audioSize"></p>
+              <p style="color:#4F8EF7;font-size:.75rem;margin-top:.5rem;text-decoration:underline;cursor:pointer;">
+                Click to change file</p>
+            </div>
+          </template>
+
+          <!-- HIDDEN file input — styled via label above -->
+          <input type="file" id="id_audio_file" name="audio_file"
+                 accept=".mp3,.wav,.flac,.ogg,.m4a,.aac,audio/*"
+                 @change="handleFileChange($event)"
+                 style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;"/>
+        </label>
       </div>
-    </form>
-  </div>
+
+      <!-- ── BASIC INFO ── -->
+      <div style="background:rgba(13,20,32,.8);border:1px solid rgba(255,255,255,.06);
+                  border-radius:16px;padding:1.5rem;">
+        <h2 style="font-size:.9375rem;font-weight:700;color:#F0F4FF;margin-bottom:1rem;
+                   display:flex;align-items:center;gap:.5rem;">
+          <svg width="16" height="16" fill="none" stroke="#4F8EF7" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          Track Information
+        </h2>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+          <!-- Title -->
+          <div style="grid-column:span 2;">
+            <label style="display:block;font-size:.8125rem;font-weight:600;color:#94A3B8;margin-bottom:.375rem;">
+              Track Title *
+            </label>
+            <input type="text" name="title" required
+                   value="{{ post.title|default:'' }}"
+                   placeholder="Enter your track title"
+                   style="width:100%;background:rgba(255,255,255,.05);
+                          border:1px solid rgba(255,255,255,.1);border-radius:10px;
+                          padding:.625rem .875rem;color:#F0F4FF;font-size:.9rem;
+                          outline:none;transition:border-color .15s;font-family:inherit;"
+                   onfocus="this.style.borderColor='#4F8EF7'"
+                   onblur="this.style.borderColor='rgba(255,255,255,.1)'"/>
+          </div>
+
+          <!-- Genre -->
+          <div>
+            <label style="display:block;font-size:.8125rem;font-weight:600;color:#94A3B8;margin-bottom:.375rem;">
+              Genre *
+            </label>
+            <select name="genre" required
+                    style="width:100%;background:rgba(255,255,255,.05);
+                           border:1px solid rgba(255,255,255,.1);border-radius:10px;
+                           padding:.625rem .875rem;color:#F0F4FF;font-size:.875rem;
+                           outline:none;appearance:none;cursor:pointer;font-family:inherit;">
+              <option value="" style="background:#0D1420;">— Select Genre —</option>
+              {% for genre in genres %}
+              <option value="{{ genre.id }}"
+                      {% if post.genre == genre.id|stringformat:"s" %}selected{% endif %}
+                      style="background:#0D1420;">
+                {{ genre.name }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- BPM -->
+          <div>
+            <label style="display:block;font-size:.8125rem;font-weight:600;color:#94A3B8;margin-bottom:.375rem;">
+              BPM <span style="color:#4A5568;font-weight:400;">(optional)</span>
+            </label>
+            <input type="number" name="bpm" min="40" max="300"
+                   value="{{ post.bpm|default:'' }}"
+                   placeholder="e.g. 120"
+                   style="width:100%;background:rgba(255,255,255,.05);
+                          border:1px solid rgba(255,255,255,.1);border-radius:10px;
+                          padding:.625rem .875rem;color:#F0F4FF;font-size:.875rem;
+                          outline:none;transition:border-color .15s;font-family:inherit;"
+                   onfocus="this.style.borderColor='#4F8EF7'"
+                   onblur="this.style.borderColor='rgba(255,255,255,.1)'"/>
+          </div>
+        </div>
+
+        <!-- Cover image -->
+        <div style="margin-bottom:1rem;">
+          <label style="display:block;font-size:.8125rem;font-weight:600;color:#94A3B8;margin-bottom:.375rem;">
+            Cover Image <span style="color:#4A5568;font-weight:400;">(optional, recommended)</span>
+          </label>
+          <label for="id_cover_image"
+                 style="display:inline-flex;align-items:center;gap:.625rem;
+                        padding:.625rem 1.125rem;border-radius:10px;cursor:pointer;
+                        background:rgba(79,142,247,.08);border:1px solid rgba(79,142,247,.2);
+                        color:#93C5FD;font-size:.875rem;font-weight:600;transition:all .15s;"
+                 onmouseover="this.style.background='rgba(79,142,247,.15)'"
+                 onmouseout="this.style.background='rgba(79,142,247,.08)'">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            <span x-text="coverName || 'Browse Cover Image'"></span>
+            <input type="file" id="id_cover_image" name="cover_image"
+                   accept="image/*"
+                   @change="coverName = $event.target.files[0]?.name || ''"
+                   style="display:none;"/>
+          </label>
+          <p style="color:#4A5568;font-size:.75rem;margin-top:.375rem;">
+            JPG, PNG or WebP. Recommended: 1400×1400px square.
+          </p>
+        </div>
+
+        <!-- Tags -->
+        <div>
+          <label style="display:block;font-size:.8125rem;font-weight:600;color:#94A3B8;margin-bottom:.375rem;">
+            Tags <span style="color:#4A5568;font-weight:400;">(comma separated)</span>
+          </label>
+          <input type="text" name="tags"
+                 value="{{ post.tags|default:'' }}"
+                 placeholder="e.g. afrobeats, dancehall, trap"
+                 style="width:100%;background:rgba(255,255,255,.05);
+                        border:1px solid rgba(255,255,255,.1);border-radius:10px;
+                        padding:.625rem .875rem;color:#F0F4FF;font-size:.875rem;
+                        outline:none;font-family:inherit;"
+                 onfocus="this.style.borderColor='#4F8EF7'"
+                 onblur="this.style.borderColor='rgba(255,255,255,.1)'"/>
+        </div>
+      </div>
+
+      <!-- ── LYRICS ── -->
+      <div style="background:rgba(13,20,32,.8);border:1px solid rgba(255,255,255,.06);
+                  border-radius:16px;padding:1.5rem;">
+        <h2 style="font-size:.9375rem;font-weight:700;color:#F0F4FF;margin-bottom:.5rem;
+                   display:flex;align-items:center;gap:.5rem;">
+          <svg width="16" height="16" fill="none" stroke="#4F8EF7" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          Lyrics
+          <span style="font-size:.6875rem;background:rgba(45,212,191,.1);color:#99F6E4;
+                       border:1px solid rgba(45,212,191,.2);border-radius:999px;
+                       padding:.15rem .5rem;font-weight:600;">
+            Auto language detection
+          </span>
+        </h2>
+        <p style="color:#4A5568;font-size:.8125rem;margin-bottom:.875rem;">
+          Language is detected automatically (English, French, Spanish, Portuguese).
+          Lyrics help listeners find your track and improve recommendation accuracy.
+        </p>
+        <textarea name="lyrics" rows="8"
+                  placeholder="Paste your lyrics here (optional)..."
+                  style="width:100%;background:rgba(255,255,255,.05);
+                         border:1px solid rgba(255,255,255,.1);border-radius:10px;
+                         padding:.75rem .875rem;color:#F0F4FF;font-size:.875rem;
+                         outline:none;resize:vertical;line-height:1.7;
+                         font-family:'DM Mono',monospace;
+                         transition:border-color .15s;"
+                  onfocus="this.style.borderColor='#4F8EF7'"
+                  onblur="this.style.borderColor='rgba(255,255,255,.1)'"
+                  >{{ post.lyrics|default:'' }}</textarea>
+      </div>
+
+      <!-- ── RIGHTS & LICENSE ── -->
+      <div style="background:rgba(13,20,32,.8);border:1px solid rgba(255,255,255,.06);
+                  border-radius:16px;padding:1.5rem;" x-data="{ license: 'all_rights' }">
+        <h2 style="font-size:.9375rem;font-weight:700;color:#F0F4FF;margin-bottom:.5rem;
+                   display:flex;align-items:center;gap:.5rem;">
+          <svg width="16" height="16" fill="none" stroke="#F59E0B" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>
+          Rights & License
+        </h2>
+        <p style="color:#4A5568;font-size:.8125rem;margin-bottom:1rem;">
+          Choose how others can use your music. You retain full authorship regardless of license.
+        </p>
+
+        <div style="display:flex;flex-direction:column;gap:.625rem;">
+          {% for key, info in license_info.items %}
+          <label style="display:flex;align-items:flex-start;gap:.875rem;cursor:pointer;
+                        padding:.75rem;border-radius:10px;border:1px solid rgba(255,255,255,.06);
+                        transition:all .15s;background:rgba(255,255,255,.02);"
+                 onmouseover="this.style.borderColor='rgba(79,142,247,.25)';this.style.background='rgba(79,142,247,.04)'"
+                 onmouseout="this.style.borderColor='rgba(255,255,255,.06)';this.style.background='rgba(255,255,255,.02)'">
+            <input type="radio" name="license_type" value="{{ key }}"
+                   {% if key == 'all_rights' %}checked{% endif %}
+                   style="margin-top:3px;accent-color:#4F8EF7;flex-shrink:0;"/>
+            <div>
+              <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.2rem;">
+                <span style="font-size:.875rem;font-weight:700;color:#F0F4FF;">
+                  {{ info.name }}</span>
+                <span style="font-size:.625rem;font-weight:700;border-radius:999px;
+                             padding:.1rem .4rem;
+                             background:{{ info.color }}22;color:{{ info.color }};
+                             border:1px solid {{ info.color }}44;">
+                  {{ info.short }}</span>
+              </div>
+              <p style="font-size:.8125rem;color:#4A5568;line-height:1.4;">{{ info.desc }}</p>
+            </div>
+          </label>
+          {% endfor %}
+        </div>
+
+        <!-- Rights declaration -->
+        <div style="margin-top:1rem;padding:.875rem;background:rgba(245,158,11,.06);
+                    border:1px solid rgba(245,158,11,.15);border-radius:10px;">
+          <label style="display:flex;align-items:flex-start;gap:.625rem;cursor:pointer;">
+            <input type="checkbox" name="rights_declared" required
+                   style="margin-top:2px;accent-color:#F59E0B;flex-shrink:0;"/>
+            <span style="font-size:.8125rem;color:#FDE68A;line-height:1.5;">
+              I confirm this is my original work or I have the rights to distribute it.
+              I understand that uploading copyrighted content belonging to another artist
+              may result in permanent account suspension and legal action.
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <!-- ── CONTENT FLAGS ── -->
+      <div style="background:rgba(13,20,32,.8);border:1px solid rgba(255,255,255,.06);
+                  border-radius:16px;padding:1.5rem;">
+        <h2 style="font-size:.9375rem;font-weight:700;color:#F0F4FF;margin-bottom:1rem;">
+          Content Flags
+        </h2>
+        <label style="display:flex;align-items:center;gap:.75rem;cursor:pointer;">
+          <input type="checkbox" name="is_explicit"
+                 {% if post.is_explicit %}checked{% endif %}
+                 style="width:16px;height:16px;accent-color:#EF4444;"/>
+          <div>
+            <p style="font-size:.875rem;font-weight:600;color:#F0F4FF;margin-bottom:.125rem;">
+              Explicit Content
+              <span style="display:inline-block;background:rgba(239,68,68,.12);color:#FCA5A5;
+                           border:1px solid rgba(239,68,68,.2);border-radius:4px;
+                           padding:0 .375rem;font-size:.625rem;font-weight:700;margin-left:.25rem;">E</span>
+            </p>
+            <p style="font-size:.75rem;color:#4A5568;">
+              Mark if the track contains profanity, adult themes, or explicit content.
+            </p>
+          </div>
+        </label>
+      </div>
+
+      <!-- ── SUBMIT ── -->
+      <button type="submit"
+              :disabled="!audioSelected"
+              style="width:100%;padding:.9375rem;border-radius:13px;border:none;
+                     cursor:pointer;font-size:1rem;font-weight:700;color:white;
+                     background:linear-gradient(135deg,#4F8EF7,#7C3AED);
+                     box-shadow:0 4px 14px rgba(79,142,247,.35);
+                     transition:all .2s;font-family:inherit;"
+              x-bind:style="audioSelected ?
+                'opacity:1;cursor:pointer;' :
+                'opacity:.45;cursor:not-allowed;'"
+              onmouseover="if(!this.disabled)this.style.transform='translateY(-1px)'"
+              onmouseout="this.style.transform='translateY(0)'">
+        <span x-show="!audioSelected">Select an audio file to continue</span>
+        <span x-show="audioSelected">
+          Upload & Fingerprint Check
+          <span style="font-size:.8125rem;opacity:.8;margin-left:.5rem;">(automatically published if clean)</span>
+        </span>
+      </button>
+
+      <!-- Fingerprint explanation -->
+      <div style="background:rgba(79,142,247,.05);border:1px solid rgba(79,142,247,.12);
+                  border-radius:12px;padding:.875rem 1rem;">
+        <div style="display:flex;gap:.75rem;align-items:flex-start;">
+          <svg width="18" height="18" fill="none" stroke="#4F8EF7" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:2px;">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"/>
+          </svg>
+          <div>
+            <p style="font-size:.8125rem;font-weight:700;color:#93C5FD;margin-bottom:.25rem;">
+              How AcoustID Fingerprinting Works
+            </p>
+            <p style="font-size:.75rem;color:#4A5568;line-height:1.5;">
+              We generate an acoustic fingerprint of your audio and compare it against
+              millions of recordings. If your track matches an existing song by a
+              <strong style="color:#94A3B8;">different artist</strong> with
+              &gt;70% confidence, it is held for admin review.
+              This protects you and other artists from copyright infringement.
+              Original tracks are published immediately.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
 </div>
 
 <script>
-// Highlight the selected genre chip
-function highlightGenre(btn) {
-  document.querySelectorAll('.genre-chip').forEach(c => {
-    c.style.opacity = '0.5';
-    c.style.fontWeight = 'normal';
-  });
-  btn.style.opacity = '1';
-  btn.style.fontWeight = 'bold';
-  btn.style.boxShadow = `0 0 0 2px ${btn.style.backgroundColor.replace('20)', '80)')}`;
-}
+function uploadForm() {
+  return {
+    audioSelected: false,
+    audioName:     '',
+    audioSize:     '',
+    coverName:     '',
 
-// On page load, highlight the pre-selected genre if editing
-document.addEventListener('DOMContentLoaded', () => {
-  const sel = document.getElementById('id_genre');
-  if (sel && sel.value) {
-    const chip = document.querySelector(`.genre-chip[data-genre-id="${sel.value}"]`);
-    if (chip) highlightGenre(chip);
-  }
-});
+    handleFileChange(event) {
+      const file = event.target.files[0];
+      if (!file) { this.audioSelected = false; return; }
+      this.audioSelected = true;
+      this.audioName     = file.name;
+      const mb = (file.size / 1024 / 1024).toFixed(1);
+      this.audioSize     = `${mb} MB`;
+    },
+
+    handleFileDrop(event) {
+      const file = event.dataTransfer.files[0];
+      if (!file) return;
+      // Assign to the hidden input
+      const input = document.getElementById('id_audio_file');
+      const dt    = new DataTransfer();
+      dt.items.add(file);
+      input.files = dt.files;
+      this.audioSelected = true;
+      this.audioName     = file.name;
+      this.audioSize     = `${(file.size/1024/1024).toFixed(1)} MB`;
+    },
+  };
+}
 </script>
 {% endblock %}

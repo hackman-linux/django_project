@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'apps.search',
     'apps.analytics',
     'apps.payments',
+    'apps.admin_panel',
     'apps.api',
 ]
 
@@ -62,6 +63,9 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
+                'django.template.context_processors.i18n',
+                'napster.context_processors.language_options',
+                'napster.context_processors.site_name',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
@@ -165,3 +169,23 @@ LOGOUT_REDIRECT_URL = '/'
 # ── GeoIP2 for IP-to-country lookup ──────────────────────────────────────────
 import os
 GEOIP_PATH = os.path.join(BASE_DIR, 'geoip')
+
+# ── EMAIL CONFIGURATION ──────────────────────────────────────────────────────
+# For development: print emails to console
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# For production: switch to SMTP
+# EMAIL_BACKEND    = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST       = 'smtp.gmail.com'          # or smtp.mailtrap.io for testing
+# EMAIL_PORT       = 587
+# EMAIL_USE_TLS    = True
+# EMAIL_HOST_USER  = config('EMAIL_HOST_USER', default='')
+# EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+
+# These apply in both dev and production
+DEFAULT_FROM_EMAIL  = 'NapsterLegal <noreply@napsterlegal.com>'
+SERVER_EMAIL        = 'admin@napsterlegal.com'
+SUPPORT_EMAIL       = 'support@napsterlegal.com'
+
+# Email subjects prefix
+EMAIL_SUBJECT_PREFIX = '[NapsterLegal] '

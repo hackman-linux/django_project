@@ -111,3 +111,37 @@ class Subscription(models.Model):
 
     class Meta:
         ordering = ['-started_at']
+
+
+class ContactMessage(models.Model):
+    """
+    Messages sent by users to the admin via the Contact page.
+    Visible in the admin control panel at /control/messages/.
+    """
+    OPEN     = 'open'
+    REPLIED  = 'replied'
+    CLOSED   = 'closed'
+
+    STATUS_CHOICES = [
+        (OPEN,    'Open'),
+        (REPLIED, 'Replied'),
+        (CLOSED,  'Closed'),
+    ]
+
+    sender     = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE,
+        related_name='sent_messages', null=True, blank=True)
+    name       = models.CharField(max_length=100)
+    email      = models.EmailField()
+    subject    = models.CharField(max_length=200)
+    body       = models.TextField()
+    status     = models.CharField(max_length=10, choices=STATUS_CHOICES, default=OPEN)
+    created_at = models.DateTimeField(auto_now_add=True)
+    replied_at = models.DateTimeField(null=True, blank=True)
+    reply_body = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.subject} — {self.name} ({self.status})"
+
+    class Meta:
+        ordering = ['-created_at']

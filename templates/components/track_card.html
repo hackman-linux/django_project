@@ -1,110 +1,189 @@
 {% load static %}
-<div class="card group cursor-pointer relative"
-     onclick="playTrack('{{ track.id }}', '{{ track.title|escapejs }}', '{{ track.artist|escapejs }}', '{% if track.cover_image %}{{ track.cover_image.url }}{% endif %}', '/api/stream/{{ track.id }}/')">
+<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;
+            overflow:hidden;cursor:pointer;transition:all 0.2s;position:relative;"
+     onclick="playTrack('{{ track.id }}', '{{ track.title|escapejs }}', '{{ track.artist|escapejs }}', '{% if track.cover_image %}{{ track.cover_image.url }}{% endif %}', '/api/stream/{{ track.id }}/')"
+     onmouseover="this.style.borderColor='rgba(79,142,247,0.35)';this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 30px rgba(0,0,0,0.4)'"
+     onmouseout="this.style.borderColor='var(--border)';this.style.transform='translateY(0)';this.style.boxShadow='none'">
 
   <!-- Cover image -->
-  <div class="relative aspect-square mb-4 rounded-xl overflow-hidden bg-surface">
+  <div style="position:relative;aspect-ratio:1;overflow:hidden;background:var(--bg-elevated);">
     {% if track.cover_image %}
       <img src="{{ track.cover_image.url }}" alt="{{ track.title }}"
-           class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+           style="width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.4s;"
+           onmouseover="this.style.transform='scale(1.05)'"
+           onmouseout="this.style.transform='scale(1)'"/>
     {% else %}
-      <div class="w-full h-full bg-gradient-to-br from-primary/30 to-accent/20 flex items-center justify-center">
-        <svg class="w-10 h-10 text-muted" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M9 18V5l12-2v13M9 18c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/>
+      <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+                  background:linear-gradient(135deg,rgba(79,142,247,0.2),rgba(45,212,191,0.1));">
+        <svg width="28" height="28" fill="rgba(148,163,184,0.5)" viewBox="0 0 24 24">
+          <path d="M9 18V5l12-2v13M9 18c0 1.1-1.34 2-3 2s-3-.9-3-2z"/>
         </svg>
       </div>
     {% endif %}
 
     <!-- Play overlay -->
-    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-      <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-xl transform scale-90 group-hover:scale-100 transition-transform">
-        <svg class="w-6 h-6 text-dark ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+    <div style="position:absolute;inset:0;background:rgba(8,12,20,0.5);
+                display:flex;align-items:center;justify-content:center;
+                opacity:0;transition:opacity 0.2s;"
+         onmouseover="this.style.opacity='1'"
+         onmouseout="this.style.opacity='0'">
+      <div style="width:36px;height:36px;border-radius:50%;
+                  background:linear-gradient(135deg,#4F8EF7,#7C3AED);
+                  display:flex;align-items:center;justify-content:center;
+                  box-shadow:0 4px 14px rgba(79,142,247,0.5);">
+        <svg width="16" height="16" fill="white" viewBox="0 0 24 24">
           <path d="M8 5v14l11-7z"/>
         </svg>
       </div>
     </div>
 
     <!-- Badges -->
-    <div class="absolute top-2 right-2 flex flex-col gap-1 items-end">
+    <div style="position:absolute;top:6px;right:6px;display:flex;flex-direction:column;gap:3px;align-items:flex-end;">
       {% if track.is_explicit %}
-        <span class="badge bg-red-500/80 text-white text-xs">E</span>
+        <span style="background:rgba(239,68,68,0.85);color:white;border-radius:999px;
+                     padding:0.1rem 0.4rem;font-size:0.625rem;font-weight:700;">E</span>
       {% endif %}
       {% if track.artist.verification_status != 'verified' %}
-        <span class="badge bg-gray-500/80 text-white text-xs">Unverified</span>
+        <span style="background:rgba(100,116,139,0.85);color:white;border-radius:999px;
+                     padding:0.1rem 0.4rem;font-size:0.625rem;font-weight:600;">Unverified</span>
       {% endif %}
     </div>
   </div>
 
-  <!-- Track info -->
-  <div class="space-y-1">
-    <!-- Track title → track detail page -->
+  <!-- Info -->
+  <div style="padding:0.625rem 0.75rem;">
+    <!-- Title -->
     <a href="/track/{{ track.id }}/"
-       class="block text-white font-semibold text-sm truncate hover:text-primary transition-colors"
-       onclick="event.stopPropagation()">
+       onclick="event.stopPropagation()"
+       style="display:block;font-size:0.8125rem;font-weight:600;color:var(--text-primary);
+              text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+              margin-bottom:0.2rem;"
+       onmouseover="this.style.color='var(--aurora-blue)'"
+       onmouseout="this.style.color='var(--text-primary)'">
       {{ track.title }}
     </a>
 
-    <!-- Artist name → public artist page + inline follow button -->
-    <div class="flex items-center gap-2" onclick="event.stopPropagation()">
+    <!-- Artist + follow -->
+    <div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.4rem;"
+         onclick="event.stopPropagation()">
       <a href="/artist/{{ track.artist.id }}/"
-         class="text-muted text-xs truncate hover:text-accent transition-colors flex-1 min-w-0">
+         style="font-size:0.75rem;color:var(--text-muted);text-decoration:none;
+                flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
+         onmouseover="this.style.color='var(--aurora-teal)'"
+         onmouseout="this.style.color='var(--text-muted)'">
         {{ track.artist }}
       </a>
       {% if user.is_authenticated and user != track.artist.user %}
-      <button
-        onclick="toggleFollowCard(this, '{{ track.artist.id }}')"
-        class="text-xs text-primary border border-primary/40 hover:bg-primary/10
-               rounded-full px-2 py-0.5 transition-colors flex-shrink-0 follow-btn-{{ track.artist.id }}">
+      <button onclick="toggleFollowCard(this,'{{ track.artist.id }}')"
+              class="follow-btn-{{ track.artist.id }}"
+              style="font-size:0.625rem;font-weight:600;color:var(--aurora-blue);
+                     border:1px solid rgba(79,142,247,0.3);border-radius:999px;
+                     padding:0.1rem 0.4rem;background:transparent;cursor:pointer;
+                     flex-shrink:0;transition:all 0.15s;"
+              onmouseover="this.style.background='rgba(79,142,247,0.1)'"
+              onmouseout="this.style.background='transparent'">
         Follow
       </button>
       {% endif %}
     </div>
 
-    <div class="flex items-center justify-between pt-1">
-      <div class="flex items-center gap-3">
-        <span class="flex items-center gap-1 text-muted text-xs">
-          <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+    <!-- Stats row -->
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:0.625rem;">
+        <span style="display:flex;align-items:center;gap:3px;font-size:0.6875rem;color:var(--text-muted);">
+          <svg width="11" height="11" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5z"/>
           </svg>
           {{ track.play_count }}
         </span>
-        <span class="flex items-center gap-1 text-muted text-xs">
-          <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+        <span style="display:flex;align-items:center;gap:3px;font-size:0.6875rem;color:var(--text-muted);">
+          <svg width="11" height="11" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
           </svg>
           {{ track.like_count }}
         </span>
       </div>
-      <span class="text-muted text-xs">{{ track.duration_display }}</span>
+      <span style="font-size:0.6875rem;color:var(--text-muted);font-family:'DM Mono',monospace;">
+        {{ track.duration_display }}
+      </span>
     </div>
+
+    <!-- Offline download button -->
+    {% if user.is_authenticated %}
+    <div style="margin-top:0.375rem;" onclick="event.stopPropagation()">
+      {% if user.is_premium %}
+      <a href="/api/download/{{ track.id }}/"
+         style="display:flex;align-items:center;justify-content:center;gap:0.375rem;
+                width:100%;font-size:0.6875rem;color:#2DD4BF;
+                background:rgba(45,212,191,0.06);border:1px solid rgba(45,212,191,0.15);
+                border-radius:8px;padding:0.3rem 0.5rem;text-decoration:none;
+                transition:all 0.15s;"
+         onmouseover="this.style.background='rgba(45,212,191,0.12)'"
+         onmouseout="this.style.background='rgba(45,212,191,0.06)'"
+         title="Download for offline — {{ user.subscription_plan|default:'free'|upper }}">
+        <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        </svg>
+        Download
+      </a>
+      {% else %}
+      <a href="/pricing/"
+         style="display:flex;align-items:center;justify-content:center;gap:0.375rem;
+                width:100%;font-size:0.6875rem;color:#4A5568;
+                background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);
+                border-radius:8px;padding:0.3rem 0.5rem;text-decoration:none;"
+         title="Upgrade to download for offline">
+        <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+        </svg>
+        Premium only
+      </a>
+      {% endif %}
+    </div>
+    {% endif %}
 
     <!-- Add to playlist -->
     {% if user.is_authenticated %}
-    <div x-data="{ open: false }" class="pt-1" onclick="event.stopPropagation()">
+    <div x-data="{ open: false }" style="margin-top:0.4rem;" onclick="event.stopPropagation()">
       <button @click="open = !open"
-              class="w-full text-xs text-muted hover:text-white bg-white/5 hover:bg-white/10
-                     rounded-lg py-1.5 transition-colors opacity-0 group-hover:opacity-100">
+              style="width:100%;font-size:0.6875rem;color:var(--text-muted);
+                     background:rgba(255,255,255,0.04);border:1px solid var(--border);
+                     border-radius:8px;padding:0.3rem 0.5rem;cursor:pointer;
+                     transition:all 0.15s;"
+              onmouseover="this.style.background='rgba(255,255,255,0.08)';this.style.color='var(--text-primary)'"
+              onmouseout="this.style.background='rgba(255,255,255,0.04)';this.style.color='var(--text-muted)'">
         + Add to Playlist
       </button>
-      <div x-show="open" @click.outside="open = false"
-           x-transition
-           class="absolute bottom-12 left-0 right-0 bg-surface border border-white/10 rounded-xl p-3 shadow-xl z-20">
-        {% if user.playlists.all %}
-          {% for pl in user.playlists.all %}
-          <form method="POST" action="/playlists/add/{{ track.id }}/">
-            {% csrf_token %}
-            <input type="hidden" name="playlist_id" value="{{ pl.id }}"/>
-            <button type="submit"
-                    class="w-full text-left text-sm text-muted hover:text-white py-2 px-2
-                           hover:bg-white/5 rounded-lg transition-colors truncate">
-              {{ pl.name }}
-            </button>
-          </form>
-          {% endfor %}
-        {% else %}
-          <p class="text-muted text-xs text-center py-2">No playlists yet.</p>
-        {% endif %}
-        <a href="/playlists/" class="block text-xs text-primary text-center mt-2 hover:underline">
+      <div x-show="open" @click.outside="open = false" x-transition
+           style="position:absolute;bottom:100%;left:0;right:0;z-index:30;
+                  background:var(--bg-elevated);border:1px solid var(--border-strong);
+                  border-radius:12px;padding:0.5rem;box-shadow:0 8px 24px rgba(0,0,0,0.4);">
+        {% for pl in user.playlists.all %}
+        <form method="POST" action="/playlists/add/{{ track.id }}/">
+          {% csrf_token %}
+          <input type="hidden" name="playlist_id" value="{{ pl.id }}"/>
+          <button type="submit"
+                  style="width:100%;text-align:left;font-size:0.8125rem;color:var(--text-secondary);
+                         background:transparent;border:none;padding:0.4rem 0.625rem;
+                         border-radius:8px;cursor:pointer;transition:all 0.15s;
+                         white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
+                  onmouseover="this.style.background='var(--bg-hover)';this.style.color='var(--text-primary)'"
+                  onmouseout="this.style.background='transparent';this.style.color='var(--text-secondary)'">
+            {{ pl.name }}
+          </button>
+        </form>
+        {% empty %}
+        <p style="font-size:0.75rem;color:var(--text-muted);text-align:center;padding:0.5rem;">
+          No playlists yet.
+        </p>
+        {% endfor %}
+        <a href="/playlists/"
+           style="display:block;font-size:0.75rem;color:var(--aurora-blue);
+                  text-align:center;padding:0.375rem;text-decoration:none;margin-top:0.25rem;"
+           onmouseover="this.style.textDecoration='underline'"
+           onmouseout="this.style.textDecoration='none'">
           Manage Playlists
         </a>
       </div>
@@ -114,27 +193,24 @@
 </div>
 
 <script>
-// Follow toggle from track card — works without page reload
 function toggleFollowCard(btn, artistId) {
-  const csrfToken = document.cookie
-    .split(';').find(c => c.trim().startsWith('csrftoken='))?.split('=')[1];
-
+  const csrf = document.cookie.split(';')
+    .find(c => c.trim().startsWith('csrftoken='))?.split('=')[1];
   fetch(`/social/follow/${artistId}/`, {
     method: 'POST',
-    headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/json' },
+    headers: { 'X-CSRFToken': csrf, 'Content-Type': 'application/json' }
   })
   .then(r => r.json())
   .then(data => {
-    // Update ALL follow buttons for this artist on the page
     document.querySelectorAll(`.follow-btn-${artistId}`).forEach(b => {
       if (data.followed) {
         b.textContent = 'Following';
-        b.classList.add('text-accent', 'border-accent/40');
-        b.classList.remove('text-primary', 'border-primary/40');
+        b.style.color = 'var(--aurora-teal)';
+        b.style.borderColor = 'rgba(45,212,191,0.3)';
       } else {
         b.textContent = 'Follow';
-        b.classList.remove('text-accent', 'border-accent/40');
-        b.classList.add('text-primary', 'border-primary/40');
+        b.style.color = 'var(--aurora-blue)';
+        b.style.borderColor = 'rgba(79,142,247,0.3)';
       }
     });
   });

@@ -118,3 +118,56 @@ def cancel_subscription(request):
                 f'{sub.expires_at.strftime("%B %d, %Y")}.')
         return redirect('my_subscription')
     return redirect('my_subscription')
+
+def pricing(request):
+    """Pricing page with all 5 plans and correct prices."""
+    free_features = [
+        'Stream all tracks (128kbps)',
+        'Create playlists',
+        'Follow artists',
+        'Search & discover',
+        'Ad-supported',
+    ]
+    premium_features = [
+        'Everything in Free',
+        'Ad-free streaming (320kbps MP3)',
+        'Offline downloads (30 days)',
+        'Supports artists directly',
+        'Priority support',
+    ]
+    pro_features = [
+        'Everything in Premium',
+        'FLAC lossless streaming',
+        'Offline downloads (30 days)',
+        'Early access (48h before release)',
+        'Custom equalizer per genre',
+        'Private listening stats',
+    ]
+    artist_pro_features = [
+        'Unlimited track uploads',
+        'Priority fingerprint review',
+        'Detailed analytics dashboard',
+        'Artist announcements',
+        'Custom artist page',
+        'Earn from stream 1',
+        'Monthly royalty statement',
+    ]
+    label_features = [
+        'Manage up to 10 artist profiles',
+        'Bulk upload (500 tracks/month)',
+        'Advanced royalty CSV export',
+        '2-hour fingerprint review',
+        'Featured on genre pages',
+        'Custom page branding',
+        'Dedicated account manager',
+        'Earn from stream 1',
+    ]
+    return render(request, 'payments/pricing.html', {
+        'free_features':     free_features,
+        'premium_features':  premium_features,
+        'pro_features':      pro_features,
+        'artist_pro_features': artist_pro_features,
+        'label_features':    label_features,
+    })
+
+

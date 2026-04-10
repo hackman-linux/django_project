@@ -1,0 +1,30 @@
+{% extends 'control/base.html' %}
+{% block title %}My Space{% endblock %}
+{% block page_title %}My Space — Listen & Discover{% endblock %}
+
+{% block content %}
+{% include 'components/player.html' %}
+
+{% if liked %}
+<div style="margin-bottom:2rem;">
+  <h2 style="font-size:.9375rem;font-weight:700;color:#F0F4FF;margin-bottom:1rem;">My Liked Tracks</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;">
+    {% for like in liked %}
+      {% include 'components/track_card.html' with track=like.track %}
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<div>
+  <h2 style="font-size:.9375rem;font-weight:700;color:#F0F4FF;margin-bottom:1rem;">New Releases</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;">
+    {% for track in new_tracks %}
+      {% include 'components/track_card.html' with track=track %}
+    {% endfor %}
+  </div>
+</div>
+
+{% load static %}
+<script src="{% static 'js/player.js' %}"></script>
+{% endblock %}
