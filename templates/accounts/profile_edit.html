@@ -1,114 +1,238 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Edit Profile — NapsterLegal{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto px-4 py-12 pt-24">
+<div style="max-width:640px;margin:0 auto;padding:2rem 1.25rem;padding-top:5rem;">
 
-  <div class="flex items-center gap-4 mb-8">
-    <a href="/profile/" class="text-muted hover:text-white transition-colors">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-      </svg>
-    </a>
-    <h1 class="text-2xl font-black text-white">Edit Profile</h1>
+  <div style="margin-bottom:1.75rem;">
+    <h1 style="font-family:'Sora',sans-serif;font-size:1.5rem;font-weight:800;
+               color:#F0F4FF;margin-bottom:.375rem;">Edit Profile</h1>
+    <p style="color:#94A3B8;font-size:.9rem;">Update your information and profile picture.</p>
   </div>
 
-  <form method="POST" enctype="multipart/form-data" class="space-y-6">
+  {% if messages %}
+  {% for msg in messages %}
+  <div style="padding:.75rem 1rem;border-radius:10px;margin-bottom:1rem;font-size:.875rem;
+              {% if msg.tags == 'success' %}background:rgba(52,211,153,.1);color:#6EE7B7;border:1px solid rgba(52,211,153,.2);
+              {% elif msg.tags == 'error' %}background:rgba(239,68,68,.1);color:#FCA5A5;border:1px solid rgba(239,68,68,.2);
+              {% else %}background:rgba(79,142,247,.1);color:#93C5FD;border:1px solid rgba(79,142,247,.2);{% endif %}">
+    {{ msg }}
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  <form method="POST" enctype="multipart/form-data"
+        style="display:flex;flex-direction:column;gap:1.25rem;">
     {% csrf_token %}
 
-    <!-- Avatar preview -->
-    <div class="card flex items-center gap-4">
-      <div class="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center text-white text-2xl font-black flex-shrink-0">
-        {% if request.user.avatar %}
-          <img src="{{ request.user.avatar.url }}" class="w-full h-full object-cover rounded-xl"/>
-        {% else %}
-          {{ request.user.username|first|upper }}
-        {% endif %}
-      </div>
-      <div class="flex-1">
-        <label class="block text-sm font-semibold text-white mb-1">Profile Picture</label>
-        {{ form.avatar }}
+    <!-- ── PROFILE PICTURE ── -->
+    <div style="background:rgba(13,20,32,.8);border:1px solid rgba(255,255,255,.06);
+                border-radius:16px;padding:1.5rem;">
+      <h2 style="font-size:.9375rem;font-weight:700;color:#F0F4FF;margin-bottom:1rem;">
+        Profile Picture</h2>
+      <div style="display:flex;align-items:center;gap:1.25rem;" x-data="{ preview: '' }">
+        <!-- Current / preview avatar -->
+        <div style="width:80px;height:80px;border-radius:50%;overflow:hidden;flex-shrink:0;
+                    background:linear-gradient(135deg,#4F8EF7,#7C3AED);
+                    display:flex;align-items:center;justify-content:center;
+                    font-size:1.75rem;font-weight:800;color:white;position:relative;">
+          <template x-if="preview">
+            <img :src="preview" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;"/>
+          </template>
+          <template x-if="!preview">
+            {% if user.avatar %}
+            <img src="{{ user.avatar.url }}"
+                 style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;"/>
+            {% else %}
+            <span>{{ user.username|first|upper }}</span>
+            {% endif %}
+          </template>
+        </div>
+        <div>
+          <label for="id_avatar"
+                 style="display:inline-flex;align-items:center;gap:.5rem;
+                        padding:.5rem 1rem;border-radius:9px;cursor:pointer;
+                        background:rgba(79,142,247,.08);border:1px solid rgba(79,142,247,.2);
+                        color:#93C5FD;font-size:.875rem;font-weight:600;transition:all .15s;"
+                 onmouseover="this.style.background='rgba(79,142,247,.15)'"
+                 onmouseout="this.style.background='rgba(79,142,247,.08)'">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            Choose Photo
+          </label>
+          <input type="file" id="id_avatar" name="avatar" accept="image/*"
+                 style="display:none;"
+                 @change="
+                   let f=$event.target.files[0];
+                   if(f){ let r=new FileReader(); r.onload=e=>preview=e.target.result; r.readAsDataURL(f); }"/>
+          <p style="color:#4A5568;font-size:.75rem;margin-top:.375rem;">
+            JPG, PNG or WebP. Recommended: 400×400px square.</p>
+        </div>
       </div>
     </div>
 
-    <!-- Basic info -->
-    <div class="card space-y-4">
-      <h2 class="text-white font-bold">Basic Information</h2>
+    <!-- ── BASIC INFO ── -->
+    <div style="background:rgba(13,20,32,.8);border:1px solid rgba(255,255,255,.06);
+                border-radius:16px;padding:1.5rem;">
+      <h2 style="font-size:.9375rem;font-weight:700;color:#F0F4FF;margin-bottom:1rem;">
+        Basic Information</h2>
+      <div style="display:flex;flex-direction:column;gap:.875rem;">
 
-      <div>
-        <label class="block text-sm font-medium text-muted mb-1">Username</label>
-        {{ form.username }}
-        {% if form.username.errors %}
-          <p class="text-red-400 text-xs mt-1">{{ form.username.errors.0 }}</p>
-        {% endif %}
-      </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.875rem;">
+          <div>
+            <label style="display:block;font-size:.8125rem;font-weight:600;color:#94A3B8;margin-bottom:.375rem;">
+              First Name</label>
+            <input type="text" name="first_name" value="{{ user.first_name }}"
+                   placeholder="Your first name"
+                   style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+                          border-radius:10px;padding:.625rem .875rem;color:#F0F4FF;font-size:.9rem;
+                          outline:none;font-family:inherit;box-sizing:border-box;"
+                   onfocus="this.style.borderColor='#4F8EF7'"
+                   onblur="this.style.borderColor='rgba(255,255,255,.1)'"/>
+          </div>
+          <div>
+            <label style="display:block;font-size:.8125rem;font-weight:600;color:#94A3B8;margin-bottom:.375rem;">
+              Last Name</label>
+            <input type="text" name="last_name" value="{{ user.last_name }}"
+                   placeholder="Your last name"
+                   style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+                          border-radius:10px;padding:.625rem .875rem;color:#F0F4FF;font-size:.9rem;
+                          outline:none;font-family:inherit;box-sizing:border-box;"
+                   onfocus="this.style.borderColor='#4F8EF7'"
+                   onblur="this.style.borderColor='rgba(255,255,255,.1)'"/>
+          </div>
+        </div>
 
-      <div>
-        <label class="block text-sm font-medium text-muted mb-1">Email</label>
-        {{ form.email }}
-        {% if form.email.errors %}
-          <p class="text-red-400 text-xs mt-1">{{ form.email.errors.0 }}</p>
-        {% endif %}
-      </div>
+        <div>
+          <label style="display:block;font-size:.8125rem;font-weight:600;color:#94A3B8;margin-bottom:.375rem;">
+            Email</label>
+          <input type="email" name="email" value="{{ user.email }}"
+                 placeholder="your@email.com"
+                 style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+                        border-radius:10px;padding:.625rem .875rem;color:#F0F4FF;font-size:.9rem;
+                        outline:none;font-family:inherit;box-sizing:border-box;"
+                 onfocus="this.style.borderColor='#4F8EF7'"
+                 onblur="this.style.borderColor='rgba(255,255,255,.1)'"/>
+        </div>
 
-      <div>
-        <label class="block text-sm font-medium text-muted mb-1">Bio</label>
-        {{ form.bio }}
+        <div>
+          <label style="display:block;font-size:.8125rem;font-weight:600;color:#94A3B8;margin-bottom:.375rem;">
+            Bio <span style="color:#4A5568;font-weight:400;">(optional)</span></label>
+          <textarea name="bio" rows="3"
+                    placeholder="Tell the world about yourself..."
+                    style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+                           border-radius:10px;padding:.625rem .875rem;color:#F0F4FF;font-size:.9rem;
+                           outline:none;resize:vertical;font-family:inherit;box-sizing:border-box;"
+                    onfocus="this.style.borderColor='#4F8EF7'"
+                    onblur="this.style.borderColor='rgba(255,255,255,.1)'"
+                    >{{ user.bio|default:'' }}</textarea>
+        </div>
       </div>
     </div>
 
-    <!-- Artist-specific fields -->
-    {% if artist_form %}
-    <div class="card space-y-4">
-      <h2 class="text-white font-bold flex items-center gap-2">
-        <svg class="w-5 h-5 text-accent" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M9 18V5l12-2v13M9 18c0 1.1-1.34 2-3 2s-3-.9-3-2 1.34-2 3-2 3 .9 3 2z"/>
-        </svg>
-        Artist Profile
-      </h2>
-
-      <div>
-        <label class="block text-sm font-medium text-muted mb-1">Stage Name</label>
-        {{ artist_form.stage_name }}
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-muted mb-1">Country</label>
-        {{ artist_form.country }}
-      </div>
-
-      <!-- Social links - simple text inputs -->
-      <div>
-        <label class="block text-sm font-medium text-muted mb-2">Social Links</label>
-        <div class="space-y-2">
-          <div class="flex items-center gap-2">
-            <span class="text-muted text-sm w-20">Instagram</span>
-            <input type="text" name="instagram"
-                   value="{{ request.user.artist_profile.social_links.instagram|default:'' }}"
-                   class="input-field flex-1" placeholder="@yourhandle"/>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="text-muted text-sm w-20">Twitter/X</span>
-            <input type="text" name="twitter"
-                   value="{{ request.user.artist_profile.social_links.twitter|default:'' }}"
-                   class="input-field flex-1" placeholder="@yourhandle"/>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="text-muted text-sm w-20">Website</span>
-            <input type="url" name="website"
-                   value="{{ request.user.artist_profile.social_links.website|default:'' }}"
-                   class="input-field flex-1" placeholder="https://yoursite.com"/>
-          </div>
+    <!-- ── ARTIST-SPECIFIC FIELDS ── -->
+    {% if user.is_artist %}
+    <div style="background:rgba(13,20,32,.8);border:1px solid rgba(45,212,191,.12);
+                border-radius:16px;padding:1.5rem;">
+      <h2 style="font-size:.9375rem;font-weight:700;color:#F0F4FF;margin-bottom:1rem;">
+        Artist Profile</h2>
+      <div style="display:flex;flex-direction:column;gap:.875rem;">
+        <div>
+          <label style="display:block;font-size:.8125rem;font-weight:600;color:#94A3B8;margin-bottom:.375rem;">
+            Stage Name *</label>
+          <input type="text" name="stage_name"
+                 value="{{ user.artist_profile.stage_name }}"
+                 placeholder="Your artist name"
+                 style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+                        border-radius:10px;padding:.625rem .875rem;color:#F0F4FF;font-size:.9rem;
+                        outline:none;font-family:inherit;box-sizing:border-box;"
+                 onfocus="this.style.borderColor='#2DD4BF'"
+                 onblur="this.style.borderColor='rgba(255,255,255,.1)'"/>
+        </div>
+        <div>
+          <label style="display:block;font-size:.8125rem;font-weight:600;color:#94A3B8;margin-bottom:.375rem;">
+            Artist Bio</label>
+          <textarea name="artist_bio" rows="4"
+                    placeholder="Describe your music, influences, story..."
+                    style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+                           border-radius:10px;padding:.625rem .875rem;color:#F0F4FF;font-size:.9rem;
+                           outline:none;resize:vertical;font-family:inherit;box-sizing:border-box;"
+                    onfocus="this.style.borderColor='#2DD4BF'"
+                    onblur="this.style.borderColor='rgba(255,255,255,.1)'"
+                    >{{ user.artist_profile.bio|default:'' }}</textarea>
+        </div>
+        <div>
+          <label style="display:block;font-size:.8125rem;font-weight:600;color:#94A3B8;margin-bottom:.375rem;">
+            Country</label>
+          <input type="text" name="country"
+                 value="{{ user.artist_profile.country|default:'' }}"
+                 placeholder="e.g. Cameroon"
+                 style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+                        border-radius:10px;padding:.625rem .875rem;color:#F0F4FF;font-size:.9rem;
+                        outline:none;font-family:inherit;box-sizing:border-box;"
+                 onfocus="this.style.borderColor='#2DD4BF'"
+                 onblur="this.style.borderColor='rgba(255,255,255,.1)'"/>
+        </div>
+        <div>
+          <label style="display:block;font-size:.8125rem;font-weight:600;color:#94A3B8;margin-bottom:.375rem;">
+            Website or Social Link <span style="color:#4A5568;font-weight:400;">(optional)</span></label>
+          <input type="url" name="website"
+                 value="{{ user.artist_profile.existing_work_url|default:'' }}"
+                 placeholder="https://soundcloud.com/yourname"
+                 style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+                        border-radius:10px;padding:.625rem .875rem;color:#F0F4FF;font-size:.9rem;
+                        outline:none;font-family:inherit;box-sizing:border-box;"
+                 onfocus="this.style.borderColor='#2DD4BF'"
+                 onblur="this.style.borderColor='rgba(255,255,255,.1)'"/>
         </div>
       </div>
     </div>
     {% endif %}
 
-    <!-- Actions -->
-    <div class="flex items-center gap-4">
-      <button type="submit" class="btn-primary px-8 py-3">Save Changes</button>
-      <a href="/profile/" class="btn-secondary px-6 py-3">Cancel</a>
+    <!-- ── CHANGE PASSWORD ── -->
+    <div style="background:rgba(13,20,32,.8);border:1px solid rgba(255,255,255,.06);
+                border-radius:16px;padding:1.5rem;">
+      <h2 style="font-size:.9375rem;font-weight:700;color:#F0F4FF;margin-bottom:.375rem;">
+        Change Password</h2>
+      <p style="color:#4A5568;font-size:.8125rem;margin-bottom:1rem;">
+        Leave blank to keep your current password.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.875rem;">
+        <div>
+          <label style="display:block;font-size:.8125rem;font-weight:600;color:#94A3B8;margin-bottom:.375rem;">
+            New Password</label>
+          <input type="password" name="new_password" placeholder="••••••••"
+                 style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+                        border-radius:10px;padding:.625rem .875rem;color:#F0F4FF;font-size:.9rem;
+                        outline:none;font-family:inherit;box-sizing:border-box;"
+                 onfocus="this.style.borderColor='#4F8EF7'"
+                 onblur="this.style.borderColor='rgba(255,255,255,.1)'"/>
+        </div>
+        <div>
+          <label style="display:block;font-size:.8125rem;font-weight:600;color:#94A3B8;margin-bottom:.375rem;">
+            Confirm Password</label>
+          <input type="password" name="confirm_password" placeholder="••••••••"
+                 style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+                        border-radius:10px;padding:.625rem .875rem;color:#F0F4FF;font-size:.9rem;
+                        outline:none;font-family:inherit;box-sizing:border-box;"
+                 onfocus="this.style.borderColor='#4F8EF7'"
+                 onblur="this.style.borderColor='rgba(255,255,255,.1)'"/>
+        </div>
+      </div>
     </div>
+
+    <!-- Submit -->
+    <button type="submit"
+            style="padding:.9375rem;border-radius:13px;border:none;cursor:pointer;
+                   font-size:1rem;font-weight:700;color:white;font-family:inherit;
+                   background:linear-gradient(135deg,#4F8EF7,#7C3AED);
+                   box-shadow:0 4px 14px rgba(79,142,247,.35);transition:all .2s;"
+            onmouseover="this.style.transform='translateY(-1px)'"
+            onmouseout="this.style.transform='translateY(0)'">
+      Save Changes
+    </button>
   </form>
 </div>
 {% endblock %}

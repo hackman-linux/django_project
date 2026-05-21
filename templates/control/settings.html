@@ -1,197 +1,222 @@
 {% extends 'control/base.html' %}
-{% block title %}App Settings
-  <!-- Revenue Simulation -->
-  {% if revenue_simulation %}
-  <div class="cp-card" style="border-color:rgba(52,211,153,.15);">
-    <h2 style="font-size:.9375rem;font-weight:700;color:#F0F4FF;margin-bottom:1rem;
-               display:flex;align-items:center;gap:.5rem;">
-      Revenue Simulation
-      <span style="font-size:.6875rem;background:rgba(52,211,153,.1);color:#6EE7B7;
-                   border:1px solid rgba(52,211,153,.2);border-radius:999px;padding:.15rem .5rem;">
-        Live Model</span>
-    </h2>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1rem;">
-      {% with s=revenue_simulation %}
-      <div style="text-align:center;background:rgba(255,255,255,.02);border-radius:8px;padding:.75rem;">
-        <div style="font-size:1.125rem;font-weight:700;color:#F0F4FF;font-family:'DM Mono',monospace;">
-          ${{ s.revenue.total_monthly|floatformat:2 }}
-        </div>
-        <div style="font-size:.625rem;color:#4A5568;">Total Monthly</div>
-      </div>
-      <div style="text-align:center;background:rgba(255,255,255,.02);border-radius:8px;padding:.75rem;">
-        <div style="font-size:1.125rem;font-weight:700;color:#4F8EF7;font-family:'DM Mono',monospace;">
-          ${{ s.revenue.artist_pool_40pct|floatformat:2 }}
-        </div>
-        <div style="font-size:.625rem;color:#4A5568;">Artist Pool (40%)</div>
-      </div>
-      <div style="text-align:center;background:rgba(255,255,255,.02);border-radius:8px;padding:.75rem;">
-        <div style="font-size:1.125rem;font-weight:700;color:#34D399;font-family:'DM Mono',monospace;">
-          ${{ s.revenue.owner_profit_35pct|floatformat:2 }}
-        </div>
-        <div style="font-size:.625rem;color:#4A5568;">Owner Profit (35%)</div>
-      </div>
-      <div style="text-align:center;background:rgba(255,255,255,.02);border-radius:8px;padding:.75rem;">
-        <div style="font-size:1.125rem;font-weight:700;color:#F59E0B;font-family:'DM Mono',monospace;">
-          ${{ s.revenue.production_25pct|floatformat:2 }}
-        </div>
-        <div style="font-size:.625rem;color:#4A5568;">Production (25%)</div>
-      </div>
-      {% endwith %}
-    </div>
-    <p style="font-size:.75rem;color:#4A5568;">
-      Simulation with {{ revenue_simulation.inputs.premium_users }} Premium + 
-      {{ revenue_simulation.inputs.pro_users }} Pro subscribers.
-      A sample artist with {{ revenue_simulation.inputs.your_plays }} plays earns 
-      <strong style="color:#34D399;">${{ revenue_simulation.your_earnings.monthly_earnings }}</strong>/month.
-    </p>
-  </div>
-  {% endif %}
-
-{% endblock %}
-{% block page_title %}App Settings & Configuration
-  <!-- Revenue Simulation -->
-  {% if revenue_simulation %}
-  <div class="cp-card" style="border-color:rgba(52,211,153,.15);">
-    <h2 style="font-size:.9375rem;font-weight:700;color:#F0F4FF;margin-bottom:1rem;
-               display:flex;align-items:center;gap:.5rem;">
-      Revenue Simulation
-      <span style="font-size:.6875rem;background:rgba(52,211,153,.1);color:#6EE7B7;
-                   border:1px solid rgba(52,211,153,.2);border-radius:999px;padding:.15rem .5rem;">
-        Live Model</span>
-    </h2>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1rem;">
-      {% with s=revenue_simulation %}
-      <div style="text-align:center;background:rgba(255,255,255,.02);border-radius:8px;padding:.75rem;">
-        <div style="font-size:1.125rem;font-weight:700;color:#F0F4FF;font-family:'DM Mono',monospace;">
-          ${{ s.revenue.total_monthly|floatformat:2 }}
-        </div>
-        <div style="font-size:.625rem;color:#4A5568;">Total Monthly</div>
-      </div>
-      <div style="text-align:center;background:rgba(255,255,255,.02);border-radius:8px;padding:.75rem;">
-        <div style="font-size:1.125rem;font-weight:700;color:#4F8EF7;font-family:'DM Mono',monospace;">
-          ${{ s.revenue.artist_pool_40pct|floatformat:2 }}
-        </div>
-        <div style="font-size:.625rem;color:#4A5568;">Artist Pool (40%)</div>
-      </div>
-      <div style="text-align:center;background:rgba(255,255,255,.02);border-radius:8px;padding:.75rem;">
-        <div style="font-size:1.125rem;font-weight:700;color:#34D399;font-family:'DM Mono',monospace;">
-          ${{ s.revenue.owner_profit_35pct|floatformat:2 }}
-        </div>
-        <div style="font-size:.625rem;color:#4A5568;">Owner Profit (35%)</div>
-      </div>
-      <div style="text-align:center;background:rgba(255,255,255,.02);border-radius:8px;padding:.75rem;">
-        <div style="font-size:1.125rem;font-weight:700;color:#F59E0B;font-family:'DM Mono',monospace;">
-          ${{ s.revenue.production_25pct|floatformat:2 }}
-        </div>
-        <div style="font-size:.625rem;color:#4A5568;">Production (25%)</div>
-      </div>
-      {% endwith %}
-    </div>
-    <p style="font-size:.75rem;color:#4A5568;">
-      Simulation with {{ revenue_simulation.inputs.premium_users }} Premium + 
-      {{ revenue_simulation.inputs.pro_users }} Pro subscribers.
-      A sample artist with {{ revenue_simulation.inputs.your_plays }} plays earns 
-      <strong style="color:#34D399;">${{ revenue_simulation.your_earnings.monthly_earnings }}</strong>/month.
-    </p>
-  </div>
-  {% endif %}
-
-{% endblock %}
+{% block title %}Settings{% endblock %}
+{% block page_title %}App Settings & Configuration{% endblock %}
 
 {% block content %}
-<div style="max-width:640px;display:flex;flex-direction:column;gap:1.25rem;">
+<div style="display:flex;flex-direction:column;gap:1.5rem;max-width:900px;">
 
+  <!-- ── PLATFORM CONFIGURATION ── -->
   <div class="cp-card">
-    <h2 style="font-size:.9375rem;font-weight:700;color:#F0F4FF;margin-bottom:1rem;">Platform Configuration</h2>
-    <form method="POST" style="display:flex;flex-direction:column;gap:.875rem;">
+    <div style="display:flex;align-items:center;gap:.625rem;margin-bottom:1.25rem;">
+      <div style="width:32px;height:32px;border-radius:8px;flex-shrink:0;
+                  background:rgba(79,142,247,.12);border:1px solid rgba(79,142,247,.2);
+                  display:flex;align-items:center;justify-content:center;">
+        <svg width="16" height="16" fill="none" stroke="#4F8EF7" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+      </div>
+      <h2 style="font-size:1rem;font-weight:700;color:#F0F4FF;">Platform Configuration</h2>
+    </div>
+
+    <form method="POST" style="display:grid;grid-template-columns:1fr 1fr;gap:.875rem;">
       {% csrf_token %}
       {% for label, name, value, hint in settings_fields %}
       <div>
-        <label style="display:block;font-size:.75rem;font-weight:600;color:#4A5568;margin-bottom:.3rem;">{{ label }}</label>
+        <label style="display:block;font-size:.75rem;font-weight:600;color:#4A5568;margin-bottom:.3rem;">
+          {{ label }}</label>
         <input type="text" name="{{ name }}" value="{{ value }}" class="cp-input"/>
-        {% if hint %}<p style="font-size:.6875rem;color:#4A5568;margin-top:.25rem;">{{ hint }}</p>{% endif %}
+        {% if hint %}
+        <p style="font-size:.625rem;color:#374151;margin-top:.25rem;">{{ hint }}</p>
+        {% endif %}
       </div>
       {% endfor %}
-      <button type="submit" class="cp-btn cp-btn-primary" style="align-self:flex-start;">Save Settings</button>
+      <div style="grid-column:span 2;display:flex;justify-content:flex-start;padding-top:.25rem;">
+        <button type="submit" class="cp-btn cp-btn-primary">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          Save Configuration
+        </button>
+      </div>
     </form>
   </div>
 
-  <div class="cp-card">
-    <h2 style="font-size:.9375rem;font-weight:700;color:#F0F4FF;margin-bottom:1rem;">Create Staff Account</h2>
-    <p style="font-size:.8125rem;color:#4A5568;margin-bottom:1rem;">
-      Create accounts for staff members. Credentials will be sent to their email.
-    </p>
-    <form method="POST" action="/control/users/create/" style="display:flex;flex-direction:column;gap:.875rem;">
-      {% csrf_token %}
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.875rem;">
-        <div>
-          <label style="display:block;font-size:.75rem;font-weight:600;color:#4A5568;margin-bottom:.3rem;">Username</label>
-          <input type="text" name="username" required class="cp-input" placeholder="staff_member"/>
-        </div>
-        <div>
-          <label style="display:block;font-size:.75rem;font-weight:600;color:#4A5568;margin-bottom:.3rem;">Email</label>
-          <input type="email" name="email" required class="cp-input" placeholder="staff@example.com"/>
-        </div>
-      </div>
-      <div>
-        <label style="display:block;font-size:.75rem;font-weight:600;color:#4A5568;margin-bottom:.3rem;">Role</label>
-        <select name="role" class="cp-input">
-          <option value="staff">Staff (Can access admin panel)</option>
-          <option value="superuser">Superuser (Full admin access)</option>
-        </select>
-      </div>
-      <button type="submit" class="cp-btn cp-btn-primary" style="align-self:flex-start;">
-        Create Account & Send Email
-      </button>
-    </form>
-  </div>
-</div>
-
-  <!-- Revenue Simulation -->
+  <!-- ── REVENUE SIMULATION ── -->
   {% if revenue_simulation %}
   <div class="cp-card" style="border-color:rgba(52,211,153,.15);">
-    <h2 style="font-size:.9375rem;font-weight:700;color:#F0F4FF;margin-bottom:1rem;
-               display:flex;align-items:center;gap:.5rem;">
-      Revenue Simulation
-      <span style="font-size:.6875rem;background:rgba(52,211,153,.1);color:#6EE7B7;
-                   border:1px solid rgba(52,211,153,.2);border-radius:999px;padding:.15rem .5rem;">
-        Live Model</span>
-    </h2>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1rem;">
-      {% with s=revenue_simulation %}
-      <div style="text-align:center;background:rgba(255,255,255,.02);border-radius:8px;padding:.75rem;">
-        <div style="font-size:1.125rem;font-weight:700;color:#F0F4FF;font-family:'DM Mono',monospace;">
-          ${{ s.revenue.total_monthly|floatformat:2 }}
-        </div>
-        <div style="font-size:.625rem;color:#4A5568;">Total Monthly</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+      <h2 style="font-size:1rem;font-weight:700;color:#F0F4FF;">
+        Revenue Simulation
+        <span style="font-size:.6875rem;background:rgba(52,211,153,.1);color:#6EE7B7;
+                     border:1px solid rgba(52,211,153,.2);border-radius:999px;
+                     padding:.15rem .5rem;margin-left:.5rem;">Live Model</span>
+      </h2>
+    </div>
+    {% with s=revenue_simulation %}
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:.875rem;">
+      <div style="text-align:center;background:rgba(255,255,255,.02);border-radius:10px;padding:.875rem;
+                  border:1px solid rgba(255,255,255,.04);">
+        <div style="font-family:'DM Mono',monospace;font-size:1.25rem;font-weight:700;color:#F0F4FF;">
+          ${{ s.revenue.total_monthly|floatformat:2 }}</div>
+        <div style="font-size:.625rem;color:#4A5568;margin-top:.25rem;">Total Monthly</div>
       </div>
-      <div style="text-align:center;background:rgba(255,255,255,.02);border-radius:8px;padding:.75rem;">
-        <div style="font-size:1.125rem;font-weight:700;color:#4F8EF7;font-family:'DM Mono',monospace;">
-          ${{ s.revenue.artist_pool_40pct|floatformat:2 }}
-        </div>
-        <div style="font-size:.625rem;color:#4A5568;">Artist Pool (40%)</div>
+      <div style="text-align:center;background:rgba(79,142,247,.05);border-radius:10px;padding:.875rem;
+                  border:1px solid rgba(79,142,247,.1);">
+        <div style="font-family:'DM Mono',monospace;font-size:1.25rem;font-weight:700;color:#4F8EF7;">
+          ${{ s.revenue.artist_pool_40pct|floatformat:2 }}</div>
+        <div style="font-size:.625rem;color:#4A5568;margin-top:.25rem;">Artist Pool (40%)</div>
       </div>
-      <div style="text-align:center;background:rgba(255,255,255,.02);border-radius:8px;padding:.75rem;">
-        <div style="font-size:1.125rem;font-weight:700;color:#34D399;font-family:'DM Mono',monospace;">
-          ${{ s.revenue.owner_profit_35pct|floatformat:2 }}
-        </div>
-        <div style="font-size:.625rem;color:#4A5568;">Owner Profit (35%)</div>
+      <div style="text-align:center;background:rgba(52,211,153,.05);border-radius:10px;padding:.875rem;
+                  border:1px solid rgba(52,211,153,.1);">
+        <div style="font-family:'DM Mono',monospace;font-size:1.25rem;font-weight:700;color:#34D399;">
+          ${{ s.revenue.owner_profit_35pct|floatformat:2 }}</div>
+        <div style="font-size:.625rem;color:#4A5568;margin-top:.25rem;">Owner Profit (35%)</div>
       </div>
-      <div style="text-align:center;background:rgba(255,255,255,.02);border-radius:8px;padding:.75rem;">
-        <div style="font-size:1.125rem;font-weight:700;color:#F59E0B;font-family:'DM Mono',monospace;">
-          ${{ s.revenue.production_25pct|floatformat:2 }}
-        </div>
-        <div style="font-size:.625rem;color:#4A5568;">Production (25%)</div>
+      <div style="text-align:center;background:rgba(245,158,11,.05);border-radius:10px;padding:.875rem;
+                  border:1px solid rgba(245,158,11,.1);">
+        <div style="font-family:'DM Mono',monospace;font-size:1.25rem;font-weight:700;color:#F59E0B;">
+          ${{ s.revenue.production_25pct|floatformat:2 }}</div>
+        <div style="font-size:.625rem;color:#4A5568;margin-top:.25rem;">Production (25%)</div>
       </div>
-      {% endwith %}
     </div>
     <p style="font-size:.75rem;color:#4A5568;">
-      Simulation with {{ revenue_simulation.inputs.premium_users }} Premium + 
-      {{ revenue_simulation.inputs.pro_users }} Pro subscribers.
-      A sample artist with {{ revenue_simulation.inputs.your_plays }} plays earns 
-      <strong style="color:#34D399;">${{ revenue_simulation.your_earnings.monthly_earnings }}</strong>/month.
+      Simulation: {{ s.inputs.premium_users }} Premium + {{ s.inputs.pro_users }} Pro subscribers.
+      Sample artist with {{ s.inputs.your_plays }} plays earns
+      <strong style="color:#34D399;">${{ s.your_earnings.monthly_earnings }}</strong>/month.
     </p>
+    {% endwith %}
   </div>
   {% endif %}
 
+  <!-- ── CREATE STAFF ACCOUNT ── -->
+  <div class="cp-card" style="border-color:rgba(245,158,11,.12);">
+    <div style="display:flex;align-items:center;gap:.625rem;margin-bottom:1.25rem;">
+      <div style="width:32px;height:32px;border-radius:8px;flex-shrink:0;
+                  background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);
+                  display:flex;align-items:center;justify-content:center;">
+        <svg width="16" height="16" fill="none" stroke="#F59E0B" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+        </svg>
+      </div>
+      <div>
+        <h2 style="font-size:1rem;font-weight:700;color:#F0F4FF;">Create Staff Account</h2>
+        <p style="font-size:.75rem;color:#4A5568;margin-top:.125rem;">
+          Credentials are emailed directly. Each admin sees only their assigned section.
+        </p>
+      </div>
+    </div>
+
+    <!-- Role permission table -->
+    <div style="background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);
+                border-radius:10px;padding:1rem;margin-bottom:1.25rem;">
+      <p style="font-size:.75rem;font-weight:700;color:#94A3B8;margin-bottom:.75rem;
+                letter-spacing:.06em;text-transform:uppercase;">Available Roles</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;">
+        {% for role_key, label in role_labels.items %}
+        {% if role_key != 'full' %}
+        <div style="display:flex;align-items:flex-start;gap:.5rem;padding:.5rem .625rem;
+                    background:rgba(255,255,255,.02);border-radius:7px;
+                    border:1px solid rgba(255,255,255,.04);">
+          <div style="width:6px;height:6px;border-radius:50%;background:#EF4444;
+                      flex-shrink:0;margin-top:5px;"></div>
+          <div>
+            <p style="font-size:.8125rem;font-weight:600;color:#F0F4FF;">{{ label }}</p>
+            <p style="font-size:.6875rem;color:#4A5568;">
+              {{ role_perms|default:'' }}
+              {% for k, v in role_perms.items %}
+                {% if k == role_key %}Accesses: {{ v|join:", " }}{% endif %}
+              {% endfor %}
+            </p>
+          </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <form method="POST" action="/control/users/create/">
+      {% csrf_token %}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.875rem;margin-bottom:.875rem;">
+        <div>
+          <label style="display:block;font-size:.75rem;font-weight:600;color:#4A5568;margin-bottom:.3rem;">Username *</label>
+          <input type="text" name="username" required class="cp-input" placeholder="admin_user"/>
+        </div>
+        <div>
+          <label style="display:block;font-size:.75rem;font-weight:600;color:#4A5568;margin-bottom:.3rem;">Email * (receives credentials)</label>
+          <input type="email" name="email" required class="cp-input" placeholder="admin@example.com"/>
+        </div>
+        <div>
+          <label style="display:block;font-size:.75rem;font-weight:600;color:#4A5568;margin-bottom:.3rem;">Role *</label>
+          <select name="role" class="cp-input">
+            {% for role_key, label in role_labels.items %}
+            {% if role_key != 'full' %}
+            <option value="{{ role_key }}">{{ label }}</option>
+            {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label style="display:block;font-size:.75rem;font-weight:600;color:#4A5568;margin-bottom:.3rem;">
+            Custom Password <span style="color:#374151;font-weight:400;">(leave blank to auto-generate)</span></label>
+          <input type="text" name="password" class="cp-input" placeholder="Leave blank for auto-generated secure password"/>
+        </div>
+      </div>
+      <button type="submit" class="cp-btn cp-btn-primary">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+        </svg>
+        Create Account & Send Credentials by Email
+      </button>
+    </form>
+  </div>
+
+  <!-- ── EXISTING STAFF ── -->
+  {% if staff_accounts %}
+  <div class="cp-card">
+    <h2 style="font-size:1rem;font-weight:700;color:#F0F4FF;margin-bottom:1rem;">
+      Staff Accounts ({{ staff_accounts|length }})</h2>
+    <table class="cp-table">
+      <thead>
+        <tr><th>Username</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for u in staff_accounts %}
+        <tr>
+          <td style="font-weight:600;color:#F0F4FF;">{{ u.username }}</td>
+          <td style="color:#4A5568;font-size:.8125rem;">{{ u.email }}</td>
+          <td>
+            <span class="cp-badge"
+                  style="background:rgba(79,142,247,.1);color:#93C5FD;border:1px solid rgba(79,142,247,.2);">
+              {% for k, v in role_labels.items %}{% if k == u.admin_role %}{{ v }}{% endif %}{% endfor %}
+              {% if not u.admin_role %}Staff{% endif %}
+            </span>
+          </td>
+          <td>
+            <span class="cp-badge"
+                  style="{% if u.is_active %}background:rgba(52,211,153,.1);color:#6EE7B7;border:1px solid rgba(52,211,153,.2);
+                         {% else %}background:rgba(239,68,68,.1);color:#FCA5A5;border:1px solid rgba(239,68,68,.2);{% endif %}">
+              {% if u.is_active %}Active{% else %}Disabled{% endif %}
+            </span>
+          </td>
+          <td>
+            <a href="/control/users/{{ u.id }}/toggle/"
+               style="font-size:.75rem;font-weight:600;
+                      {% if u.is_active %}color:#F87171;{% else %}color:#6EE7B7;{% endif %}"
+               onmouseover="this.style.textDecoration='underline'"
+               onmouseout="this.style.textDecoration='none'">
+              {% if u.is_active %}Disable{% else %}Enable{% endif %}
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+</div>
 {% endblock %}

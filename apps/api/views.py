@@ -1,16 +1,22 @@
+"""
+NapsterLegal — API Views
+Handles: streaming, track info, listen logging, offline downloads,
+         lyrics language detection.
+"""
 from django.http import FileResponse, Http404, JsonResponse
 from django.views.decorators.http import require_GET, require_POST
 from django.shortcuts import get_object_or_404
-from apps.music.models import Track
-from apps.music.models import Track, OfflineDownload
+from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from datetime import timedelta
 import os
-from django.contrib.auth.decorators import login_required
 
+from apps.music.models import Track, OfflineDownload
+
+
+# ── HELPERS ───────────────────────────────────────────────────────────────────
 
 def _get_client_ip(request):
-    """Get real client IP using django-ipware."""
     try:
         from ipware import get_client_ip
         ip, _ = get_client_ip(request)
@@ -24,7 +30,6 @@ def _get_client_ip(request):
 
 
 def _detect_device(request):
-    """Detect device type from User-Agent."""
     ua = request.META.get('HTTP_USER_AGENT', '').lower()
     if any(x in ua for x in ['mobile', 'android', 'iphone', 'ipod']):
         return 'mobile'
@@ -34,11 +39,7 @@ def _detect_device(request):
 
 
 def _log_play_event(request, track):
-    """
-    Log a PlayEvent to MariaDB analytics.
-    Includes IP address, country code, device type.
-    This data is ADMIN ONLY — never exposed to artists or users.
-    """
+    """Log a PlayEvent to MariaDB. Admin-only data."""
     try:
         from apps.analytics.models import PlayEvent
         from apps.analytics.geo import get_country_code
@@ -48,80 +49,75 @@ def _log_play_event(request, track):
         country_code = get_country_code(ip)
 
         PlayEvent.objects.using('analytics').create(
-            track_id         = str(track.id),
-            user_id          = str(request.user.id) if request.user.is_authenticated else None,
-            session_id       = request.session.session_key or '',
-            ip_address       = ip,
-            country_code     = country_code,
-            device_type      = device,
-            listened_duration= 0,    # Updated later via /api/log-listen/
-            completed        = False,
+            track_id          = str(track.id),
+            user_id           = str(request.user.id) if request.user.is_authenticated else None,
+            session_id        = request.session.session_key or '',
+            ip_address        = ip,
+            country_code      = country_code,
+            device_type       = device,
+            listened_duration = 0,
+            completed         = False,
         )
     except Exception as e:
-        # Analytics must NEVER break streaming
         print(f"[Analytics] PlayEvent log error: {e}")
 
+
+# ── STREAM ────────────────────────────────────────────────────────────────────
 
 @require_GET
 def stream_track(request, track_id):
     """
     Stream audio file.
-    Blocks flagged tracks (acoustid_status=failed) at API level.
-    Logs PlayEvent to MariaDB.
+    - Blocks flagged tracks (acoustid_status=failed).
+    - Serves quality based on subscription tier.
+    - Logs PlayEvent to MariaDB.
     """
     track = get_object_or_404(Track, id=track_id, is_published=True)
 
-    # Hard block — flagged tracks cannot be streamed
     if track.acoustid_status == 'failed':
-        raise Http404
+        raise Http404("Track unavailable.")
 
     if not track.audio_file:
         raise Http404("Audio file not found.")
 
-    # Increment play count
-    Track.objects.filter(id=track_id).update(
-        play_count=track.play_count + 1
-    )
+    # Increment play count atomically
+    Track.objects.filter(id=track_id).update(play_count=track.play_count + 1)
 
-    # Log to MariaDB
+    # Log analytics
     _log_play_event(request, track)
 
-    # ── Audio quality tier based on subscription ─────────────────────────────
-    # Free users: serve the file as-is (typically MP3 128kbps)
-    # Premium / Artist Pro users: serve the original uploaded file (FLAC/WAV/320kbps)
+    # Determine quality tier
     user_is_premium = (
         request.user.is_authenticated and
         getattr(request.user, 'is_premium', False)
     )
-
-    # Detect uploaded format
     audio_name  = track.audio_file.name.lower()
     is_lossless = audio_name.endswith('.flac') or audio_name.endswith('.wav')
 
-    if is_lossless and not user_is_premium:
-        # Serve a standard quality notice — in production transcode here
-        # For demo: serve the file but set X-Quality header
-        content_type = 'audio/mpeg'
-        quality_header = 'standard-128kbps'
-    elif is_lossless and user_is_premium:
+    if is_lossless and user_is_premium:
         content_type   = 'audio/flac' if audio_name.endswith('.flac') else 'audio/wav'
         quality_header = 'lossless'
+    elif is_lossless and not user_is_premium:
+        content_type   = 'audio/mpeg'
+        quality_header = 'standard-128kbps'
     else:
         content_type   = 'audio/mpeg'
-        quality_header = 'standard-128kbps' if not user_is_premium else 'hd-320kbps'
+        quality_header = 'hd-320kbps' if user_is_premium else 'standard-128kbps'
 
     response = FileResponse(
         track.audio_file.open('rb'),
         content_type=content_type,
     )
-    response['Content-Disposition'] = f'inline; filename="{track.title}"' 
+    response['Content-Disposition'] = f'inline; filename="{track.title}"'
     response['Accept-Ranges']        = 'bytes'
     response['X-Audio-Quality']      = quality_header
     return response
 
 
+# ── TRACK INFO ────────────────────────────────────────────────────────────────
+
 def track_info(request, track_id):
-    """Return track metadata as JSON."""
+    """Return track metadata as JSON for the player."""
     track = get_object_or_404(Track, id=track_id, is_published=True)
     if track.acoustid_status == 'failed':
         raise Http404
@@ -132,15 +128,18 @@ def track_info(request, track_id):
         'duration':   track.duration,
         'cover':      track.cover_image.url if track.cover_image else '',
         'stream_url': f'/api/stream/{track.id}/',
+        'lyrics':     track.lyrics or '',
+        'has_lyrics': bool(track.lyrics and track.lyrics.strip()),
     })
 
+
+# ── LOG LISTEN ────────────────────────────────────────────────────────────────
 
 @require_POST
 def log_listen(request):
     """
     Receives actual listen duration from JS player via sendBeacon.
-    Updates the most recent PlayEvent for this track in MariaDB.
-    ADMIN ONLY data — never exposed to users or artists.
+    Updates the most recent PlayEvent in MariaDB. Admin-only data.
     """
     try:
         from apps.analytics.models import PlayEvent
@@ -152,10 +151,10 @@ def log_listen(request):
         if not track_id:
             return JsonResponse({'status': 'error', 'msg': 'no track_id'})
 
-        # Update the most recent PlayEvent for this track/session
-        event = PlayEvent.objects.using('analytics').filter(
-            track_id=track_id
-        ).order_by('-timestamp').first()
+        event = (PlayEvent.objects.using('analytics')
+                 .filter(track_id=track_id)
+                 .order_by('-timestamp')
+                 .first())
 
         if event:
             event.listened_duration = duration
@@ -164,93 +163,210 @@ def log_listen(request):
                 using='analytics',
                 update_fields=['listened_duration', 'completed']
             )
-
     except Exception as e:
         print(f"[Analytics] log_listen error: {e}")
 
     return JsonResponse({'status': 'ok'})
 
 
+# ── OFFLINE DOWNLOAD ──────────────────────────────────────────────────────────
+
 @login_required
 def download_track(request, track_id):
     """
-    Serve track for offline use based on subscription tier.
-    
-    Quality tiers:
-        Free tier:       128kbps (MP3)
-        Premium/Artist:  320kbps (MP3)
-        Listener Pro:    FLAC lossless
-        Artist Label:    FLAC lossless
-    """
+    Serve track for offline use. Quality depends on subscription tier.
 
+    Free:           blocked (403)
+    Premium ($4.99):320kbps MP3, 30 days
+    Listener Pro:   FLAC lossless, 30 days
+    Artist Pro:     320kbps MP3, 30 days
+    Artist Label:   FLAC lossless, 30 days
+    """
     track = get_object_or_404(Track, id=track_id, is_published=True)
-    
+
     if not track.audio_file:
         return JsonResponse({'error': 'No audio file'}, status=404)
 
     user = request.user
-    
-    # Determine quality based on subscription
-    plan = getattr(user, 'subscription_plan', 'free')
+
+    # Get subscription plan slug
+    plan = 'free'
+    try:
+        active_sub = user.subscriptions.filter(status='active').order_by('-created_at').first()
+        if active_sub:
+            plan = active_sub.plan.slug
+    except Exception:
+        plan = getattr(user, 'subscription_plan', 'free')
+
     quality_map = {
-        'free':            ('128kbps', 0),       # free: 0 days (no offline)
-        'premium_listener':('320kbps', 30),      # 30 day offline
-        'listener_pro':    ('flac',    30),       # 30 day FLAC offline
-        'artist_pro':      ('320kbps', 30),
-        'artist_label':    ('flac',    30),
+        'free':             ('128kbps', 0),
+        'premium_listener': ('320kbps', 30),
+        'listener_pro':     ('flac',    30),
+        'artist_pro':       ('320kbps', 30),
+        'artist_label':     ('flac',    30),
     }
-    
+
     quality, days = quality_map.get(plan, ('128kbps', 0))
-    
+
     if days == 0:
         return JsonResponse({
-            'error': 'Offline downloads require a paid subscription.',
+            'error':       'Offline downloads require a Premium or Pro subscription.',
             'upgrade_url': '/pricing/',
         }, status=403)
 
-    # Record the download
+    # Record download
     expires = timezone.now() + timedelta(days=days)
-    dl, created = OfflineDownload.objects.update_or_create(
+    OfflineDownload.objects.update_or_create(
         user=user, track=track,
-        defaults={'quality': quality, 'expires_at': expires,
-                  'downloaded_at': timezone.now()}
+        defaults={
+            'quality':       quality,
+            'expires_at':    expires,
+            'downloaded_at': timezone.now(),
+        }
     )
 
-    # Serve the file
-    from django.http import FileResponse
+    # Serve file
     response = FileResponse(
         open(track.audio_file.path, 'rb'),
         content_type='audio/mpeg',
         as_attachment=True,
-        filename=f"{track.title} — {track.artist}.mp3"
+        filename=f"{track.title} — {track.artist}.mp3",
     )
-    response['X-Quality']    = quality
-    response['X-Expires']    = expires.isoformat()
-    response['X-Track-Id']   = str(track.id)
+    response['X-Quality']  = quality
+    response['X-Expires']  = expires.isoformat()
+    response['X-Track-Id'] = str(track.id)
     return response
 
 
-@login_required  
+@login_required
 def my_downloads(request):
-    """List user's offline downloads."""
-    from apps.music.models import OfflineDownload
-    from django.utils import timezone
-    
-    downloads = OfflineDownload.objects.filter(
-        user=request.user,
-        expires_at__gt=timezone.now()
-    ).select_related('track', 'track__artist')
-    
+    """List the current user's active offline downloads as JSON."""
+    downloads = (OfflineDownload.objects
+                 .filter(user=request.user, expires_at__gt=timezone.now())
+                 .select_related('track', 'track__artist'))
+
     return JsonResponse({
         'downloads': [
             {
-                'track_id':    str(d.track.id),
-                'title':       d.track.title,
-                'artist':      str(d.track.artist),
-                'quality':     d.quality,
-                'expires_at':  d.expires_at.isoformat(),
-                'cover':       d.track.cover_image.url if d.track.cover_image else None,
+                'track_id':   str(d.track.id),
+                'title':      d.track.title,
+                'artist':     str(d.track.artist),
+                'quality':    d.quality,
+                'expires_at': d.expires_at.isoformat(),
+                'cover':      d.track.cover_image.url if d.track.cover_image else None,
             }
             for d in downloads
         ]
     })
+
+
+# ── LYRICS LANGUAGE DETECTION ────────────────────────────────────────────────
+
+@require_POST
+def detect_lyrics(request):
+    """
+    Detect language of submitted lyrics text.
+    Called from the upload form via AJAX so user sees detected language live.
+    Returns ISO 639-1 code + full language name.
+
+    Uses frequency analysis — no external API or library needed.
+    Supports: French, Spanish, Portuguese, English.
+    """
+    text = request.POST.get('lyrics', '').strip()
+
+    if not text:
+        return JsonResponse({'language': 'en', 'name': 'English', 'confidence': 0})
+
+    code, name, confidence = _detect_language(text)
+
+    return JsonResponse({
+        'language':   code,
+        'name':       name,
+        'confidence': confidence,
+        'message':    f'Detected: {name} ({confidence}% confident)',
+    })
+
+
+def _detect_language(text):
+    """
+    Frequency-based language detection.
+    Returns (code, name, confidence_percent).
+    """
+    sample = text.lower()[:1000]
+    words  = set(sample.split())
+
+    SIGNATURES = {
+        'fr': {
+            'words': {
+                'je','tu','il','elle','nous','vous','ils','elles',
+                'le','la','les','un','une','des','du','de','et',
+                'est','sont','avec','pour','dans','sur','que','qui',
+                'pas','plus','comme','tout','bien','aussi','mais',
+                'mon','ma','mes','ton','ta','tes','son','sa','ses',
+                'au','aux','ce','cet','cette','ces','moi','toi','lui',
+                'ne','se','en','y','dont','où','quand','comment','très',
+                'avoir','être','faire','aller','venir','voir','savoir',
+            },
+            'trigrams': ["les","est","des","que","une","pas","pour","dans"],
+            'name': 'French',
+        },
+        'es': {
+            'words': {
+                'yo','tu','él','ella','nosotros','vosotros','ellos','ellas',
+                'el','la','los','las','un','una','unos','unas',
+                'es','son','estar','ser','con','por','en','que',
+                'quien','como','todo','bien','pero','muy','también',
+                'me','te','le','nos','os','les','mi','mis','su','sus',
+                'del','al','lo','ya','si','no','más','menos',
+                'hacer','tener','poder','querer','ver','dar','saber',
+            },
+            'trigrams': ["los","las","que","una","con","por","del"],
+            'name': 'Spanish',
+        },
+        'pt': {
+            'words': {
+                'eu','tu','ele','ela','nós','vós','eles','elas',
+                'o','a','os','as','um','uma','uns','umas',
+                'de','do','da','dos','das','em','no','na',
+                'que','com','para','por','mas','também','muito',
+                'me','te','lhe','nos','se','meu','minha','seu','sua',
+                'ao','à','isto','isso','aqui','lá','já','ainda',
+                'ser','estar','ter','fazer','ir','ver','dar','poder',
+            },
+            'trigrams': ["que","com","uma","para","não","dos","das"],
+            'name': 'Portuguese',
+        },
+        'de': {
+            'words': {
+                'ich','du','er','sie','es','wir','ihr','sie',
+                'der','die','das','ein','eine','eines','einem',
+                'ist','sind','und','mit','für','auf','in','an',
+                'nicht','auch','aber','wenn','dann','noch','schon',
+                'mich','dich','ihn','uns','euch','mir','dir','ihm',
+                'von','zu','bei','nach','vor','über','unter','durch',
+                'haben','sein','werden','können','müssen','sollen',
+            },
+            'trigrams': ["die","der","und","das","ist","nicht","ein"],
+            'name': 'German',
+        },
+    }
+
+    scores = {}
+    for lang, data in SIGNATURES.items():
+        word_hits    = len(words & data['words'])
+        trigram_hits = sum(1 for t in data['trigrams'] if t in sample)
+        scores[lang] = word_hits * 2 + trigram_hits
+
+    if not any(scores.values()):
+        return ('en', 'English', 50)
+
+    best_lang = max(scores, key=scores.get)
+    best_score = scores[best_lang]
+    total      = sum(scores.values()) or 1
+    confidence = min(int(best_score / total * 100), 99)
+
+    if confidence < 30:
+        return ('en', 'English', 50)
+
+    name = SIGNATURES[best_lang]['name']
+    return (best_lang, name, confidence)

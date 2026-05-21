@@ -316,3 +316,35 @@
   </div>
 </div>
 {% endblock %}
+
+<!-- ══ FAQ SECTION ══════════════════════════════════════════════════════════ -->
+<div style="max-width:700px;margin:3rem auto 0;" x-data="{ open: null }">
+  <h2 style="font-family:'Sora',sans-serif;font-size:1.375rem;font-weight:800;
+             color:#F0F4FF;text-align:center;margin-bottom:1.75rem;">
+    Frequently Asked Questions
+  </h2>
+
+  {% with faqs='' %}
+  {% for q, a in faq_items %}
+  <div style="border-bottom:1px solid rgba(255,255,255,.05);overflow:hidden;">
+    <button @click="open === {{ forloop.counter }} ? open = null : open = {{ forloop.counter }}"
+            style="width:100%;display:flex;align-items:center;justify-content:space-between;
+                   padding:1.125rem 0;background:none;border:none;cursor:pointer;
+                   color:#F0F4FF;font-size:.9375rem;font-weight:600;text-align:left;
+                   font-family:inherit;transition:color .15s;"
+            :style="open === {{ forloop.counter }} ? 'color:#4F8EF7;' : ''">
+      <span>{{ q }}</span>
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+           style="flex-shrink:0;transition:transform .2s;"
+           :style="open === {{ forloop.counter }} ? 'transform:rotate(180deg);stroke:#4F8EF7;' : ''">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+      </svg>
+    </button>
+    <div x-show="open === {{ forloop.counter }}" x-transition
+         style="padding-bottom:1rem;color:#94A3B8;font-size:.9rem;line-height:1.65;">
+      {{ a }}
+    </div>
+  </div>
+  {% endfor %}
+  {% endwith %}
+</div>

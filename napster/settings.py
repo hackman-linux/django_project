@@ -1,3 +1,14 @@
+
+# Load .env file
+import os as _os_env
+_env_file = _os_env.path.join(_os_env.path.dirname(_os_env.path.dirname(__file__)), '.env')
+if _os_env.path.exists(_env_file):
+    with open(_env_file) as _f:
+        for _line in _f:
+            _line = _line.strip()
+            if _line and not _line.startswith('#') and '=' in _line:
+                _k, _v = _line.split('=', 1)
+                _os_env.environ.setdefault(_k.strip(), _v.strip())
 from pathlib import Path
 from decouple import config
 
@@ -87,6 +98,17 @@ DATABASES = {
         'PORT': config('POSTGRES_PORT', default='5432'),
     },
     # MariaDB — analytics & logs
+    'replica': {
+        # Supabase PostgreSQL — hot standby for Option B failover
+        # Replace these values with your Supabase connection details
+        'ENGINE':   'django.db.backends.postgresql',
+        'NAME':     config('REPLICA_DB_NAME',     default='postgres'),
+        'USER':     config('REPLICA_DB_USER',     default='postgres'),
+        'PASSWORD': config('REPLICA_DB_PASSWORD', default=''),
+        'HOST':     config('REPLICA_DB_HOST',     default='localhost'),
+        'PORT':     config('REPLICA_DB_PORT',     default='5432'),
+        'OPTIONS':  {'connect_timeout': 5},  # fast timeout so fallback is quick
+    },
     'analytics': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': config('MYSQL_DB'),
@@ -101,7 +123,7 @@ DATABASES = {
 }
 
 # Route analytics models to MariaDB
-DATABASE_ROUTERS = ['napster.routers.AnalyticsRouter']
+DATABASE_ROUTERS = ['napster.routers.AnalyticsRouter', 'napster.routers.FallbackRouter']
 
 # ── Custom user model ─────────────────────────────────────────────
 AUTH_USER_MODEL = 'accounts.CustomUser'

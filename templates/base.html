@@ -44,16 +44,16 @@
 
         <!-- Desktop nav links -->
         <div class="hidden md:flex items-center gap-6">
-          <a href="/" class="nav-link">Discover</a>
-          <a href="/pricing/" class="nav-link">Pricing</a>
-          <a href="/search/" class="nav-link">Search</a>
+          <a href="/" class="nav-link">{% trans "Discover" %}</a>
+          <a href="/pricing/" class="nav-link">{% trans "Pricing" %}</a>
+          <a href="/search/" class="nav-link">{% trans "Search" %}</a>
           {% if user.is_authenticated %}
-            <a href="/playlists/" class="nav-link">Playlists</a>
+            <a href="/playlists/" class="nav-link">{% trans "Playlists" %}</a>
             {% if user.is_artist %}
-              <a href="/upload/" class="nav-link">Upload</a>
+              <a href="/upload/" class="nav-link">{% trans "Upload" %}</a>
               <a href="/accounts/dashboard/artist/" class="nav-link" style="color:#4F8EF7;font-weight:600;">🎵 Studio</a>
             {% else %}
-              <a href="/accounts/dashboard/listener/" class="nav-link">My Space</a>
+              <a href="/accounts/dashboard/listener/" class="nav-link">{% trans "My Space" %}</a>
             {% endif %}
           {% endif %}
         </div>
@@ -74,6 +74,31 @@
           
           
           
+          
+          <!-- Notification Bell -->
+          {% if user.is_authenticated %}
+          <a href="/accounts/notifications/"
+             style="position:relative;display:flex;align-items:center;justify-content:center;
+                    width:34px;height:34px;border-radius:9px;
+                    background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+                    color:#94A3B8;transition:all .15s;text-decoration:none;"
+             onmouseover="this.style.color='#F0F4FF';this.style.background='rgba(255,255,255,.08)'"
+             onmouseout="this.style.color='#94A3B8';this.style.background='rgba(255,255,255,.04)'"
+             id="notif-bell">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+            <!-- Unread count badge -->
+            <span id="notif-count"
+                  style="display:none;position:absolute;top:-4px;right:-4px;
+                         min-width:16px;height:16px;border-radius:999px;
+                         background:#EF4444;color:white;font-size:.5625rem;
+                         font-weight:700;text-align:center;line-height:16px;
+                         padding:0 3px;">0</span>
+          </a>
+          {% endif %}
+
           <!-- LANGUAGE SWITCHER — working i18n -->
           <div x-data="{ lo: false }" style="position:relative;">
             <button @click="lo=!lo" @click.outside="lo=false"
@@ -296,6 +321,8 @@
   {% load static %}
   {% load i18n %}
   <script src="{% static 'js/player.js' %}"></script>
+  <script src="{% static 'js/lyrics_player.js' %}"></script>
+  <script src="{% static 'js/lyrics_detector.js' %}"></script>
   <script src="{% static 'js/player_persist.js' %}"></script>
 
 
@@ -314,5 +341,79 @@
     });
   }
   </script>
+
+  <script>
+  // Fetch notification count every 30 seconds
+  function updateNotifCount() {
+    if (!document.getElementById('notif-bell')) return;
+    fetch('/accounts/notifications/count/')
+      .then(r => r.json())
+      .then(data => {
+        const badge = document.getElementById('notif-count');
+        if (!badge) return;
+        if (data.count > 0) {
+          badge.textContent = data.count > 99 ? '99+' : data.count;
+          badge.style.display = 'block';
+        } else {
+          badge.style.display = 'none';
+        }
+      })
+      .catch(() => {});
+  }
+  document.addEventListener('DOMContentLoaded', updateNotifCount);
+  setInterval(updateNotifCount, 30000);
+  </script>
+
+  <script>
+  // ── WIRE LYRICS PLAYER TO AUDIO PLAYER ─────────────────────────────────────
+  (function() {
+    function wireLyrics() {
+      const playerEl = document.getElementById('audio-player');
+      if (!playerEl) { setTimeout(wireLyrics, 500); return; }
+      try {
+        const p = Alpine.$data(playerEl);
+        if (!p || !p.audio) { setTimeout(wireLyrics, 500); return; }
+
+        // Init lyrics panel
+        LyricsPlayer.init();
+
+        // Track timeupdate → sync lyrics
+        p.audio.addEventListener('timeupdate', () => {
+          if (p.playing) LyricsPlayer.update(p.audio.currentTime);
+        });
+
+        // Pause/resume vinyl animation
+        p.audio.addEventListener('pause', () => LyricsPlayer.pauseAnimation());
+        p.audio.addEventListener('play',  () => LyricsPlayer.resumeAnimation());
+
+        // When track changes, update lyrics panel if open
+        const _origLoadTrack = p.loadTrack.bind(p);
+        p.loadTrack = function(track) {
+          window._currentPlayerTrack = track;
+          _origLoadTrack(track);
+          // Fetch lyrics from API and attach to track
+          if (track && track.id) {
+            fetch(`/api/track/${track.id}/info/`)
+              .then(r => r.ok ? r.json() : null)
+              .then(data => {
+                if (data) {
+                  track.lyrics   = data.lyrics   || '';
+                  track.duration = data.duration  || 0;
+                  // If lyrics panel is open, refresh it
+                  if (document.getElementById('nl-lyrics-panel') &&
+                      parseFloat(document.getElementById('nl-lyrics-panel').style.opacity) > 0) {
+                    LyricsPlayer.show(track);
+                  }
+                }
+              }).catch(() => {});
+          }
+        };
+
+      } catch(e) { setTimeout(wireLyrics, 500); }
+    }
+    document.addEventListener('DOMContentLoaded', () => setTimeout(wireLyrics, 800));
+  })();
+  </script>
+
 </body>
 </html>

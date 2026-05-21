@@ -1,40 +1,65 @@
+"""
+NapsterLegal — Music Forms
+Clean ModelForm for track upload — no magic, no missing fields.
+"""
 from django import forms
-from .models import Track, Album, Genre
+from .models import Track, Genre
 
 
 class TrackUploadForm(forms.ModelForm):
+    """
+    Track upload form.
+    All validation happens here so views stay clean.
+    """
     class Meta:
         model  = Track
-        fields = ['title', 'audio_file', 'cover_image', 'genre', 'album',
-                  'lyrics', 'bpm', 'license_type', 'is_explicit', 'is_published',
-                  'preview_start']
+        fields = [
+            'title', 'audio_file', 'cover_image',
+            'genre', 'license_type', 'lyrics',
+            'is_explicit', 'bpm',
+        ]
         widgets = {
             'title': forms.TextInput(attrs={
-                'class': 'input-field',
-                'placeholder': 'Track title'
+                'placeholder': 'Enter your track title',
+                'required': True,
             }),
-            'audio_file': forms.FileInput(attrs={
-                'class': 'input-field',
-                'accept': 'audio/mpeg,audio/flac,audio/wav,audio/*'
-            }),
-            'cover_image': forms.FileInput(attrs={
-                'class': 'input-field',
-                'accept': 'image/*'
-            }),
-            'genre': forms.Select(attrs={'class': 'input-field'}),
-            'album': forms.Select(attrs={'class': 'input-field'}),
             'lyrics': forms.Textarea(attrs={
-                'class': 'input-field',
-                'rows': 6,
-                'placeholder': 'Paste your lyrics here (optional)'
+                'placeholder': 'Paste your lyrics here (optional)...',
+                'rows': 8,
             }),
             'bpm': forms.NumberInput(attrs={
-                'class': 'input-field',
-                'placeholder': 'e.g. 128'
-            }),
-            'license_type': forms.Select(attrs={'class': 'input-field'}),
-            'preview_start': forms.NumberInput(attrs={
-                'class': 'input-field',
-                'placeholder': 'Preview start in seconds (default: 0)'
+                'placeholder': 'e.g. 120',
+                'min': 40, 'max': 300,
             }),
         }
+
+    def clean_audio_file(self):
+        f = self.cleaned_data.get('audio_file')
+        if not f:
+            raise forms.ValidationError('Audio file is required.')
+
+        import os
+        ext = os.path.splitext(f.name)[1].lower()
+        allowed = ['.mp3', '.wav', '.flac', '.ogg', '.m4a', '.aac']
+        if ext not in allowed:
+            raise forms.ValidationError(
+                f'File type "{ext}" not allowed. Accepted: {", ".join(allowed)}')
+
+        max_mb = 200
+        if f.size > max_mb * 1024 * 1024:
+            raise forms.ValidationError(
+                f'File too large. Maximum is {max_mb}MB.')
+
+        return f
+
+    def clean_title(self):
+        t = self.cleaned_data.get('title', '').strip()
+        if not t:
+            raise forms.ValidationError('Track title is required.')
+        return t
+
+    def clean_genre(self):
+        g = self.cleaned_data.get('genre')
+        if not g:
+            raise forms.ValidationError('Please select a genre.')
+        return g

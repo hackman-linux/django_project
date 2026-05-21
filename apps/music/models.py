@@ -191,3 +191,14 @@ class OfflineDownload(models.Model):
     def is_expired(self):
         from django.utils import timezone
         return self.expires_at and self.expires_at < timezone.now()
+
+
+from django.db.models import Q
+
+def public_tracks():
+    return Track.objects.filter(is_published=True).filter(
+        Q(acoustid_status='passed') |
+        Q(acoustid_status='pending') |
+        Q(acoustid_status='') |
+        Q(acoustid_status__isnull=True)
+    )

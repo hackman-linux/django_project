@@ -1,9 +1,10 @@
-# French — NapsterLegal (Francophone Africa edition)
+# French — NapsterLegal
 msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: fr\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 msgid "Discover"
 msgstr "Découvrir"
@@ -23,9 +24,6 @@ msgstr "Tarifs"
 msgid "My Space"
 msgstr "Mon Espace"
 
-msgid "Studio"
-msgstr "Studio"
-
 msgid "Log In"
 msgstr "Connexion"
 
@@ -44,95 +42,17 @@ msgstr "Modifier le profil"
 msgid "Subscription"
 msgstr "Abonnement"
 
+msgid "Artist Dashboard"
+msgstr "Studio Artiste"
+
 msgid "Settings"
 msgstr "Paramètres"
 
-msgid "Language"
-msgstr "Langue"
+msgid "Dashboard"
+msgstr "Tableau de bord"
 
-msgid "Audio Quality"
-msgstr "Qualité audio"
-
-msgid "Save Changes"
-msgstr "Enregistrer"
-
-msgid "Play"
-msgstr "Écouter"
-
-msgid "Add to Playlist"
-msgstr "Ajouter à la playliste"
-
-msgid "Like"
-msgstr "J'aime"
-
-msgid "Follow"
-msgstr "Suivre"
-
-msgid "Following"
-msgstr "Abonné"
-
-msgid "Share"
-msgstr "Partager"
-
-msgid "Username"
-msgstr "Nom d'utilisateur"
-
-msgid "Password"
-msgstr "Mot de passe"
-
-msgid "Email"
-msgstr "Courriel"
-
-msgid "Register"
-msgstr "S'inscrire"
-
-msgid "Login"
-msgstr "Se connecter"
-
-msgid "Overview"
-msgstr "Vue d'ensemble"
-
-msgid "Your Tracks"
-msgstr "Vos pistes"
-
-msgid "Total Plays"
-msgstr "Lectures totales"
-
-msgid "Upload Track"
-msgstr "Publier une piste"
-
-msgid "Free"
-msgstr "Gratuit"
-
-msgid "Premium"
-msgstr "Premium"
-
-msgid "per month"
-msgstr "par mois"
-
-msgid "Subscribe"
-msgstr "S'abonner"
-
-msgid "Send Message"
-msgstr "Envoyer"
-
-msgid "Message"
-msgstr "Message"
-
-msgid "Now Playing"
-msgstr "En cours"
-
-msgid "Next"
-msgstr "Suivant"
-
-msgid "Previous"
-msgstr "Précédent"
-
-msgid "Shuffle"
-msgstr "Aléatoire"
-
-msgid "Repeat"
-msgstr "Répéter"
+msgid "Search tracks, artists..."
+msgstr "Chercher pistes, artistes..."
 
 msgid "New Releases"
 msgstr "Nouvelles sorties"
@@ -140,14 +60,68 @@ msgstr "Nouvelles sorties"
 msgid "Trending Now"
 msgstr "Tendances"
 
+msgid "Follow"
+msgstr "Suivre"
+
+msgid "Like"
+msgstr "J'aime"
+
+msgid "Share"
+msgstr "Partager"
+
+msgid "Play"
+msgstr "Écouter"
+
+msgid "Previous"
+msgstr "Précédent"
+
+msgid "Next"
+msgstr "Suivant"
+
+msgid "Shuffle"
+msgstr "Aléatoire"
+
+msgid "Repeat"
+msgstr "Répéter"
+
 msgid "Contact Admin"
 msgstr "Contacter l'admin"
+
+msgid "Send Message"
+msgstr "Envoyer"
 
 msgid "Subject"
 msgstr "Sujet"
 
-msgid "Search tracks, artists..."
-msgstr "Rechercher pistes, artistes..."
+msgid "Message"
+msgstr "Message"
 
-msgid "No results found"
-msgstr "Aucun résultat"
+msgid "Subscribe"
+msgstr "S'abonner"
+
+msgid "Free"
+msgstr "Gratuit"
+
+msgid "per month"
+msgstr "par mois"
+
+msgid "Upload Track"
+msgstr "Publier une piste"
+
+msgid "Overview"
+msgstr "Vue d'ensemble"
+
+msgid "Your Tracks"
+msgstr "Vos pistes"
+
+msgid "Notifications"
+msgstr "Notifications"
+
+msgid "Save Changes"
+msgstr "Enregistrer"
+
+msgid "Language"
+msgstr "Langue"
+
+msgid "Audio Quality"
+msgstr "Qualité audio"

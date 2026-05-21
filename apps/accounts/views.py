@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -87,40 +88,68 @@ def profile_view(request):
 
 @login_required
 def profile_edit(request):
+    """Edit profile — works for listener, artist, and admin."""
+    user = request.user
+
     if request.method == 'POST':
-        # Handle basic user fields
-        user = request.user
-        user.email      = request.POST.get('email', user.email).strip()
-        user.first_name = request.POST.get('first_name', user.first_name).strip()
-        user.last_name  = request.POST.get('last_name', user.last_name).strip()
-        if 'avatar' in request.FILES:
-            user.avatar = request.FILES['avatar']
+        # Basic user fields
+        user.first_name = request.POST.get('first_name', '').strip()
+        user.last_name  = request.POST.get('last_name',  '').strip()
+        user.email      = request.POST.get('email',      '').strip()
+
+        # Bio (if field exists on CustomUser)
+        bio = request.POST.get('bio', '').strip()
+        if hasattr(user, 'bio'):
+            user.bio = bio
+
+        # Avatar upload
+        avatar = request.FILES.get('avatar')
+        if avatar:
+            if hasattr(user, 'avatar') and user.avatar:
+                try:
+                    import os
+                    if os.path.isfile(user.avatar.path):
+                        os.remove(user.avatar.path)
+                except Exception:
+                    pass
+            user.avatar = avatar
+
+        # Password change
+        new_pw  = request.POST.get('new_password', '').strip()
+        conf_pw = request.POST.get('confirm_password', '').strip()
+        if new_pw:
+            if new_pw == conf_pw and len(new_pw) >= 8:
+                user.set_password(new_pw)
+                messages.success(request, 'Password changed. Please log in again.')
+            elif new_pw != conf_pw:
+                messages.error(request, 'Passwords do not match.')
+            else:
+                messages.error(request, 'Password must be at least 8 characters.')
+
         user.save()
 
-        # Handle artist profile fields if applicable
+        # Artist-specific fields
         if user.is_artist() and hasattr(user, 'artist_profile'):
-            ap = user.artist_profile
-            ap.stage_name = request.POST.get('stage_name', ap.stage_name).strip()
-            ap.bio        = request.POST.get('bio', ap.bio).strip()
-            if 'profile_image' in request.FILES:
-                ap.profile_image = request.FILES['profile_image']
-            ap.save()
+            artist = user.artist_profile
+            stage_name = request.POST.get('stage_name', '').strip()
+            if stage_name:
+                artist.stage_name = stage_name
+            artist_bio = request.POST.get('artist_bio', '').strip()
+            if hasattr(artist, 'bio'):
+                artist.bio = artist_bio
+            country = request.POST.get('country', '').strip()
+            if hasattr(artist, 'country'):
+                artist.country = country
+            website = request.POST.get('website', '').strip()
+            if hasattr(artist, 'existing_work_url'):
+                artist.existing_work_url = website
+            artist.save()
 
-        messages.success(request, 'Profile updated successfully.')
-        return redirect('profile')
+        messages.success(request, 'Profile updated successfully!')
+        return redirect('profile_edit')
 
-    return render(request, 'accounts/profile_edit.html', {
-        'profile_user': request.user,
-        'artist':       getattr(request.user, 'artist_profile', None),
-    })
+    return render(request, 'accounts/profile_edit.html')
 
-
-# ── ADMIN VIEWS ───────────────────────────────────────────────────────────────
-
-def _require_admin(request):
-    """Returns True if the request should be blocked (not staff/superuser)."""
-    return not (request.user.is_authenticated and
-                (request.user.is_staff or request.user.is_superuser))
 
 
 @login_required
@@ -477,4 +506,59 @@ def contact_view(request):
     return render(request, 'accounts/contact.html', {
         'prefill_name':  request.user.username if request.user.is_authenticated else '',
         'prefill_email': request.user.email    if request.user.is_authenticated else '',
+    })
+
+
+@login_required
+def notifications_view(request):
+    """List all notifications for the current user."""
+    from .models import Notification
+    notifs = Notification.objects.filter(recipient=request.user).order_by('-created_at')[:50]
+    # Mark all as read
+    Notification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
+    return render(request, 'accounts/notifications.html', {'notifications': notifs})
+
+
+@login_required
+def notification_count(request):
+    """JSON endpoint: unread notification count for navbar badge."""
+    from .models import Notification
+    count = Notification.objects.filter(recipient=request.user, is_read=False).count()
+    return JsonResponse({'count': count})
+
+
+@login_required
+def contact_view(request):
+    """Contact the admin. Shows sent messages and admin replies."""
+    from .models import ContactMessage, Notification
+    if request.method == 'POST':
+        name    = request.POST.get('name', '').strip()
+        email   = request.POST.get('email', '').strip()
+        subject = request.POST.get('subject', '').strip()
+        body    = request.POST.get('body', '').strip()
+        if name and email and subject and body:
+            ContactMessage.objects.create(
+                sender  = request.user if request.user.is_authenticated else None,
+                name    = name,
+                email   = email,
+                subject = subject,
+                body    = body,
+            )
+            messages.success(request, 'Message sent! Admin will reply soon.')
+            return redirect('contact')
+        messages.error(request, 'All fields are required.')
+
+    # Show user's own messages and admin replies
+    user_messages = []
+    if request.user.is_authenticated:
+        try:
+            user_messages = ContactMessage.objects.filter(
+                sender=request.user).order_by('-created_at')
+        except Exception:
+            pass
+
+    return render(request, 'accounts/contact.html', {
+        'prefill_name':  request.user.username if request.user.is_authenticated else '',
+        'prefill_email': request.user.email    if request.user.is_authenticated else '',
+        'user_messages': user_messages,
     })

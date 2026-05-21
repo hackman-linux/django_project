@@ -145,3 +145,79 @@ class ContactMessage(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+
+
+class Notification(models.Model):
+    """
+    In-app notifications for users.
+    Covers:
+      - Admin replies to contact messages
+      - Artist announcements to followers
+      - Follower/like events for artists
+      - System alerts
+    """
+    TYPE_ADMIN_REPLY    = 'admin_reply'
+    TYPE_ARTIST_POST    = 'artist_post'
+    TYPE_NEW_FOLLOWER   = 'new_follower'
+    TYPE_TRACK_LIKED    = 'track_liked'
+    TYPE_TRACK_APPROVED = 'track_approved'
+    TYPE_TRACK_REJECTED = 'track_rejected'
+    TYPE_SYSTEM         = 'system'
+
+    TYPE_CHOICES = [
+        (TYPE_ADMIN_REPLY,    'Admin Reply'),
+        (TYPE_ARTIST_POST,    'Artist Announcement'),
+        (TYPE_NEW_FOLLOWER,   'New Follower'),
+        (TYPE_TRACK_LIKED,    'Track Liked'),
+        (TYPE_TRACK_APPROVED, 'Track Approved'),
+        (TYPE_TRACK_REJECTED, 'Track Rejected'),
+        (TYPE_SYSTEM,         'System'),
+    ]
+
+    recipient   = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE,
+        related_name='notifications')
+    notif_type  = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    title       = models.CharField(max_length=200)
+    body        = models.TextField()
+    link        = models.CharField(max_length=300, blank=True)
+    is_read     = models.BooleanField(default=False)
+    created_at  = models.DateTimeField(auto_now_add=True)
+
+    # Optional references
+    sender_name = models.CharField(max_length=100, blank=True)
+    extra_data  = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        ordering  = ['-created_at']
+        indexes   = [models.Index(fields=['recipient', 'is_read'])]
+
+    def __str__(self):
+        return f"→ {self.recipient.username}: {self.title}"
+
+    @classmethod
+    def send(cls, recipient, notif_type, title, body, link='', sender_name='', extra=None):
+        """Create a notification and optionally send email."""
+        notif = cls.objects.create(
+            recipient   = recipient,
+            notif_type  = notif_type,
+            title       = title,
+            body        = body,
+            link        = link,
+            sender_name = sender_name,
+            extra_data  = extra or {},
+        )
+        # Send email notification
+        try:
+            from django.core.mail import send_mail
+            from django.conf import settings
+            send_mail(
+                subject      = f'[NapsterLegal] {title}',
+                message      = f'{body}\n\n→ {settings.SITE_URL if hasattr(settings,"SITE_URL") else "http://localhost:8000"}{link}',
+                from_email   = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@napsterlegal.com'),
+                recipient_list=[recipient.email],
+                fail_silently= True,
+            )
+        except Exception:
+            pass
+        return notif
