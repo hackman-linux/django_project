@@ -1,0 +1,416 @@
+/*M!999999\- enable the sandbox mode */ 
+-- MariaDB dump 10.19-11.8.6-MariaDB, for debian-linux-gnu (x86_64)
+--
+-- Host: localhost    Database: napsterlegal_analytics
+-- ------------------------------------------------------
+-- Server version	11.8.6-MariaDB-0+deb13u1 from Debian
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*M!100616 SET @OLD_NOTE_VERBOSITY=@@NOTE_VERBOSITY, NOTE_VERBOSITY=0 */;
+
+--
+-- Table structure for table `analytics_artiststats`
+--
+
+DROP TABLE IF EXISTS `analytics_artiststats`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `analytics_artiststats` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `artist_id` uuid NOT NULL,
+  `date` date NOT NULL,
+  `total_plays` int(10) unsigned NOT NULL CHECK (`total_plays` >= 0),
+  `unique_listeners` int(10) unsigned NOT NULL CHECK (`unique_listeners` >= 0),
+  `new_followers` int(10) unsigned NOT NULL CHECK (`new_followers` >= 0),
+  `top_track_id` uuid DEFAULT NULL,
+  `revenue_estimate` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `analytics_artiststats_artist_id_date_d845845f_uniq` (`artist_id`,`date`),
+  KEY `analytics_artiststats_artist_id_124e1c77` (`artist_id`),
+  KEY `analytics_artiststats_date_21a00cac` (`date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `analytics_artiststats`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `analytics_artiststats` WRITE;
+/*!40000 ALTER TABLE `analytics_artiststats` DISABLE KEYS */;
+/*!40000 ALTER TABLE `analytics_artiststats` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `analytics_playevent`
+--
+
+DROP TABLE IF EXISTS `analytics_playevent`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `analytics_playevent` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `track_id` uuid NOT NULL,
+  `user_id` uuid DEFAULT NULL,
+  `session_id` varchar(100) NOT NULL,
+  `listened_duration` int(10) unsigned NOT NULL CHECK (`listened_duration` >= 0),
+  `completed` tinyint(1) NOT NULL,
+  `ip_address` char(39) DEFAULT NULL,
+  `country_code` varchar(2) NOT NULL,
+  `device_type` varchar(50) NOT NULL,
+  `timestamp` datetime(6) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `analytics_playevent_timestamp_66e17013` (`timestamp`)
+) ENGINE=InnoDB AUTO_INCREMENT=230 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `analytics_playevent`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `analytics_playevent` WRITE;
+/*!40000 ALTER TABLE `analytics_playevent` DISABLE KEYS */;
+INSERT INTO `analytics_playevent` VALUES
+(1,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','09d0cae5-4a74-4448-bf3a-566635d01fa1','l0kfcmwx7mil6houaz0yn0sp4l8o7afl',0,0,'127.0.0.1','','desktop','2026-03-22 09:02:23.048395'),
+(2,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','09d0cae5-4a74-4448-bf3a-566635d01fa1','l0kfcmwx7mil6houaz0yn0sp4l8o7afl',0,0,'127.0.0.1','','desktop','2026-03-22 10:19:10.873214'),
+(3,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','09d0cae5-4a74-4448-bf3a-566635d01fa1','l0kfcmwx7mil6houaz0yn0sp4l8o7afl',0,0,'127.0.0.1','','desktop','2026-03-22 10:19:17.172378'),
+(4,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','09d0cae5-4a74-4448-bf3a-566635d01fa1','l0kfcmwx7mil6houaz0yn0sp4l8o7afl',0,0,'127.0.0.1','','desktop','2026-03-22 11:32:59.312626'),
+(5,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','09d0cae5-4a74-4448-bf3a-566635d01fa1','l0kfcmwx7mil6houaz0yn0sp4l8o7afl',0,0,'127.0.0.1','','desktop','2026-03-22 11:32:59.581101'),
+(6,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','09d0cae5-4a74-4448-bf3a-566635d01fa1','l0kfcmwx7mil6houaz0yn0sp4l8o7afl',0,0,'127.0.0.1','','desktop','2026-03-22 12:24:37.779041'),
+(7,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','09d0cae5-4a74-4448-bf3a-566635d01fa1','l0kfcmwx7mil6houaz0yn0sp4l8o7afl',0,0,'127.0.0.1','','desktop','2026-03-22 12:24:38.230166'),
+(8,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774',NULL,'',0,0,'127.0.0.1','','desktop','2026-03-24 10:26:51.441014'),
+(9,'ffbac88f-b369-4a5c-bd6e-5165b04e2290','c7cb31d8-3b6f-4d84-93ff-31da014c4cd3','zk5btu9x7bcjzknau8chubkmafhw2jn4',0,0,'127.0.0.1','','desktop','2026-03-25 08:00:16.728077'),
+(10,'ffbac88f-b369-4a5c-bd6e-5165b04e2290','c7cb31d8-3b6f-4d84-93ff-31da014c4cd3','zk5btu9x7bcjzknau8chubkmafhw2jn4',0,0,'127.0.0.1','','desktop','2026-03-25 08:00:30.558847'),
+(11,'ffbac88f-b369-4a5c-bd6e-5165b04e2290','c7cb31d8-3b6f-4d84-93ff-31da014c4cd3','zk5btu9x7bcjzknau8chubkmafhw2jn4',0,0,'127.0.0.1','','desktop','2026-03-25 08:00:32.909386'),
+(12,'ffbac88f-b369-4a5c-bd6e-5165b04e2290','c7cb31d8-3b6f-4d84-93ff-31da014c4cd3','zk5btu9x7bcjzknau8chubkmafhw2jn4',0,0,'127.0.0.1','','desktop','2026-03-25 08:00:36.107119'),
+(13,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','149df37e-20fd-48ae-96f6-fdaf514df22e','9o00g9lhoabrmhvbm0sjgwm70r02akzd',0,0,'127.0.0.1','','desktop','2026-03-25 08:02:15.396836'),
+(14,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','c7cb31d8-3b6f-4d84-93ff-31da014c4cd3','0d0muouf2prcw7ftpx7gg89w1i1m8x5l',0,0,'127.0.0.1','','desktop','2026-03-25 08:04:09.758600'),
+(15,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','c7cb31d8-3b6f-4d84-93ff-31da014c4cd3','0d0muouf2prcw7ftpx7gg89w1i1m8x5l',0,0,'127.0.0.1','','desktop','2026-03-25 08:04:10.000493'),
+(16,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','c7cb31d8-3b6f-4d84-93ff-31da014c4cd3','0d0muouf2prcw7ftpx7gg89w1i1m8x5l',0,0,'127.0.0.1','','desktop','2026-03-25 08:05:35.234119'),
+(17,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','c7cb31d8-3b6f-4d84-93ff-31da014c4cd3','0d0muouf2prcw7ftpx7gg89w1i1m8x5l',0,0,'127.0.0.1','','desktop','2026-03-25 08:05:35.422697'),
+(18,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','c7cb31d8-3b6f-4d84-93ff-31da014c4cd3','0d0muouf2prcw7ftpx7gg89w1i1m8x5l',0,0,'127.0.0.1','','desktop','2026-03-25 08:05:43.624769'),
+(19,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','c7cb31d8-3b6f-4d84-93ff-31da014c4cd3','0d0muouf2prcw7ftpx7gg89w1i1m8x5l',0,0,'127.0.0.1','','desktop','2026-03-25 08:05:43.783519'),
+(20,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','c7cb31d8-3b6f-4d84-93ff-31da014c4cd3','0d0muouf2prcw7ftpx7gg89w1i1m8x5l',0,0,'127.0.0.1','','desktop','2026-03-25 08:07:28.517991'),
+(21,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','c7cb31d8-3b6f-4d84-93ff-31da014c4cd3','0d0muouf2prcw7ftpx7gg89w1i1m8x5l',0,0,'127.0.0.1','','desktop','2026-03-25 08:07:28.781293'),
+(22,'ffbac88f-b369-4a5c-bd6e-5165b04e2290','149df37e-20fd-48ae-96f6-fdaf514df22e','zflgkwwiwz5fm2v7sh22qxgqyd40awkq',0,0,'127.0.0.1','','desktop','2026-03-25 08:08:19.740880'),
+(23,'ffbac88f-b369-4a5c-bd6e-5165b04e2290','149df37e-20fd-48ae-96f6-fdaf514df22e','zflgkwwiwz5fm2v7sh22qxgqyd40awkq',0,0,'127.0.0.1','','desktop','2026-03-25 08:08:21.669055'),
+(24,'ffbac88f-b369-4a5c-bd6e-5165b04e2290','149df37e-20fd-48ae-96f6-fdaf514df22e','zflgkwwiwz5fm2v7sh22qxgqyd40awkq',0,0,'127.0.0.1','','desktop','2026-03-25 08:08:23.517243'),
+(25,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','zflgkwwiwz5fm2v7sh22qxgqyd40awkq',0,0,'127.0.0.1','','desktop','2026-03-25 08:09:46.880038'),
+(26,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','zflgkwwiwz5fm2v7sh22qxgqyd40awkq',0,0,'127.0.0.1','','desktop','2026-03-25 08:09:47.068377'),
+(27,'ffbac88f-b369-4a5c-bd6e-5165b04e2290','149df37e-20fd-48ae-96f6-fdaf514df22e','zflgkwwiwz5fm2v7sh22qxgqyd40awkq',0,0,'127.0.0.1','','desktop','2026-03-25 08:11:57.558648'),
+(28,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','zflgkwwiwz5fm2v7sh22qxgqyd40awkq',0,0,'127.0.0.1','','desktop','2026-03-25 08:13:00.276381'),
+(29,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','zflgkwwiwz5fm2v7sh22qxgqyd40awkq',0,0,'127.0.0.1','','desktop','2026-03-25 08:13:00.492803'),
+(30,'ffbac88f-b369-4a5c-bd6e-5165b04e2290','149df37e-20fd-48ae-96f6-fdaf514df22e','zflgkwwiwz5fm2v7sh22qxgqyd40awkq',0,0,'127.0.0.1','','desktop','2026-03-25 08:14:49.322527'),
+(31,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','149df37e-20fd-48ae-96f6-fdaf514df22e','zflgkwwiwz5fm2v7sh22qxgqyd40awkq',0,0,'127.0.0.1','','desktop','2026-03-25 08:20:03.545718'),
+(32,'ffbac88f-b369-4a5c-bd6e-5165b04e2290','149df37e-20fd-48ae-96f6-fdaf514df22e','zflgkwwiwz5fm2v7sh22qxgqyd40awkq',0,0,'127.0.0.1','','desktop','2026-03-25 08:34:02.067394'),
+(33,'ffbac88f-b369-4a5c-bd6e-5165b04e2290','149df37e-20fd-48ae-96f6-fdaf514df22e','ckid0ew8tzxgdr9ftik2vpvzupk84o2q',14,0,'127.0.0.1','','desktop','2026-03-28 19:32:00.011164'),
+(34,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','ckid0ew8tzxgdr9ftik2vpvzupk84o2q',0,0,'127.0.0.1','','desktop','2026-03-29 13:35:34.710406'),
+(35,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','ckid0ew8tzxgdr9ftik2vpvzupk84o2q',6,0,'127.0.0.1','','desktop','2026-03-29 13:35:34.980294'),
+(36,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','ckid0ew8tzxgdr9ftik2vpvzupk84o2q',0,0,'127.0.0.1','','desktop','2026-03-29 13:35:42.387091'),
+(37,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','ckid0ew8tzxgdr9ftik2vpvzupk84o2q',0,0,'127.0.0.1','','desktop','2026-03-29 13:35:42.569060'),
+(38,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8',NULL,'',208,1,'127.0.0.1','','desktop','2026-03-29 13:40:49.320731'),
+(39,'f9c21cf0-3fd4-4e73-836a-7ac95433ba76','149df37e-20fd-48ae-96f6-fdaf514df22e','o9745eoipph7f0lkfkvfcit4xocotfnw',0,0,'127.0.0.1','','desktop','2026-03-30 00:50:31.877928'),
+(40,'c357587d-768d-4c35-9c0e-4871d366647f','657f37fb-efd0-426b-b99d-2bfda9259d9d','xsvlbud1q158nuq7r54i5989r5p35c6b',208,1,'127.0.0.1','','desktop','2026-03-30 13:05:14.907260'),
+(41,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','6yktybgfutjtv11o0f3vmzpqh30oo5im',0,0,'127.0.0.1','','desktop','2026-03-30 13:13:55.386153'),
+(42,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','6yktybgfutjtv11o0f3vmzpqh30oo5im',0,0,'127.0.0.1','','desktop','2026-03-30 13:13:55.593657'),
+(43,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','149df37e-20fd-48ae-96f6-fdaf514df22e','6yktybgfutjtv11o0f3vmzpqh30oo5im',0,0,'127.0.0.1','','desktop','2026-03-30 13:14:00.872248'),
+(44,'ffbac88f-b369-4a5c-bd6e-5165b04e2290','149df37e-20fd-48ae-96f6-fdaf514df22e','6yktybgfutjtv11o0f3vmzpqh30oo5im',0,0,'127.0.0.1','','desktop','2026-03-30 13:15:54.560715'),
+(45,'c357587d-768d-4c35-9c0e-4871d366647f','149df37e-20fd-48ae-96f6-fdaf514df22e','6yktybgfutjtv11o0f3vmzpqh30oo5im',0,0,'127.0.0.1','','desktop','2026-03-30 13:15:59.710320'),
+(46,'ffbac88f-b369-4a5c-bd6e-5165b04e2290','149df37e-20fd-48ae-96f6-fdaf514df22e','6yktybgfutjtv11o0f3vmzpqh30oo5im',0,0,'127.0.0.1','','desktop','2026-03-30 13:16:11.754635'),
+(47,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','149df37e-20fd-48ae-96f6-fdaf514df22e','6yktybgfutjtv11o0f3vmzpqh30oo5im',0,0,'127.0.0.1','','desktop','2026-03-30 13:16:14.903145'),
+(48,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','09d0cae5-4a74-4448-bf3a-566635d01fa1','9ztercpnlr8jod8k0pi2m0xzjtgl4mfw',0,0,'127.0.0.1','','desktop','2026-03-30 16:21:28.599175'),
+(49,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','149df37e-20fd-48ae-96f6-fdaf514df22e','osyk0ye7qmu5deyh69oaltrfq5z7qvzm',0,0,'127.0.0.1','','desktop','2026-03-30 16:31:06.658556'),
+(50,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','osyk0ye7qmu5deyh69oaltrfq5z7qvzm',0,0,'127.0.0.1','','desktop','2026-03-30 16:34:00.752000'),
+(51,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','osyk0ye7qmu5deyh69oaltrfq5z7qvzm',0,0,'127.0.0.1','','desktop','2026-03-30 16:34:00.972922'),
+(52,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','osyk0ye7qmu5deyh69oaltrfq5z7qvzm',0,0,'127.0.0.1','','desktop','2026-03-30 16:34:04.362167'),
+(53,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','osyk0ye7qmu5deyh69oaltrfq5z7qvzm',0,0,'127.0.0.1','','desktop','2026-03-30 16:34:04.562430'),
+(54,'c357587d-768d-4c35-9c0e-4871d366647f','0237bbcb-267e-4906-9f11-c971415c3f64','s8575oejn6ysdtwd5ubpqpwaw6wfypxy',208,1,'127.0.0.1','','desktop','2026-03-31 05:05:47.410486'),
+(55,'ffbac88f-b369-4a5c-bd6e-5165b04e2290','09d0cae5-4a74-4448-bf3a-566635d01fa1','5tcmtzal5q4z1vq6yku9q7g6nsbzssgo',0,0,'127.0.0.1','LC','desktop','2026-04-03 16:58:30.703458'),
+(56,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','09d0cae5-4a74-4448-bf3a-566635d01fa1','5tcmtzal5q4z1vq6yku9q7g6nsbzssgo',0,0,'127.0.0.1','LC','desktop','2026-04-03 16:58:34.418077'),
+(57,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','09d0cae5-4a74-4448-bf3a-566635d01fa1','5tcmtzal5q4z1vq6yku9q7g6nsbzssgo',0,0,'127.0.0.1','LC','desktop','2026-04-03 16:58:36.452528'),
+(58,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','09d0cae5-4a74-4448-bf3a-566635d01fa1','5tcmtzal5q4z1vq6yku9q7g6nsbzssgo',0,0,'127.0.0.1','LC','desktop','2026-04-03 16:58:36.688544'),
+(59,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','3lt6hv65q7v5rug0m6ol3twz6ohcw3gg',0,0,'127.0.0.1','LC','desktop','2026-04-03 17:17:49.495462'),
+(60,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','3lt6hv65q7v5rug0m6ol3twz6ohcw3gg',198,1,'127.0.0.1','LC','desktop','2026-04-03 17:17:50.294722'),
+(61,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','149df37e-20fd-48ae-96f6-fdaf514df22e','3lt6hv65q7v5rug0m6ol3twz6ohcw3gg',208,1,'127.0.0.1','LC','desktop','2026-04-03 18:53:40.178057'),
+(62,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8',NULL,'',208,1,'127.0.0.1','LC','desktop','2026-04-03 18:58:58.088825'),
+(63,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','wjf253d1dgug8qf8jg2spyit0mbkt2cz',0,0,'127.0.0.1','LC','desktop','2026-04-03 22:08:40.191846'),
+(64,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','wjf253d1dgug8qf8jg2spyit0mbkt2cz',0,0,'127.0.0.1','LC','desktop','2026-04-03 22:08:40.911647'),
+(65,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','wjf253d1dgug8qf8jg2spyit0mbkt2cz',0,0,'127.0.0.1','LC','desktop','2026-04-03 22:08:43.019610'),
+(66,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','wjf253d1dgug8qf8jg2spyit0mbkt2cz',0,0,'127.0.0.1','LC','desktop','2026-04-03 22:08:43.237775'),
+(67,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','wjf253d1dgug8qf8jg2spyit0mbkt2cz',0,0,'127.0.0.1','LC','desktop','2026-04-03 22:15:17.665586'),
+(68,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','wjf253d1dgug8qf8jg2spyit0mbkt2cz',0,0,'127.0.0.1','LC','desktop','2026-04-03 22:15:17.913975'),
+(69,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','wjf253d1dgug8qf8jg2spyit0mbkt2cz',0,0,'127.0.0.1','LC','desktop','2026-04-03 22:15:21.010984'),
+(70,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','wjf253d1dgug8qf8jg2spyit0mbkt2cz',0,0,'127.0.0.1','LC','desktop','2026-04-03 22:15:21.196040'),
+(71,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','wjf253d1dgug8qf8jg2spyit0mbkt2cz',0,0,'127.0.0.1','LC','desktop','2026-04-03 22:15:23.513418'),
+(72,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','wjf253d1dgug8qf8jg2spyit0mbkt2cz',0,0,'127.0.0.1','LC','desktop','2026-04-03 22:15:23.697637'),
+(73,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','wjf253d1dgug8qf8jg2spyit0mbkt2cz',0,0,'127.0.0.1','LC','desktop','2026-04-03 22:15:25.430281'),
+(74,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','wjf253d1dgug8qf8jg2spyit0mbkt2cz',27,0,'127.0.0.1','LC','desktop','2026-04-03 22:15:25.757818'),
+(75,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','wjf253d1dgug8qf8jg2spyit0mbkt2cz',0,0,'127.0.0.1','LC','desktop','2026-04-03 22:15:53.761735'),
+(76,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','wjf253d1dgug8qf8jg2spyit0mbkt2cz',0,0,'127.0.0.1','LC','desktop','2026-04-03 22:15:53.941980'),
+(77,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','wjf253d1dgug8qf8jg2spyit0mbkt2cz',0,0,'127.0.0.1','LC','desktop','2026-04-03 22:15:56.780021'),
+(78,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','wjf253d1dgug8qf8jg2spyit0mbkt2cz',102,0,'127.0.0.1','LC','desktop','2026-04-03 22:15:57.457421'),
+(79,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','149df37e-20fd-48ae-96f6-fdaf514df22e','dda1wexxz4e469rxiheap9gj47bul1ii',208,1,'127.0.0.1','LC','desktop','2026-04-04 00:04:08.619617'),
+(80,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','dda1wexxz4e469rxiheap9gj47bul1ii',0,0,'127.0.0.1','LC','desktop','2026-04-04 00:05:21.923122'),
+(81,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','dda1wexxz4e469rxiheap9gj47bul1ii',6,0,'127.0.0.1','LC','desktop','2026-04-04 00:05:22.302937'),
+(82,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','dda1wexxz4e469rxiheap9gj47bul1ii',0,0,'127.0.0.1','LC','desktop','2026-04-04 00:05:29.361477'),
+(83,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','dda1wexxz4e469rxiheap9gj47bul1ii',0,0,'127.0.0.1','LC','desktop','2026-04-04 00:05:29.537071'),
+(84,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','dda1wexxz4e469rxiheap9gj47bul1ii',0,0,'127.0.0.1','LC','desktop','2026-04-04 00:05:31.939282'),
+(85,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','dda1wexxz4e469rxiheap9gj47bul1ii',3,0,'127.0.0.1','LC','desktop','2026-04-04 00:05:32.150785'),
+(86,'ffbac88f-b369-4a5c-bd6e-5165b04e2290','149df37e-20fd-48ae-96f6-fdaf514df22e','dda1wexxz4e469rxiheap9gj47bul1ii',8,0,'127.0.0.1','LC','desktop','2026-04-04 00:19:48.796566'),
+(87,'ffbac88f-b369-4a5c-bd6e-5165b04e2290','149df37e-20fd-48ae-96f6-fdaf514df22e','dda1wexxz4e469rxiheap9gj47bul1ii',31,0,'127.0.0.1','LC','desktop','2026-04-04 00:19:59.626467'),
+(88,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','dda1wexxz4e469rxiheap9gj47bul1ii',6,0,'127.0.0.1','LC','desktop','2026-04-04 00:29:10.179219'),
+(89,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','dda1wexxz4e469rxiheap9gj47bul1ii',0,0,'127.0.0.1','LC','desktop','2026-04-04 00:29:17.707999'),
+(90,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','dda1wexxz4e469rxiheap9gj47bul1ii',0,0,'127.0.0.1','LC','desktop','2026-04-04 00:29:18.092640'),
+(91,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','dda1wexxz4e469rxiheap9gj47bul1ii',0,0,'127.0.0.1','LC','desktop','2026-04-04 00:29:20.803867'),
+(92,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','dda1wexxz4e469rxiheap9gj47bul1ii',31,0,'127.0.0.1','LC','desktop','2026-04-04 00:29:20.984852'),
+(93,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','dda1wexxz4e469rxiheap9gj47bul1ii',0,0,'127.0.0.1','LC','desktop','2026-04-04 00:29:53.019639'),
+(94,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','dda1wexxz4e469rxiheap9gj47bul1ii',0,0,'127.0.0.1','LC','desktop','2026-04-04 00:29:53.193679'),
+(95,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','dda1wexxz4e469rxiheap9gj47bul1ii',0,0,'127.0.0.1','LC','desktop','2026-04-04 00:29:55.511434'),
+(96,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','dda1wexxz4e469rxiheap9gj47bul1ii',44,0,'127.0.0.1','LC','desktop','2026-04-04 00:29:55.684285'),
+(97,'ffbac88f-b369-4a5c-bd6e-5165b04e2290','149df37e-20fd-48ae-96f6-fdaf514df22e','dda1wexxz4e469rxiheap9gj47bul1ii',208,0,'127.0.0.1','LC','desktop','2026-04-04 09:25:03.240526'),
+(98,'ffbac88f-b369-4a5c-bd6e-5165b04e2290','149df37e-20fd-48ae-96f6-fdaf514df22e','dda1wexxz4e469rxiheap9gj47bul1ii',208,0,'127.0.0.1','LC','desktop','2026-04-04 09:30:01.802801'),
+(99,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','dda1wexxz4e469rxiheap9gj47bul1ii',0,0,'127.0.0.1','LC','desktop','2026-04-04 09:34:24.159608'),
+(100,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','dda1wexxz4e469rxiheap9gj47bul1ii',10,0,'127.0.0.1','LC','desktop','2026-04-04 09:34:24.670419'),
+(101,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','149df37e-20fd-48ae-96f6-fdaf514df22e','dda1wexxz4e469rxiheap9gj47bul1ii',17,0,'127.0.0.1','LC','desktop','2026-04-04 10:46:43.507996'),
+(102,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','149df37e-20fd-48ae-96f6-fdaf514df22e','dda1wexxz4e469rxiheap9gj47bul1ii',208,0,'127.0.0.1','LC','desktop','2026-04-04 10:47:03.186988'),
+(103,'c357587d-768d-4c35-9c0e-4871d366647f','149df37e-20fd-48ae-96f6-fdaf514df22e','dda1wexxz4e469rxiheap9gj47bul1ii',28,0,'127.0.0.1','LC','desktop','2026-04-04 11:48:38.064321'),
+(104,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','149df37e-20fd-48ae-96f6-fdaf514df22e','dda1wexxz4e469rxiheap9gj47bul1ii',28,0,'127.0.0.1','LC','desktop','2026-04-04 11:49:32.281837'),
+(105,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','p7inms2qudy9c84r97u1wb5q4ynhcbdc',0,0,'127.0.0.1','LC','desktop','2026-04-04 12:08:27.655880'),
+(106,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','p7inms2qudy9c84r97u1wb5q4ynhcbdc',50,0,'127.0.0.1','LC','desktop','2026-04-04 12:08:28.135048'),
+(107,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','p7inms2qudy9c84r97u1wb5q4ynhcbdc',0,0,'127.0.0.1','LC','desktop','2026-04-04 12:08:56.471598'),
+(108,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','p7inms2qudy9c84r97u1wb5q4ynhcbdc',198,0,'127.0.0.1','LC','desktop','2026-04-04 12:08:56.689237'),
+(109,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','149df37e-20fd-48ae-96f6-fdaf514df22e','p7inms2qudy9c84r97u1wb5q4ynhcbdc',120,0,'127.0.0.1','LC','desktop','2026-04-04 12:09:40.354446'),
+(110,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','149df37e-20fd-48ae-96f6-fdaf514df22e','p7inms2qudy9c84r97u1wb5q4ynhcbdc',0,0,'127.0.0.1','LC','desktop','2026-04-04 12:12:41.857880'),
+(111,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','149df37e-20fd-48ae-96f6-fdaf514df22e','p7inms2qudy9c84r97u1wb5q4ynhcbdc',0,0,'127.0.0.1','LC','desktop','2026-04-04 12:16:04.258845'),
+(112,'ffbac88f-b369-4a5c-bd6e-5165b04e2290',NULL,'',10,0,'127.0.0.1','LC','desktop','2026-04-04 20:14:46.322015'),
+(113,'ffbac88f-b369-4a5c-bd6e-5165b04e2290',NULL,'',62,0,'127.0.0.1','LC','desktop','2026-04-04 20:14:58.123618'),
+(114,'ffbac88f-b369-4a5c-bd6e-5165b04e2290','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',19,0,'127.0.0.1','LC','desktop','2026-04-04 20:19:34.627781'),
+(115,'ffbac88f-b369-4a5c-bd6e-5165b04e2290','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-04 20:19:41.484575'),
+(116,'ffbac88f-b369-4a5c-bd6e-5165b04e2290','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-04 20:19:44.033849'),
+(117,'ffbac88f-b369-4a5c-bd6e-5165b04e2290','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',20,0,'127.0.0.1','LC','desktop','2026-04-04 20:19:45.953088'),
+(118,'ffbac88f-b369-4a5c-bd6e-5165b04e2290','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',52,0,'127.0.0.1','LC','desktop','2026-04-04 20:20:06.777032'),
+(119,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',5,0,'127.0.0.1','LC','desktop','2026-04-04 20:36:37.504192'),
+(120,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-04 20:36:43.742101'),
+(121,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',4,0,'127.0.0.1','LC','desktop','2026-04-04 20:36:43.931948'),
+(122,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-04 20:36:50.309657'),
+(123,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-04 20:36:50.545296'),
+(124,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-04 20:36:53.244026'),
+(125,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-04 20:36:53.445830'),
+(126,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-04 20:36:54.781393'),
+(127,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',4,0,'127.0.0.1','LC','desktop','2026-04-04 20:36:54.973370'),
+(128,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-04 20:36:59.848661'),
+(129,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-04 20:37:01.227008'),
+(130,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-04 20:37:01.422681'),
+(131,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',24,0,'127.0.0.1','LC','desktop','2026-04-04 20:37:02.481248'),
+(132,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-04 20:37:27.355828'),
+(133,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',198,0,'127.0.0.1','LC','desktop','2026-04-04 20:37:27.595858'),
+(134,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',208,0,'127.0.0.1','LC','desktop','2026-04-04 20:40:46.982992'),
+(135,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-04 20:44:16.408563'),
+(136,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',198,0,'127.0.0.1','LC','desktop','2026-04-04 20:44:16.625704'),
+(137,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',208,0,'127.0.0.1','LC','desktop','2026-04-04 20:47:36.228714'),
+(138,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-04 20:51:05.775804'),
+(139,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',198,0,'127.0.0.1','LC','desktop','2026-04-04 20:51:06.060641'),
+(140,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',208,0,'127.0.0.1','LC','desktop','2026-04-04 20:54:25.940622'),
+(141,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-04 20:57:55.592156'),
+(142,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',198,0,'127.0.0.1','LC','desktop','2026-04-04 20:57:55.894874'),
+(143,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',77,0,'127.0.0.1','LC','desktop','2026-04-04 21:01:18.405623'),
+(144,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',15,0,'127.0.0.1','LC','desktop','2026-04-04 21:03:20.962827'),
+(145,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',2,0,'127.0.0.1','LC','desktop','2026-04-04 21:03:37.200127'),
+(146,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',64,0,'127.0.0.1','LC','desktop','2026-04-04 21:03:39.934450'),
+(147,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-04 21:04:49.367640'),
+(148,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',10,0,'127.0.0.1','LC','desktop','2026-04-04 21:04:49.651945'),
+(149,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-04 21:05:01.580246'),
+(150,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',3,0,'127.0.0.1','LC','desktop','2026-04-04 21:05:02.043942'),
+(151,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-04 21:05:06.529167'),
+(152,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-04 21:05:06.741950'),
+(153,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-04 21:05:08.397875'),
+(154,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',4,0,'127.0.0.1','LC','desktop','2026-04-04 21:05:08.897017'),
+(155,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-04 21:06:09.020332'),
+(156,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',198,0,'127.0.0.1','LC','desktop','2026-04-04 21:06:09.287798'),
+(157,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-04 21:20:09.821347'),
+(158,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',198,1,'127.0.0.1','LC','desktop','2026-04-04 21:20:10.374527'),
+(159,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-05 16:17:54.935822'),
+(160,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-05 16:17:55.138264'),
+(161,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-05 16:18:11.262949'),
+(162,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-05 16:18:11.446000'),
+(163,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-05 16:18:44.141678'),
+(164,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-05 16:18:44.342972'),
+(165,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-05 16:18:45.895954'),
+(166,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-05 16:18:46.082712'),
+(167,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-05 16:51:17.855275'),
+(168,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-05 16:51:18.507430'),
+(169,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-05 16:51:32.330500'),
+(170,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-05 16:51:33.005329'),
+(171,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-05 16:51:37.374527'),
+(172,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-05 16:51:37.613013'),
+(173,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-05 16:51:38.175392'),
+(174,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-05 16:51:38.406181'),
+(175,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-05 16:51:38.576853'),
+(176,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-05 16:51:38.919088'),
+(177,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-05 16:51:41.101644'),
+(178,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-05 16:51:41.362156'),
+(179,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-05 16:51:44.159007'),
+(180,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-05 16:51:45.936351'),
+(181,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-05 16:51:46.147226'),
+(182,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-05 16:51:47.081754'),
+(183,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-05 16:55:16.321062'),
+(184,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-05 16:55:16.495501'),
+(185,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-05 16:58:35.823298'),
+(186,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-05 17:02:05.004035'),
+(187,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-05 17:02:05.205293'),
+(188,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','149df37e-20fd-48ae-96f6-fdaf514df22e','id3xshd9o2bgxu0dbldte9w1cs4lrr6r',0,0,'127.0.0.1','LC','desktop','2026-04-05 17:05:24.627889'),
+(189,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','9zmpt5wfxmtkavflfxkc41ogv997k2xs',0,0,'127.0.0.1','LC','desktop','2026-04-05 20:34:42.106300'),
+(190,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','9zmpt5wfxmtkavflfxkc41ogv997k2xs',0,0,'127.0.0.1','LC','desktop','2026-04-05 20:34:42.580137'),
+(191,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','9zmpt5wfxmtkavflfxkc41ogv997k2xs',0,0,'127.0.0.1','LC','desktop','2026-04-05 20:34:48.224321'),
+(192,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','9zmpt5wfxmtkavflfxkc41ogv997k2xs',0,0,'127.0.0.1','LC','desktop','2026-04-05 20:34:48.486910'),
+(193,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','zkc9cv2s5qkcq2npkczqnzy4wm90p0gd',0,0,'127.0.0.1','LC','desktop','2026-04-05 21:18:56.041462'),
+(194,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','zkc9cv2s5qkcq2npkczqnzy4wm90p0gd',0,0,'127.0.0.1','LC','desktop','2026-04-05 21:18:56.301985'),
+(195,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','149df37e-20fd-48ae-96f6-fdaf514df22e','zkc9cv2s5qkcq2npkczqnzy4wm90p0gd',0,0,'127.0.0.1','LC','desktop','2026-04-05 21:18:59.075059'),
+(196,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','zkc9cv2s5qkcq2npkczqnzy4wm90p0gd',0,0,'127.0.0.1','LC','desktop','2026-04-05 21:19:07.043153'),
+(197,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','zkc9cv2s5qkcq2npkczqnzy4wm90p0gd',0,0,'127.0.0.1','LC','desktop','2026-04-05 21:19:07.397932'),
+(198,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','149df37e-20fd-48ae-96f6-fdaf514df22e','zkc9cv2s5qkcq2npkczqnzy4wm90p0gd',0,0,'127.0.0.1','LC','desktop','2026-04-05 21:19:20.012240'),
+(199,'ffbac88f-b369-4a5c-bd6e-5165b04e2290','149df37e-20fd-48ae-96f6-fdaf514df22e','z97kcrvy11ieb7kcczisle5ayo27v7uv',0,0,'127.0.0.1','LC','desktop','2026-04-08 11:10:03.343843'),
+(200,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','z97kcrvy11ieb7kcczisle5ayo27v7uv',0,0,'127.0.0.1','LC','desktop','2026-04-08 11:13:05.258581'),
+(201,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','149df37e-20fd-48ae-96f6-fdaf514df22e','z97kcrvy11ieb7kcczisle5ayo27v7uv',0,0,'127.0.0.1','LC','desktop','2026-04-08 11:13:05.594874'),
+(202,'e468c929-2b36-426c-b794-273677a45750','657f37fb-efd0-426b-b99d-2bfda9259d9d','4isg5hnt1dcrpefpz73qr3xi94c6ilcj',0,0,'127.0.0.1','LC','desktop','2026-04-10 00:25:20.000942'),
+(203,'e468c929-2b36-426c-b794-273677a45750','657f37fb-efd0-426b-b99d-2bfda9259d9d','4isg5hnt1dcrpefpz73qr3xi94c6ilcj',0,0,'127.0.0.1','LC','desktop','2026-04-10 00:25:20.360792'),
+(204,'c357587d-768d-4c35-9c0e-4871d366647f','657f37fb-efd0-426b-b99d-2bfda9259d9d','4isg5hnt1dcrpefpz73qr3xi94c6ilcj',0,0,'127.0.0.1','LC','desktop','2026-04-10 00:42:29.941940'),
+(205,'e468c929-2b36-426c-b794-273677a45750','657f37fb-efd0-426b-b99d-2bfda9259d9d','4isg5hnt1dcrpefpz73qr3xi94c6ilcj',0,0,'127.0.0.1','LC','desktop','2026-04-10 00:42:59.880983'),
+(206,'e468c929-2b36-426c-b794-273677a45750','657f37fb-efd0-426b-b99d-2bfda9259d9d','4isg5hnt1dcrpefpz73qr3xi94c6ilcj',0,0,'127.0.0.1','LC','desktop','2026-04-10 00:43:00.259957'),
+(207,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','0237bbcb-267e-4906-9f11-c971415c3f64','qclpb8ayf1n7fu9yb9a8osbx953e5a6p',0,0,'127.0.0.1','LC','desktop','2026-04-10 06:41:27.708682'),
+(208,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','0237bbcb-267e-4906-9f11-c971415c3f64','qclpb8ayf1n7fu9yb9a8osbx953e5a6p',0,0,'127.0.0.1','LC','desktop','2026-04-10 06:41:27.948577'),
+(209,'c357587d-768d-4c35-9c0e-4871d366647f','0237bbcb-267e-4906-9f11-c971415c3f64','qclpb8ayf1n7fu9yb9a8osbx953e5a6p',0,0,'127.0.0.1','LC','desktop','2026-04-10 06:45:24.485108'),
+(210,'ffbac88f-b369-4a5c-bd6e-5165b04e2290','0237bbcb-267e-4906-9f11-c971415c3f64','qclpb8ayf1n7fu9yb9a8osbx953e5a6p',0,0,'127.0.0.1','LC','desktop','2026-04-10 06:47:52.978986'),
+(211,'e468c929-2b36-426c-b794-273677a45750','657f37fb-efd0-426b-b99d-2bfda9259d9d','rc2tw6lekxatlv31wtyvbwocqeao6ddl',0,0,'127.0.0.1','LC','desktop','2026-04-10 21:32:06.939071'),
+(212,'e468c929-2b36-426c-b794-273677a45750','657f37fb-efd0-426b-b99d-2bfda9259d9d','rc2tw6lekxatlv31wtyvbwocqeao6ddl',0,0,'127.0.0.1','LC','desktop','2026-04-10 21:32:07.237547'),
+(213,'c357587d-768d-4c35-9c0e-4871d366647f','657f37fb-efd0-426b-b99d-2bfda9259d9d','rc2tw6lekxatlv31wtyvbwocqeao6ddl',0,0,'127.0.0.1','LC','desktop','2026-04-10 21:36:34.228294'),
+(214,'af95753e-8dbc-484a-b6a7-7b3ec46e1dc9','09d0cae5-4a74-4448-bf3a-566635d01fa1','jw91wgptoow2fmhvlws7rdqi79c5nzt0',0,0,'127.0.0.1','LC','desktop','2026-04-12 08:13:48.702750'),
+(215,'af95753e-8dbc-484a-b6a7-7b3ec46e1dc9','09d0cae5-4a74-4448-bf3a-566635d01fa1','jw91wgptoow2fmhvlws7rdqi79c5nzt0',0,0,'127.0.0.1','LC','desktop','2026-04-12 08:13:48.984391'),
+(216,'563ac021-17a1-413b-ac2e-b184bd41771f','09d0cae5-4a74-4448-bf3a-566635d01fa1','jw91wgptoow2fmhvlws7rdqi79c5nzt0',0,0,'127.0.0.1','LC','desktop','2026-04-12 08:19:22.423685'),
+(217,'563ac021-17a1-413b-ac2e-b184bd41771f','09d0cae5-4a74-4448-bf3a-566635d01fa1','jw91wgptoow2fmhvlws7rdqi79c5nzt0',0,0,'127.0.0.1','LC','desktop','2026-04-12 08:22:13.055221'),
+(218,'ffbac88f-b369-4a5c-bd6e-5165b04e2290','149df37e-20fd-48ae-96f6-fdaf514df22e','tl4jco9x80ydsenwkuzj2xcntduop2k6',0,0,'127.0.0.1','LC','desktop','2026-04-20 12:42:44.012441'),
+(219,'ffbac88f-b369-4a5c-bd6e-5165b04e2290','149df37e-20fd-48ae-96f6-fdaf514df22e','tl4jco9x80ydsenwkuzj2xcntduop2k6',0,0,'127.0.0.1','LC','desktop','2026-04-20 12:43:02.287933'),
+(220,'48c49d6b-223d-4ce8-9c8f-a3a03b40f8a8','149df37e-20fd-48ae-96f6-fdaf514df22e','tl4jco9x80ydsenwkuzj2xcntduop2k6',0,0,'127.0.0.1','LC','desktop','2026-04-20 12:45:20.420386'),
+(221,'e468c929-2b36-426c-b794-273677a45750','0237bbcb-267e-4906-9f11-c971415c3f64','h6sh8hz57chdwgsmf13xwwb9pw0jsj7w',0,0,'127.0.0.1','LC','desktop','2026-04-20 12:46:18.232025'),
+(222,'e468c929-2b36-426c-b794-273677a45750','0237bbcb-267e-4906-9f11-c971415c3f64','h6sh8hz57chdwgsmf13xwwb9pw0jsj7w',0,0,'127.0.0.1','LC','desktop','2026-04-20 12:46:18.464401'),
+(223,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','09d0cae5-4a74-4448-bf3a-566635d01fa1','n14i55m7rwnbpfyydyv0aueulzzevtvj',0,0,'127.0.0.1','LC','desktop','2026-04-21 09:49:02.173204'),
+(224,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774','09d0cae5-4a74-4448-bf3a-566635d01fa1','n14i55m7rwnbpfyydyv0aueulzzevtvj',0,0,'127.0.0.1','LC','desktop','2026-04-21 09:49:02.553950'),
+(225,'5cdcbb50-73a8-4970-9eb0-57927442ff85','657f37fb-efd0-426b-b99d-2bfda9259d9d','z9j3uk2svllxrly7jxbt4zjxvdeq9zkm',0,0,'127.0.0.1','LC','desktop','2026-05-21 16:13:48.378255'),
+(226,'c357587d-768d-4c35-9c0e-4871d366647f',NULL,'',0,0,'127.0.0.1','LC','desktop','2026-05-21 16:54:04.533887'),
+(227,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774',NULL,'',0,0,'127.0.0.1','LC','desktop','2026-06-24 15:05:29.979485'),
+(228,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774',NULL,'',0,0,'127.0.0.1','LC','desktop','2026-06-24 15:05:30.586342'),
+(229,'75b9ef0c-8c3e-44b7-8b07-328cc4e03774',NULL,'',0,0,'127.0.0.1','LC','desktop','2026-06-24 15:05:33.179698');
+/*!40000 ALTER TABLE `analytics_playevent` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `analytics_searchlog`
+--
+
+DROP TABLE IF EXISTS `analytics_searchlog`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `analytics_searchlog` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `query` varchar(200) NOT NULL,
+  `user_id` uuid DEFAULT NULL,
+  `results_count` int(10) unsigned NOT NULL CHECK (`results_count` >= 0),
+  `clicked_track_id` uuid DEFAULT NULL,
+  `timestamp` datetime(6) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `analytics_searchlog_timestamp_55d0145a` (`timestamp`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `analytics_searchlog`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `analytics_searchlog` WRITE;
+/*!40000 ALTER TABLE `analytics_searchlog` DISABLE KEYS */;
+INSERT INTO `analytics_searchlog` VALUES
+(1,'confession','149df37e-20fd-48ae-96f6-fdaf514df22e',1,NULL,'2026-03-25 08:12:31.935957'),
+(2,'confession','149df37e-20fd-48ae-96f6-fdaf514df22e',1,NULL,'2026-03-25 08:12:36.266204'),
+(3,'R&B','149df37e-20fd-48ae-96f6-fdaf514df22e',0,NULL,'2026-03-30 00:41:21.371039'),
+(4,'mrc','149df37e-20fd-48ae-96f6-fdaf514df22e',0,NULL,'2026-03-30 13:14:28.468333'),
+(5,'mrc','149df37e-20fd-48ae-96f6-fdaf514df22e',0,NULL,'2026-03-30 13:14:36.856478'),
+(6,'mrc','149df37e-20fd-48ae-96f6-fdaf514df22e',0,NULL,'2026-03-30 13:14:39.741753'),
+(7,'hello world','09d0cae5-4a74-4448-bf3a-566635d01fa1',1,NULL,'2026-04-12 08:19:13.007470');
+/*!40000 ALTER TABLE `analytics_searchlog` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `django_migrations`
+--
+
+DROP TABLE IF EXISTS `django_migrations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `django_migrations` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `app` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `applied` datetime(6) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `django_migrations`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `django_migrations` WRITE;
+/*!40000 ALTER TABLE `django_migrations` DISABLE KEYS */;
+INSERT INTO `django_migrations` VALUES
+(1,'contenttypes','0001_initial','2026-03-22 04:19:15.362609'),
+(2,'contenttypes','0002_remove_content_type_name','2026-03-22 04:19:15.439772'),
+(3,'auth','0001_initial','2026-03-22 04:19:15.511794'),
+(4,'auth','0002_alter_permission_name_max_length','2026-03-22 04:19:15.636764'),
+(5,'auth','0003_alter_user_email_max_length','2026-03-22 04:19:15.694982'),
+(6,'auth','0004_alter_user_username_opts','2026-03-22 04:19:15.754927'),
+(7,'auth','0005_alter_user_last_login_null','2026-03-22 04:19:15.809332'),
+(8,'auth','0006_require_contenttypes_0002','2026-03-22 04:19:15.856166'),
+(9,'auth','0007_alter_validators_add_error_messages','2026-03-22 04:19:15.925894'),
+(10,'auth','0008_alter_user_username_max_length','2026-03-22 04:19:15.993195'),
+(11,'auth','0009_alter_user_last_name_max_length','2026-03-22 04:19:16.052190'),
+(12,'auth','0010_alter_group_name_max_length','2026-03-22 04:19:16.177878'),
+(13,'auth','0011_update_proxy_permissions','2026-03-22 04:19:16.222971'),
+(14,'auth','0012_alter_user_first_name_max_length','2026-03-22 04:19:16.282410'),
+(15,'accounts','0001_initial','2026-03-22 04:19:16.386457'),
+(16,'admin','0001_initial','2026-03-22 04:19:16.573675'),
+(17,'admin','0002_logentry_remove_auto_add','2026-03-22 04:19:16.639687'),
+(18,'admin','0003_logentry_add_action_flag_choices','2026-03-22 04:19:16.708132'),
+(19,'sessions','0001_initial','2026-03-22 04:19:16.764269'),
+(20,'analytics','0001_initial','2026-03-22 04:42:06.507644');
+/*!40000 ALTER TABLE `django_migrations` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
+
+-- Dump completed on 2026-06-26  7:06:44
